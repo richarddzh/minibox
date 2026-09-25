@@ -234,8 +234,10 @@ function corner_points(i) =
         a0 = atan2(start[1] - center[1], start[0] - center[0]),
         sweep = sign(cross2(-u, v)) * (180 - angle),
         steps = max(4, ceil(abs(sweep) * $fn / 360)))
+    // Remove trig drift at tangent endpoints before boolean intersections.
     [for (j = [0 : steps])
-        center + radius * [cos(a0 + sweep * j / steps), sin(a0 + sweep * j / steps)]];
+        [for (v = center + radius * [cos(a0 + sweep * j / steps), sin(a0 + sweep * j / steps)])
+            round(v * 1000000) / 1000000]];
 
 function top_path(trim = 0) = concat(
     [[rim_radius + trim, deck_height]],
@@ -423,7 +425,10 @@ module rounded_rectangle(size, radius) {
 }
 
 module outer_profile() {
-    polygon([for (i = [0 : 5]) each corner_points(i)]);
+    // The spherical volume alone defines the lower fillets; a second sampled
+    // bottom arc would intersect the same surface at almost coincident points.
+    polygon(concat([[0, -bottom_radius], [case_depth, -bottom_radius]],
+                   [for (i = [2 : 5]) each corner_points(i)]));
 }
 
 module corner_sphere(radius) {
@@ -458,16 +463,13 @@ module corner_sphere(radius) {
 
 module spherical_base_volume(inset = 0) {
     radius = bottom_radius - inset;
-    union() {
-        // A convex hull of spheres produces spherical corners and tangent edge fillets.
-        hull()
-            for (x = [bottom_radius, case_width - bottom_radius])
-                for (y = [bottom_radius, case_depth - bottom_radius])
-                    translate([x, y, bottom_radius]) corner_sphere(radius);
-        translate([inset, inset, bottom_radius])
-            linear_extrude(height = rear_height + wall)
-                rounded_rectangle([case_width, case_depth] - [2 * inset, 2 * inset], radius);
-    }
+    // One hull shares the sphere equator with the vertical wall. Separately
+    // rounded extrusions create near-coincident seams at Z=bottom_radius.
+    hull()
+        for (x = [bottom_radius, case_width - bottom_radius])
+            for (y = [bottom_radius, case_depth - bottom_radius])
+                for (z = [bottom_radius, rear_height + wall])
+                    translate([x, y, z]) corner_sphere(radius);
 }
 
 module case_volume(inset = 0) {
@@ -640,8 +642,9 @@ module control_mount_footprint(top_z) {
                 distance_to_rectangle([$hole_x, $hole_y], bounds) - radius <= small_gap_fill)
                 hull() {
                     circle(d = module_boss_diameter);
-                    translate([bounds[0] - $hole_x, bounds[1] - $hole_y])
-                        square([bounds[2] - bounds[0], bounds[3] - bounds[1]]);
+                    translate([bounds[0] - $hole_x + eps, bounds[1] - $hole_y + eps])
+                        square([bounds[2] - bounds[0] - 2 * eps,
+                                bounds[3] - bounds[1] - 2 * eps]);
                 }
         }
 }

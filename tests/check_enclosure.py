@@ -2,6 +2,7 @@
 
 import argparse
 from collections import Counter, defaultdict
+from math import dist
 from pathlib import Path
 import re
 import shutil
@@ -130,15 +131,33 @@ def check_3mf_export(path, source, reference, euler):
     assert read_triangles(path) == read_triangles(source), f"3MF changed mesh coordinates or winding: {path}"
 
 
-def mesh_info(path, expected_euler):
-    triangles = read_triangles(path)
+def triangle_normal(triangle):
+    a, b, c = triangle
+    u = [b[i] - a[i] for i in range(3)]
+    v = [c[i] - a[i] for i in range(3)]
+    return (u[1] * v[2] - u[2] * v[1],
+            u[2] * v[0] - u[0] * v[2],
+            u[0] * v[1] - u[1] * v[0])
+
+
+def mesh_measurements(triangles, expected_euler, label):
     edges = Counter()
     directed = Counter()
     neighbors = defaultdict(set)
+    edge_faces = defaultdict(list)
+    vertex_links = defaultdict(list)
+    faces = set()
     volume = 0.0
-    for triangle in triangles:
+    for face_index, triangle in enumerate(triangles):
         a, b, c = map(tuple, triangle)
-        assert len({a, b, c}) == 3, f"Degenerate triangle in {path}"
+        assert len({a, b, c}) == 3, f"Collapsed triangle in {label}"
+        normal = triangle_normal(triangle)
+        assert sum(v * v for v in normal) > 1e-24, f"Zero-area triangle in {label}"
+        key = tuple(sorted((a, b, c)))
+        assert key not in faces, f"Duplicate triangle in {label}"
+        faces.add(key)
+        for vertex, pair in [(a, (b, c)), (b, (c, a)), (c, (a, b))]:
+            vertex_links[vertex].append(pair)
         volume += (
             a[0] * (b[1] * c[2] - b[2] * c[1])
             + a[1] * (b[2] * c[0] - b[0] * c[2])
@@ -146,29 +165,72 @@ def mesh_info(path, expected_euler):
         ) / 6
         for start, end in [(a, b), (b, c), (c, a)]:
             edges[tuple(sorted((start, end)))] += 1
+            edge_faces[tuple(sorted((start, end)))].append(face_index)
             directed[(start, end)] += 1
             neighbors[start].add(end)
             neighbors[end].add(start)
-    assert all(count == 2 for count in edges.values()), f"Non-manifold edges: {path}"
+    assert all(count == 2 for count in edges.values()), f"Non-manifold/open edges: {label}"
     assert all(directed[(b, a)] == count for (a, b), count in directed.items()), (
-        f"Inconsistent face orientation: {path}"
+        f"Inconsistent face orientation: {label}"
     )
+    face_neighbors = defaultdict(set)
+    for first, second in edge_faces.values():
+        face_neighbors[first].add(second)
+        face_neighbors[second].add(first)
     visited = set()
-    pending = [next(iter(neighbors))]
+    pending = [0]
     while pending:
-        vertex = pending.pop()
-        if vertex not in visited:
-            visited.add(vertex)
-            pending.extend(neighbors[vertex] - visited)
-    assert len(visited) == len(neighbors), f"Detached supports/components: {path}"
+        face = pending.pop()
+        if face not in visited:
+            visited.add(face)
+            pending.extend(face_neighbors[face] - visited)
+    assert len(visited) == len(triangles), f"Multiple edge-connected shells: {label}"
+    for links in vertex_links.values():
+        ring = defaultdict(set)
+        for a, b in links:
+            ring[a].add(b)
+            ring[b].add(a)
+        assert all(len(adjacent) == 2 for adjacent in ring.values()), f"Non-manifold vertex: {label}"
+        seen = set()
+        pending = [next(iter(ring))]
+        while pending:
+            vertex = pending.pop()
+            if vertex not in seen:
+                seen.add(vertex)
+                pending.extend(ring[vertex] - seen)
+        assert len(seen) == len(ring), f"Pinched vertex: {label}"
     assert len(neighbors) - len(edges) + len(triangles) == expected_euler, (
-        f"Unexpected holes/handles in {path}"
+        f"Unexpected holes/handles in {label}"
     )
-    assert volume > 0, f"Inverted or empty mesh: {path}"
+    assert volume > 0, f"Inverted or empty mesh: {label}"
     bounds = [
         (min(v[i] for v in neighbors), max(v[i] for v in neighbors)) for i in range(3)
     ]
-    print(f"{path.name}: closed, connected; volume={volume:.1f} mm^3; bounds={bounds}")
+    return bounds, volume
+
+
+def mesh_info(path, expected_euler):
+    triangles = read_triangles(path)
+    bounds, volume = mesh_measurements(triangles, expected_euler, path.name)
+    minimum_edge = min(dist(t[i], t[(i + 1) % 3]) for t in triangles for i in range(3))
+    assert minimum_edge >= 0.001, f"Submicron edge ({minimum_edge} mm): {path}"
+    normals = [triangle_normal(t) for t in triangles]
+    if path.suffix == ".stl":
+        data = path.read_bytes()
+        if len(data) == 84 + len(triangles) * 50:
+            for offset, normal in zip(range(84, len(data), 50), normals):
+                stored = struct.unpack_from("<3f", data, offset)
+                assert sum(a * b for a, b in zip(stored, normal)) > 0, (
+                    f"Stored STL normal disagrees with winding: {path}"
+                )
+    for digits in (6, 4, 3):
+        rounded = [[tuple(round(v, digits) for v in vertex) for vertex in t] for t in triangles]
+        mesh_measurements(rounded, expected_euler, f"{path.name}, rounded to {digits} decimals")
+        for original, triangle in zip(normals, rounded):
+            assert sum(a * b for a, b in zip(original, triangle_normal(triangle))) > 0, (
+                f"Triangle flips after rounding to {digits} decimals: {path}"
+            )
+    print(f"{path.name}: closed, connected, precision-safe; volume={volume:.1f} mm^3; bounds={bounds}")
     return bounds, volume
 
 
@@ -207,6 +269,17 @@ def check_y_up_exports(executable, output, meshes):
                        planar_area(path, new_axis, new_coordinate)) < 0.1, (
                 f"Wrong bottom/rear orientation: {part}"
             )
+
+
+def split_clearance_checks(checks):
+    sections = re.split(r"^// CHECK_GROUP ([a-z-]+)\n", checks.read_text(encoding="utf-8"), flags=re.M)
+    assert len(sections) == 13, "Expected all six clearance groups."
+    groups = []
+    for name, body in zip(sections[1::2], sections[2::2]):
+        path = checks.with_name(f"{checks.stem}-{name}.scad")
+        path.write_text(sections[0] + body, encoding="utf-8")
+        groups.append((name, path))
+    return groups
 
 
 def main():
@@ -252,6 +325,10 @@ def main():
         f"include <{SOURCE}>\n"
         """
 expected_screen_stack = 3;
+expected_mount_normal = -expected_screen_stack - 6;
+lid_midline = inner_path(top_path(), 1.5);
+expected_rear_rise = 1.5 * 11.1 * tan(75);
+// CHECK_GROUP screen-and-shell
 assert(slope_angle == 60);
 assert(abs(corner_angle(3) - 120) < 0.001 && abs(corner_angle(4) - 120) < 0.001);
 assert(bottom_radius == 12 && rim_radius == 6 && bend_radius == 10);
@@ -375,6 +452,7 @@ difference() {
                         translate(p - [0.05, 0.05, 0.05]) cube([0.1, 0.1, 0.1]);
     difference() { case_volume(); case_volume(wall); }
 }
+// CHECK_GROUP ports-and-lid
 // Two independent rear port coordinates; the bore remains cylindrical through the wall.
 intersection() {
     bottom_shell();
@@ -487,6 +565,7 @@ difference() {
                 cube([1.6, 4, deck_height - panel_thickness - bottom_radius - 2]);
     bottom_shell();
 }
+// CHECK_GROUP floor-layout
 assert($fn == 32 && len(top_path()) >= 12);
 assert(insert_diameter == 4.7 && insert_depth == 5.2);
 assert(esp32_size == [58, 68] && esp32_hole_spacing == [49, 58]);
@@ -593,7 +672,7 @@ assert(joystick_standoff_height == 16);
 assert(keyboard_mount_z - screw_tip_depth >= 1.5);
 assert(abs(screen_board_gap - screen_stack_above_pcb - screen_front_clearance) < 0.001);
 // Actual pad faces and the free gap follow the panel normal, not the world Z axis.
-expected_mount_normal = -expected_screen_stack - 6;
+// CHECK_GROUP screen-mounting
 for (x = [9.05, 110.95])
     for (v = [45.17, 100.07]) {
         difference() {
@@ -687,13 +766,13 @@ difference() {
         translate([3, 0, 19.5]) cube([0.3, 0.3, 0.4]);
     bottom_shell();
 }
+// CHECK_GROUP assembly-and-seats
 // Ignore nominal mating faces with a 0.02 mm tolerance, not real penetrations.
 // Each solid below is an error region; their union must be empty.
 intersection() { bottom_shell(); translate([0, 0, eps]) lid(); }
 intersection() { module_envelopes(eps); bottom_shell(); }
 intersection() { module_envelopes(eps); lid(); }
 // Both side rails must remain solid across every bend and intervening panel segment.
-lid_midline = inner_path(top_path(), 1.5);
 difference() {
     union()
         for (x = [13.5, 114.5]) {
@@ -729,7 +808,6 @@ intersection() {
     }
 }
 assert(rear_mount_depth == 10);
-expected_rear_rise = 1.5 * 11.1 * tan(75);
 for (x = shell_hole_x) {
     assert(abs(column_root_z(x, case_depth - 11) -
                (rear_height - 13 - expected_rear_rise)) < 0.001);
@@ -782,6 +860,7 @@ difference() {
                                        (y > deck_depth ? expected_rear_rise * 0.2 : 3), bottom_radius + 1) - 1]);
     bottom_shell();
 }
+// CHECK_GROUP supports-and-sockets
 // Former narrow channels between the columns/posts and the walls must be solid.
 difference() {
     union() {
@@ -864,15 +943,14 @@ intersection() {
 """,
         encoding="utf-8",
     )
-    render(args.openscad, checks, args.output / "interference.stl",
-           ['part="none"', "expected_screen_stack=3"], empty=True)
-    render(
-        args.openscad,
-        checks,
-        args.output / "thicker-screen-interference.stl",
-        ['part="none"', "screen_stack_above_pcb=12", "expected_screen_stack=12"],
-        empty=True,
-    )
+    groups = split_clearance_checks(checks)
+    for thickness in (3, 12):
+        for name, source in groups:
+            print(f"Checking {name}, display thickness {thickness} mm...", flush=True)
+            render(args.openscad, source, args.output / f"errors-{thickness}mm-{name}.stl",
+                   ['part="none"', f"screen_stack_above_pcb={thickness}",
+                    f"expected_screen_stack={thickness}"], empty=True)
+            print(f"PASS: {name}, display thickness {thickness} mm.", flush=True)
     print("PASS: raised screen and 21 mm lower-right switch opening, "
           "spherical R12 base corners with R9.6 inner offset, two 12 mm rear Type-C ports, "
           "R6 lid corners, 0.5 mm perimeter gap, continuous 1.5 mm bearing rim, "
