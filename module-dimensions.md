@@ -280,6 +280,18 @@ OpenSCAD 参数化模型见 [`minibox-enclosure.scad`](minibox-enclosure.scad)�
 & "C:\Program Files\OpenSCAD\openscad.com" --export-format binstl -D 'part="lid-y-up"' -o .\lid-y-up.stl .\minibox-enclosure.scad
 ```
 
+### 独立 3MF 文件（原始装配坐标）
+
+`bottom.3mf` 和 `lid.3mf` 使用原始 CAD 坐标：**X 左右、Y 前后、Z 向上，单位毫米**，分别由 `part="bottom"` 和 `part="lid"` 导出。没有 Y 向上转换，也没有侧立、自动落地或其他装配变换；每个文件只包含对应的一个实体，不含模块预览。
+
+底壳范围为 X=0–120、Y=0–154、Z=0–124.1288 mm；盖板范围为 X=2.9–117.1、Y=6.5–147.5、Z=25–124.1288 mm。**`lid.3mf` 与侧立的 `lid.stl` 姿态不同**：3MF 保留盖板装配位置，因此最低点 Z=25 mm，不直接位于打印平台。打印前应在切片软件中选择所需朝向并落地；若要保留两个部件的装配关系，导入时不要自动居中或落地。
+
+这些文件是几何模型，不包含打印机、材料、支撑或切片参数。当前 OpenSCAD 2021.01 原生 3MF 导出会舍入部分近邻顶点，造成退化三角面；因此使用下面的命令先导出并验证临时二进制 STL，再完整保留坐标打包为标准 3MF。回归检查确认毫米单位、单实体、无额外摆放变换、封闭连通网格，并逐个核对三角面顶点坐标及方向与原始装配坐标 STL 完全一致。临时文件自动清理，现有 STL 不会被覆盖。
+
+```powershell
+python .\tests\check_enclosure.py --openscad "C:\Program Files\OpenSCAD\openscad.com" --output . --3mf-only
+```
+
 ### 尚需实物复测的参数
 
 草图没有标注圆角半径，当前底部 R12、上缘 R6、转折 R10 是设计值，并非实测值。键盘和摇杆窗口尺寸、偏心位置及柱顶安装距离已补充；屏幕 PCB 加屏体共 5 mm（2+3 mm）及显示区左右边距已补充。显示区上下边距、屏幕后部接插件、摇杆总高、其他模块 PCB 厚度和摇杆安装孔左右边距仍待实测，不能据此认定已验证实物装配。

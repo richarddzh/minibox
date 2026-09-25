@@ -7,6 +7,9 @@ import re
 import shutil
 import struct
 import subprocess
+from tempfile import TemporaryDirectory
+from xml.etree import ElementTree
+from zipfile import ZIP_DEFLATED, ZipFile
 
 
 SOURCE = Path(__file__).resolve().parents[1] / "minibox-enclosure.scad"
@@ -31,6 +34,8 @@ def render(executable, source, output, definitions=(), empty=False):
 
 
 def read_triangles(path):
+    if path.suffix == ".3mf":
+        return read_3mf_triangles(path)
     data = path.read_bytes()
     if len(data) >= 84 and len(data) == 84 + struct.unpack_from("<I", data, 80)[0] * 50:
         triangles = []
@@ -46,6 +51,83 @@ def read_triangles(path):
     ]
     assert vertices and len(vertices) % 3 == 0, f"Invalid STL: {path}"
     return [vertices[i : i + 3] for i in range(0, len(vertices), 3)]
+
+
+def read_3mf_triangles(path):
+    ns = {"m": "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"}
+    with ZipFile(path) as archive:
+        assert archive.testzip() is None, f"Corrupt 3MF archive: {path}"
+        model = ElementTree.fromstring(archive.read("3D/3dmodel.model"))
+    assert model.get("unit") == "millimeter", f"Incorrect 3MF units: {path}"
+    objects = model.findall("m:resources/m:object", ns)
+    items = model.findall("m:build/m:item", ns)
+    assert len(objects) == len(items) == 1, f"Expected one independent 3MF part: {path}"
+    assert items[0].get("objectid") == objects[0].get("id")
+    identity = "1 0 0 0 1 0 0 0 1 0 0 0"
+    assert list(map(float, items[0].get("transform", identity).split())) == list(map(float, identity.split())), (
+        f"3MF must preserve original assembly placement: {path}"
+    )
+    assert objects[0].find("m:components", ns) is None, f"Unexpected component transform: {path}"
+    vertices = [
+        tuple(float(vertex.attrib[axis]) for axis in ("x", "y", "z"))
+        for vertex in objects[0].findall("m:mesh/m:vertices/m:vertex", ns)
+    ]
+    faces = [
+        tuple(int(face.attrib[key]) for key in ("v1", "v2", "v3"))
+        for face in objects[0].findall("m:mesh/m:triangles/m:triangle", ns)
+    ]
+    assert vertices and faces, f"Empty 3MF mesh: {path}"
+    assert all(0 <= index < len(vertices) for face in faces for index in face), (
+        f"Invalid 3MF vertex index: {path}"
+    )
+    return [[vertices[index] for index in face] for face in faces]
+
+
+def write_3mf(source, destination):
+    # OpenSCAD 2021.01's native 3MF writer rounds nearby vertices together.
+    # Round-trip the validated STL coordinates without decimal truncation.
+    triangles = read_triangles(source)
+    indices = {}
+    faces = []
+    for triangle in triangles:
+        faces.append([indices.setdefault(vertex, len(indices)) for vertex in triangle])
+    ns = "http://schemas.microsoft.com/3dmanufacturing/core/2015/02"
+    model = ElementTree.Element("model", {"xmlns": ns, "unit": "millimeter"})
+    resources = ElementTree.SubElement(model, "resources")
+    obj = ElementTree.SubElement(resources, "object", {"id": "1", "type": "model", "name": source.stem})
+    mesh = ElementTree.SubElement(obj, "mesh")
+    vertices = ElementTree.SubElement(mesh, "vertices")
+    for vertex in indices:
+        ElementTree.SubElement(vertices, "vertex", dict(zip(("x", "y", "z"), map(repr, vertex))))
+    elements = ElementTree.SubElement(mesh, "triangles")
+    for face in faces:
+        ElementTree.SubElement(elements, "triangle", dict(zip(("v1", "v2", "v3"), map(str, face))))
+    build = ElementTree.SubElement(model, "build")
+    ElementTree.SubElement(build, "item", {"objectid": "1"})
+    content_types = b'''<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="model" ContentType="application/vnd.ms-package.3dmanufacturing-3dmodel+xml"/>
+</Types>'''
+    relationships = b'''<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rel0" Type="http://schemas.microsoft.com/3dmanufacturing/2013/01/3dmodel" Target="/3D/3dmodel.model"/>
+</Relationships>'''
+    with ZipFile(destination, "w", compression=ZIP_DEFLATED) as archive:
+        archive.writestr("[Content_Types].xml", content_types)
+        archive.writestr("_rels/.rels", relationships)
+        archive.writestr("3D/3dmodel.model", ElementTree.tostring(model, encoding="utf-8", xml_declaration=True))
+
+
+def check_3mf_export(path, source, reference, euler):
+    bounds, volume = mesh_info(path, euler)
+    expected_bounds, expected_volume = reference
+    assert abs(volume - expected_volume) < 1, f"3MF export changed volume: {path}"
+    for axis in range(3):
+        assert all(abs(a - b) < 0.001 for a, b in zip(bounds[axis], expected_bounds[axis])), (
+            f"3MF export changed original assembly coordinates: {path}"
+        )
+    assert read_triangles(path) == read_triangles(source), f"3MF changed mesh coordinates or winding: {path}"
 
 
 def mesh_info(path, expected_euler):
@@ -131,9 +213,22 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--openscad", default=shutil.which("openscad"))
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--3mf-only", action="store_true", dest="three_mf_only",
+                        help="Export and verify only the two original-coordinate 3MF parts.")
     args = parser.parse_args()
     assert args.openscad, "Pass --openscad with the path to openscad.com or openscad."
     args.output.mkdir(parents=True, exist_ok=True)
+    if args.three_mf_only:
+        with TemporaryDirectory(prefix="minibox-3mf-") as temporary:
+            for part, euler in [("bottom", -2), ("lid", -22)]:
+                source = Path(temporary) / f"{part}.stl"
+                render(args.openscad, SOURCE, source, [f'part="{part}"'])
+                reference = mesh_info(source, euler)
+                output = args.output / f"{part}.3mf"
+                write_3mf(source, output)
+                check_3mf_export(output, source, reference, euler)
+        print("PASS: original-coordinate 3MF exports exactly preserve both validated STL meshes.")
+        return
     meshes = {}
     for part, euler in [("bottom", -2), ("lid", -22), ("lid-print", -22)]:
         output = args.output / f"{part}.stl"
@@ -145,6 +240,11 @@ def main():
     assert abs(meshes["bottom"][0][2][0]) < 0.001, "Spherical corners lifted the bottom off Z=0."
     assert abs(meshes["lid-print"][0][2][0]) < 0.001, "Print orientation is not on Z=0."
     assert abs(meshes["lid"][1] - meshes["lid-print"][1]) < 1, "Print transform changed volume."
+    for part, euler in [("bottom", -2), ("lid", -22)]:
+        output = args.output / f"{part}.3mf"
+        source = args.output / f"{part}.stl"
+        write_3mf(source, output)
+        check_3mf_export(output, source, meshes[part], euler)
     check_y_up_exports(args.openscad, args.output, meshes)
 
     checks = args.output / "clearance-check.scad"
