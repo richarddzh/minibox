@@ -90,6 +90,43 @@ def mesh_info(path, expected_euler):
     return bounds, volume
 
 
+def planar_area(path, axis, coordinate):
+    axes = [i for i in range(3) if i != axis]
+    u, v = axes
+    area = 0.0
+    for a, b, c in read_triangles(path):
+        if all(abs(p[axis] - coordinate) < 0.001 for p in (a, b, c)):
+            area += abs((b[u] - a[u]) * (c[v] - a[v]) -
+                        (b[v] - a[v]) * (c[u] - a[u])) / 2
+    return area
+
+
+def check_y_up_exports(executable, output, meshes):
+    for part, original, euler in [
+        ("bottom-y-up", "bottom", -2), ("lid-y-up", "lid-print", -22)
+    ]:
+        path = output / f"{part}.stl"
+        original_path = output / f"{original}.stl"
+        render(executable, SOURCE, path, [f'part="{part}"'])
+        bounds, volume = mesh_info(path, euler)
+        original_bounds, original_volume = meshes[original]
+        depth = original_bounds[1][1]
+        expected = [original_bounds[0], original_bounds[2],
+                    (0, depth - original_bounds[1][0])]
+        for axis in range(3):
+            assert all(abs(a - b) < 0.001 for a, b in zip(bounds[axis], expected[axis])), (
+                f"Incorrect Y-up bounds: {part}"
+            )
+        assert abs(volume - original_volume) < 1, f"Y-up rotation changed volume: {part}"
+        assert abs(bounds[1][0]) < 0.001, f"Y-up export must rest on Y=0: {part}"
+        # A -90-degree rotation maps the bottom to -Y and the rear to -Z.
+        for old_axis, old_coordinate, new_axis, new_coordinate in [(2, 0, 1, 0), (1, depth, 2, 0)]:
+            assert abs(planar_area(original_path, old_axis, old_coordinate) -
+                       planar_area(path, new_axis, new_coordinate)) < 0.1, (
+                f"Wrong bottom/rear orientation: {part}"
+            )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--openscad", default=shutil.which("openscad"))
@@ -108,6 +145,7 @@ def main():
     assert abs(meshes["bottom"][0][2][0]) < 0.001, "Spherical corners lifted the bottom off Z=0."
     assert abs(meshes["lid-print"][0][2][0]) < 0.001, "Print orientation is not on Z=0."
     assert abs(meshes["lid"][1] - meshes["lid-print"][1]) < 1, "Print transform changed volume."
+    check_y_up_exports(args.openscad, args.output, meshes)
 
     checks = args.output / "clearance-check.scad"
     checks.write_text(

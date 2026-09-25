@@ -6,7 +6,7 @@
 */
 
 /* [View] */
-part = "assembly"; // [assembly, exploded, bottom, lid, lid-print]
+part = "assembly"; // [assembly, exploded, bottom, lid, lid-print, bottom-y-up, lid-y-up]
 show_modules = false;
 explode_height = 35;
 $fn = 32;
@@ -256,7 +256,8 @@ function inner_path(path, depth) = [
 
 // All six screws are vertical and sit on the two horizontal portions of the lid.
 assert(part == "assembly" || part == "exploded" || part == "bottom" ||
-       part == "lid" || part == "lid-print" || part == "none", "Unknown part.");
+       part == "lid" || part == "lid-print" || part == "bottom-y-up" ||
+       part == "lid-y-up" || part == "none", "Unknown part.");
 assert(slope_angle > 30 && slope_angle < 80, "Screen slope must be between 30 and 80 degrees.");
 assert(min(bottom_radius, rim_radius) > wall && bend_radius > panel_thickness,
        "Corner radii must exceed their wall/panel thickness.");
@@ -887,6 +888,12 @@ if (part == "bottom") {
     lid();
 } else if (part == "lid-print") {
     printable_lid();
+} else if (part == "bottom-y-up") {
+    translate([0, 0, case_depth])
+        rotate([-90, 0, 0]) bottom_shell();
+} else if (part == "lid-y-up") {
+    translate([0, 0, case_depth - 2 * (rim_radius + joint_clearance)])
+        rotate([-90, 0, 0]) printable_lid();
 } else if (part == "assembly" || part == "exploded") {
     color([0.82, 0.82, 0.84]) bottom_shell();
     translate([0, 0, part == "exploded" ? explode_height : 0])

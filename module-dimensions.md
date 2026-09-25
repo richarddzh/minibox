@@ -250,6 +250,8 @@ OpenSCAD 参数化模型见 [`minibox-enclosure.scad`](minibox-enclosure.scad)�
 - `"bottom"`：底壳
 - `"lid"`：上盖（装配坐标）
 - `"lid-print"`：上盖侧立并落在 Z=0 平台上
+- `"bottom-y-up"`：底壳转为 Y 向上坐标，供采用该坐标约定的网站使用
+- `"lid-y-up"`：将 `lid-print` 的侧立姿态转为 Y 向上坐标
 - `"assembly"`：装配预览
 - `"exploded"`：上盖向上移开的拆分预览
 
@@ -265,11 +267,17 @@ OpenSCAD 参数化模型见 [`minibox-enclosure.scad`](minibox-enclosure.scad)�
 
 仓库中的 `bottom.stl` 为底壳，底面位于 Z=0；`lid.stl` 为独立上盖，使用 `part="lid-print"` 的侧立落地朝向，**不是装配坐标**。两者均为毫米单位的二进制 STL，采用 `$fn=32`，不含模块预览实体。装配查看请使用 SCAD 的 `"assembly"` 模式。
 
+**网站兼容版本：`bottom-y-up.stl`、`lid-y-up.stl`。** 根据“带两个 Type-C 孔的后壁显示在顶部，底面显示在后方，而左右方向正常”的描述，网站可能使用 Y 向上坐标。兼容版相对原 STL 绕 X 轴旋转 **−90°**，再平移至非负坐标；坐标变换为 X 保持、原 Z 变为新 Y、原 Y 反向变为新 Z。因此底面位于 **Y=0**，底壳后壁朝 −Z，左右不变。这是旋转，不是镜像，尺寸、孔位及实体体积不变。STL 本身不携带“哪个轴朝上”的元数据，网站是否适用仍需上传确认。
+
+原版 `bottom.stl`、`lid.stl` 保持不变，继续供通常采用 Z 向上的切片软件使用；不要把 Y 向上兼容版直接当作已摆正的 Z 向上打印文件。上盖兼容版保留原来的侧立打印姿态，只转换坐标轴，并非装配朝向。回归检查验证兼容版的封闭连通性、体积、轴向尺寸，以及原底面和后壁分别转到 Y=0 和 Z=0。
+
 重新导出时不必修改源文件的默认预览模式：
 
 ```powershell
 & "C:\Program Files\OpenSCAD\openscad.com" --export-format binstl -D 'part="bottom"' -o .\bottom.stl .\minibox-enclosure.scad
 & "C:\Program Files\OpenSCAD\openscad.com" --export-format binstl -D 'part="lid-print"' -o .\lid.stl .\minibox-enclosure.scad
+& "C:\Program Files\OpenSCAD\openscad.com" --export-format binstl -D 'part="bottom-y-up"' -o .\bottom-y-up.stl .\minibox-enclosure.scad
+& "C:\Program Files\OpenSCAD\openscad.com" --export-format binstl -D 'part="lid-y-up"' -o .\lid-y-up.stl .\minibox-enclosure.scad
 ```
 
 ### 尚需实物复测的参数
