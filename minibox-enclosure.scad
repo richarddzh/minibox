@@ -9,14 +9,14 @@
 part = "assembly"; // [assembly, exploded, bottom, lid, lid-print]
 show_modules = false;
 explode_height = 35;
-$fn = 16;
+$fn = 32;
 
 /* [Enclosure] */
 case_width = 120;
 deck_depth = 58;
 deck_height = 28;
 slope_angle = 60;
-slope_length = 137;
+slope_length = 111;
 rear_ledge = 18;
 wall = 2.4;
 floor_thickness = 4;
@@ -49,6 +49,7 @@ rear_mount_depth = 10;
 middle_boss_diameter = 7;
 middle_mount_y = 49.2;
 screen_gusset_thickness = 2;
+screen_brace_clearance = 2.5; // Compact side-wall brace clearance to floor-mounted modules
 support_angle = 75; // Minimum brace slope measured from the horizontal
 small_gap_fill = 5;
 
@@ -97,14 +98,16 @@ breadboard_height = 10;
 tft_size = [108.04, 61.74];
 tft_view = [83.52, 55.68];
 tft_hole_spacing = [101.9, 54.9];
-tft_window_clearance = 0.8;
-screen_stack_above_pcb = 8;
-screen_front_clearance = 1;
+tft_view_side_margins = [10, 14.52]; // Left and right PCB edges to the active display
+tft_window_clearance = 2; // Total enlargement: 1 mm per side
+tft_window_radius = 6;
+screen_pcb_thickness = 2;
+screen_stack_above_pcb = 3;
+screen_front_clearance = 1; // Reserved for acrylic film and assembly clearance
 screen_back_height = 4;
 screen_back_edge_margin = 8;
-screen_window_offset = [0, 0];
-screen_shift_along = 53;
-screen_port_clearance = 15;
+screen_shift_along = 26.62;
+screen_port_clearance = 8;
 
 /* [Switch below the screen, right side] */
 switch_hole_diameter = 21;
@@ -146,7 +149,9 @@ typec_center_z = rear_height / 2;
 // Conservative envelope if the quoted hex size is across flats rather than corners.
 typec_nut_envelope = typec_nut_outer_size / cos(30);
 screen_board_gap = screen_stack_above_pcb + screen_front_clearance;
-screen_mount_normal = -panel_thickness - screen_board_gap - pcb_thickness;
+screen_mount_gap = screen_pcb_thickness + screen_board_gap;
+screen_mount_normal = -panel_thickness - screen_mount_gap;
+screen_window_offset = [(tft_view_side_margins[0] - tft_view_side_margins[1]) / 2, 0];
 tft_center = [case_width / 2, 46 + screen_shift_along];
 tft_rear_extent = deck_depth + cos(slope_angle) * (tft_center[1] + tft_size[1] / 2) -
                   sin(slope_angle) * screen_mount_normal;
@@ -260,7 +265,16 @@ assert(joint_clearance > 0 && joint_clearance < wall, "Invalid lid clearance.");
 assert(switch_center[0] > tft_center[0] &&
        switch_center[1] - switch_hole_diameter / 2 >= tangent_length(4) + lid_min_edge,
        "Switch must be on the right and above the lower curved transition.");
-assert(screen_port_clearance >= 15, "Screen-to-port edge clearance must be at least 15 mm.");
+assert(screen_port_clearance >= 8, "Screen-to-port edge clearance must be at least 8 mm.");
+assert(min(tft_view_side_margins) >= 0 &&
+       abs(tft_view_side_margins[0] + tft_view[0] + tft_view_side_margins[1] -
+           tft_size[0]) < 0.001, "Display width and side margins must match the PCB.");
+assert(tft_window_clearance >= 2, "Screen aperture needs at least 1 mm per side.");
+assert(tft_window_radius > 0 &&
+       2 * tft_window_radius <= min(tft_view) + tft_window_clearance,
+       "Screen window corner radius does not fit its aperture.");
+assert(screen_brace_clearance >= floor_side_clearance,
+       "Screen side braces must retain at least the side-wall assembly clearance.");
 assert(switch_center[1] + max(switch_hole_diameter, switch_body_diameter) / 2 +
        screen_port_clearance <= tft_center[1] - tft_size[1] / 2,
        "Switch must clear the entire screen PCB, not just the display window.");
@@ -350,6 +364,8 @@ assert(abs(keyboard_window[0] - keyboard_size[0]) < 0.001 &&
 assert(min(keyboard_mount_z, joystick_mount_z) - screw_tip_depth >= 1.5,
        "Thicken the floor: the 10 mm screws must leave at least 1.5 mm below the tip pockets.");
 assert(screen_front_clearance >= module_clearance, "Insufficient screen-to-lid clearance.");
+assert(screen_pcb_thickness > 0 && screen_stack_above_pcb > 0,
+       "Screen PCB and display thicknesses must be positive.");
 assert(keyboard_mount_z + pcb_thickness + keyboard_component_height + module_clearance <=
        deck_height - panel_thickness, "Keyboard body hits the lid.");
 assert(joystick_mount_z + pcb_thickness + joystick_component_height + module_clearance <=
@@ -368,6 +384,7 @@ assert(screen_tab_depth > screw_tip_depth &&
        "Mounting tabs need blind clearance for the screw tips.");
 assert(screen_gusset_thickness >= 2, "Screen gussets must be at least 2 mm thick.");
 assert(screw_length - pcb_thickness <= screw_tip_depth &&
+       screw_length - screen_pcb_thickness <= screw_tip_depth &&
        screw_length - (panel_thickness - lid_counterbore_depth) <= screw_tip_depth,
        "Screws are too long for the blind holes.");
 assert(insert_depth < screw_tip_depth && insert_diameter < module_boss_diameter - 2,
@@ -391,7 +408,7 @@ for (spec = [[joystick_center, joystick_size], [keyboard_center, keyboard_size]]
 
 module extrude_along_x(length) {
     multmatrix([[0, 0, 1, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1]])
-        linear_extrude(height = length) children();
+        linear_extrude(height = length, convexity = 10) children();
 }
 
 module extrude_along_y(length) {
@@ -487,7 +504,7 @@ module opening_plan(inset = 0) {
 
 module plan_volume() {
     translate([0, 0, -eps])
-        linear_extrude(height = rear_height + 2 * eps) children();
+        linear_extrude(height = rear_height + 2 * eps, convexity = 10) children();
 }
 
 module lid_blank() {
@@ -657,7 +674,7 @@ module screen_tabs() {
             hull() {
                 on_slope(0, along, base_normal)
                     screen_tab_pad(side, x, screen_tab_depth);
-                translate([side < 0 ? wall / 2 : case_width - 1.5 * wall,
+                translate([side < 0 ? 0 : case_width - wall,
                            front_y, root_z])
                     cube([wall, back_y - front_y, screen_gusset_thickness]);
             }
@@ -765,8 +782,9 @@ module lid_openings() {
                  tft_center[1] + screen_window_offset[1] -
                      (tft_view[1] + tft_window_clearance) / 2,
                  -panel_thickness - eps)
-            cube([tft_view[0] + tft_window_clearance,
-                  tft_view[1] + tft_window_clearance, panel_thickness + 2 * eps]);
+            linear_extrude(height = panel_thickness + 2 * eps)
+                rounded_rectangle(tft_view + [tft_window_clearance, tft_window_clearance],
+                                  tft_window_radius);
         shell_fasteners()
             translate([0, 0, -eps])
                 cylinder(d = lid_screw_diameter, h = panel_thickness + wall);
@@ -783,7 +801,8 @@ module lid() {
 }
 
 module module_boards(inset = 0, include_esp32 = true) {
-    assert(inset >= 0 && 2 * inset < pcb_thickness, "Invalid PCB inspection inset.");
+    assert(inset >= 0 && 2 * inset < min(pcb_thickness, screen_pcb_thickness),
+           "Invalid PCB inspection inset.");
     for (spec = [[joystick_center, joystick_size, joystick_mount_z],
                  [keyboard_center, keyboard_size, keyboard_mount_z]])
         translate([spec[0][0] - spec[1][0] / 2 + inset,
@@ -791,7 +810,7 @@ module module_boards(inset = 0, include_esp32 = true) {
             cube([spec[1][0] - 2 * inset, spec[1][1] - 2 * inset, pcb_thickness - 2 * inset]);
     on_slope(tft_center[0] - tft_size[0] / 2 + inset,
              tft_center[1] - tft_size[1] / 2 + inset, screen_mount_normal + inset)
-        cube([tft_size[0] - 2 * inset, tft_size[1] - 2 * inset, pcb_thickness - 2 * inset]);
+        cube([tft_size[0] - 2 * inset, tft_size[1] - 2 * inset, screen_pcb_thickness - 2 * inset]);
     if (include_esp32) difference() {
         translate([esp32_center[0] - esp32_size[0] / 2 + inset,
                    esp32_front_y + inset, esp32_mount_z + inset])
@@ -846,7 +865,7 @@ module module_envelopes(inset = 0, include_floor_modules = true) {
                  h = joystick_total_height - pcb_thickness - 2 * inset);
     on_slope(tft_center[0] - tft_size[0] / 2 + inset,
              tft_center[1] - tft_size[1] / 2 + inset,
-             screen_mount_normal + pcb_thickness + inset)
+             screen_mount_normal + screen_pcb_thickness + inset)
         cube([tft_size[0] - 2 * inset, tft_size[1] - 2 * inset,
               screen_stack_above_pcb - 2 * inset]);
     on_slope(tft_center[0] - tft_size[0] / 2 + screen_back_edge_margin + inset,

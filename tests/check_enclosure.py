@@ -104,6 +104,7 @@ def main():
         meshes[part] = mesh_info(output, euler)
     assert abs(meshes["bottom"][0][0][1] - 120) < 0.01
     assert abs(meshes["bottom"][0][1][1] - 154) < 0.01
+    assert abs(meshes["bottom"][0][2][1] - 124.129) < 0.01
     assert abs(meshes["bottom"][0][2][0]) < 0.001, "Spherical corners lifted the bottom off Z=0."
     assert abs(meshes["lid-print"][0][2][0]) < 0.001, "Print orientation is not on Z=0."
     assert abs(meshes["lid"][1] - meshes["lid-print"][1]) < 1, "Print transform changed volume."
@@ -112,12 +113,60 @@ def main():
     checks.write_text(
         f"include <{SOURCE}>\n"
         """
+expected_screen_stack = 3;
 assert(slope_angle == 60);
 assert(abs(corner_angle(3) - 120) < 0.001 && abs(corner_angle(4) - 120) < 0.001);
 assert(bottom_radius == 12 && rim_radius == 6 && bend_radius == 10);
 assert(wall == 2.4 && floor_thickness == 4 && panel_thickness == 3);
-assert(slope_length == 137 && tft_center == [60, 99]);
-assert(screen_port_clearance == 15);
+assert(slope_length == 111 && norm(tft_center - [60, 72.62]) < 0.001);
+assert(screen_port_clearance == 8);
+assert(tft_window_radius == 6 && screen_brace_clearance == 2.5);
+assert(tft_view_side_margins == [10, 14.52] && tft_window_clearance == 2);
+assert(norm(screen_window_offset - [-2.26, 0]) < 0.001);
+assert(screen_pcb_thickness == 2 && pcb_thickness == 1.6);
+assert(screen_stack_above_pcb == expected_screen_stack && screen_front_clearance == 1);
+assert(abs(screen_mount_gap - (expected_screen_stack + 3)) < 0.001);
+assert(abs(screen_mount_normal + expected_screen_stack + 6) < 0.001);
+assert(abs(tft_center[0] + screen_window_offset[0] - tft_view[0] / 2 -
+           (tft_center[0] - tft_size[0] / 2) - 10) < 0.001);
+assert(abs(tft_center[0] + tft_size[0] / 2 -
+           (tft_center[0] + screen_window_offset[0] + tft_view[0] / 2) - 14.52) < 0.001);
+assert(abs(tft_center[1] - tft_size[1] / 2 - speaker_center[1] -
+           speaker_hole_diameter / 2 - 8) < 0.001);
+// Independently probe the shifted 85.52 x 57.68 mm aperture and retained R6 corners.
+intersection() {
+    lid();
+    on_slope(14.98 + eps, 43.78 + 6, -3.1) cube([85.52 - 2 * eps, 45.68, 3.2]);
+}
+intersection() {
+    lid();
+    on_slope(14.98 + 6, 43.78 + eps, -3.1) cube([73.52, 57.68 - 2 * eps, 3.2]);
+}
+// Solid strips just outside each straight edge reject excessive or misplaced cuts.
+difference() {
+    union() {
+        for (x = [14.88, 100.55])
+            on_slope(x, 72.57, -2.9) cube([0.05, 0.1, 2.8]);
+        for (v = [43.68, 101.51])
+            on_slope(57.69, v, -2.9) cube([0.1, 0.05, 2.8]);
+    }
+    lid();
+}
+for (sx = [-1, 1])
+    for (sy = [-1, 1]) {
+        difference() {
+            on_slope(57.74 + sx * (42.76 - 1) - 0.05,
+                     72.62 + sy * (28.84 - 2) - 0.05, -2.9)
+                cube([0.1, 0.1, 2.8]);
+            lid();
+        }
+        intersection() {
+            lid();
+            on_slope(57.74 + sx * (42.76 - 1) - 0.05,
+                     72.62 + sy * (28.84 - 3.5) - 0.05, -3.1)
+                cube([0.1, 0.1, 3.2]);
+        }
+    }
 assert(switch_hole_diameter == 21 && switch_center == [90, 22]);
 assert(speaker_diameter == 23 && speaker_hole_diameter == 23.5);
 assert(microphone_hole_diameter == 5);
@@ -143,10 +192,10 @@ intersection() { audio_envelopes(eps); module_envelopes(eps); }
 intersection() { audio_envelopes(eps); typec_envelopes(eps); }
 intersection() { audio_envelopes(eps); switch_envelope(eps); }
 assert(tft_center[1] - tft_size[1] / 2 - switch_center[1] -
-       switch_hole_diameter / 2 >= 15);
+       switch_hole_diameter / 2 >= 8);
 for (port = [[speaker_center, speaker_hole_diameter],
              [microphone_center, microphone_hole_diameter], [switch_center, switch_hole_diameter]])
-    assert(tft_center[1] - tft_size[1] / 2 - port[0][1] - port[1] / 2 >= 15 &&
+    assert(tft_center[1] - tft_size[1] / 2 - port[0][1] - port[1] / 2 >= 8 &&
            port[0][1] - port[1] / 2 > tangent_length(4) + 2 &&
            port[0][1] + port[1] / 2 < slope_length - tangent_length(3) - 2);
 intersection() {
@@ -300,7 +349,7 @@ difference() {
                 cube([1.6, 4, deck_height - panel_thickness - bottom_radius - 2]);
     bottom_shell();
 }
-assert($fn == 16 && len(top_path()) >= 12);
+assert($fn == 32 && len(top_path()) >= 12);
 assert(insert_diameter == 4.7 && insert_depth == 5.2);
 assert(esp32_size == [58, 68] && esp32_hole_spacing == [49, 58]);
 assert(esp32_hole_diameter == 3 && esp32_standoff_height == 5);
@@ -350,7 +399,6 @@ for (spec = [[[8.5, 62.7, 9], [58, 68, 11.6]],
             audio_envelopes(eps);
             switch_envelope(eps);
             typec_envelopes(eps);
-            screen_tabs();
             shell_mount_columns();
             // The perimeter lip is part of the side wall, checked with its reduced gap above.
             control_holes()
@@ -358,6 +406,12 @@ for (spec = [[[8.5, 62.7, 9], [58, 68, 11.6]],
                     linear_extrude(height = $control_z - floor_thickness)
                         control_mount_footprint($control_z);
         }
+    }
+    // Wall-hugging screen braces use the separately documented compact side clearance.
+    intersection() {
+        translate(spec[0] - [2.5 - eps, 2.5 - eps, 2.5 - eps])
+            cube(spec[1] + [5 - 2 * eps, 5 - 2 * eps, 5 - 2 * eps]);
+        screen_tabs();
     }
 }
 // The shared 10 mm lane must remain free of posts, braces and modules.
@@ -379,7 +433,7 @@ intersection() {
              tft_center[1] - tft_size[1] / 2,
              screen_mount_normal - screen_back_height)
         cube([tft_size[0], tft_size[1],
-              screen_back_height + pcb_thickness + screen_stack_above_pcb]);
+              screen_back_height + screen_pcb_thickness + screen_stack_above_pcb]);
 }
 // Verify all four low posts, glue pockets, and solid blind-hole floors.
 intersection() {
@@ -400,6 +454,39 @@ difference() {
 assert(joystick_standoff_height == 16);
 assert(keyboard_mount_z - screw_tip_depth >= 1.5);
 assert(abs(screen_board_gap - screen_stack_above_pcb - screen_front_clearance) < 0.001);
+// Actual pad faces and the free gap follow the panel normal, not the world Z axis.
+expected_mount_normal = -expected_screen_stack - 6;
+for (x = [9.05, 110.95])
+    for (v = [45.17, 100.07]) {
+        difference() {
+            on_slope(x + 3, v - 0.1, expected_mount_normal - 0.2)
+                cube([0.2, 0.2, 0.18]);
+            bottom_shell();
+        }
+        intersection() {
+            bottom_shell();
+            on_slope(x + 3, v - 0.1, expected_mount_normal + eps)
+                cube([0.2, 0.2, -3 - expected_mount_normal - 2 * eps]);
+        }
+        difference() {
+            on_slope(x + 3, v - 0.1, -3 + eps) cube([0.2, 0.2, 0.18]);
+            lid();
+        }
+    }
+// A 2 mm PCB and the measured display stack must occupy their full normal depths.
+difference() {
+    on_slope(59, 71.62, expected_mount_normal + eps) cube([2, 2, 2 - 2 * eps]);
+    module_boards();
+}
+difference() {
+    on_slope(59, 71.62, expected_mount_normal + 2 + eps)
+        cube([2, 2, expected_screen_stack - 2 * eps]);
+    module_envelopes();
+}
+intersection() {
+    module_envelopes();
+    on_slope(59, 71.62, -4 + eps) cube([2, 2, 1 - 2 * eps]);
+}
 assert(keyboard_window == [57.4, 20.2]);
 assert(norm(keyboard_window_center - [84, 29.6]) < 0.001);
 assert(abs((keyboard_center[1] + keyboard_size[1] / 2) -
@@ -467,6 +554,20 @@ difference() {
 intersection() { bottom_shell(); translate([0, 0, eps]) lid(); }
 intersection() { module_envelopes(eps); bottom_shell(); }
 intersection() { module_envelopes(eps); lid(); }
+// Both side rails must remain solid across every bend and intervening panel segment.
+lid_midline = inner_path(top_path(), 1.5);
+difference() {
+    union()
+        for (x = [13.5, 114.5]) {
+            for (i = [1 : len(lid_midline) - 2])
+                translate([x - 0.05, lid_midline[i][0] - 0.05, lid_midline[i][1] - 0.05])
+                    cube([0.1, 0.1, 0.1]);
+            for (i = [0 : len(lid_midline) - 2])
+                let(p = (lid_midline[i] + lid_midline[i + 1]) / 2)
+                    translate([x - 0.05, p[0] - 0.05, p[1] - 0.05]) cube([0.1, 0.1, 0.1]);
+        }
+    lid();
+}
 // Entire module boxes plus 2 mm XY clearance must avoid the lid columns.
 intersection() {
     shell_mount_columns();
@@ -571,12 +672,12 @@ difference() {
 // All four screen braces must extend to the root required by a 75-degree slope.
 for (side = [-1, 1])
     for (dv = [-27.45, 27.45])
-        let(along = 99 + dv,
+        let(along = 72.62 + dv,
             root = 28 + sin(60) * along + cos(60) * (screen_mount_normal - 10) -
                    4 * sin(60) - 10.65 * tan(75) - 2,
             front = 58 + cos(60) * along - sin(60) * screen_mount_normal - 2,
-            x = side < 0 ? 3 : case_width - 3.2) {
-            assert(root >= esp32_mount_z + pcb_thickness + esp32_component_height + 10);
+            x = side < 0 ? 2 : case_width - 2.2) {
+            assert(root >= floor_thickness);
             difference() {
                 translate([x, front + 1, root + 0.4]) cube([0.2, 0.2, 0.2]);
                 screen_tabs();
@@ -625,12 +726,13 @@ intersection() {
 """,
         encoding="utf-8",
     )
-    render(args.openscad, checks, args.output / "interference.stl", ['part="none"'], empty=True)
+    render(args.openscad, checks, args.output / "interference.stl",
+           ['part="none"', "expected_screen_stack=3"], empty=True)
     render(
         args.openscad,
         checks,
         args.output / "thicker-screen-interference.stl",
-        ['part="none"', "screen_stack_above_pcb=12"],
+        ['part="none"', "screen_stack_above_pcb=12", "expected_screen_stack=12"],
         empty=True,
     )
     print("PASS: raised screen and 21 mm lower-right switch opening, "
@@ -640,9 +742,11 @@ intersection() {
           "open roof, filled boss-wall gaps, connected column roots, sketch layout, 6 lid screw paths, "
           "16 module sockets, rotated ESP32 beside a 35x47 mm breadboard, "
           "10 mm board gap, compact side gaps, 10 mm front gap and 20-21 mm rear gap, "
-          "75-degree braces, two shallow rear seats and 10 mm clearance to other modules, "
+          "75-degree braces, compact 2.5 mm side-brace clearance, R6 screen aperture, "
+          "8 mm screen-PCB-to-speaker gap, 2.26 mm left-shifted window with 1 mm edge margins, "
+          "2 mm screen PCB plus 3 mm display and 6 mm normal mounting gap, "
           "support directly below all 4 screen holes, "
-          "no component-envelope or column interference at 8/12 mm screen thickness "
+          "no component-envelope or column interference at 3/12 mm display thickness "
           "(0.02 mm contact tolerance).")
 
 
