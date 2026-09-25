@@ -6,7 +6,7 @@
 */
 
 /* [View] */
-part = "bottom"; // [assembly, exploded, bottom, lid, lid-print]
+part = "assembly"; // [assembly, exploded, bottom, lid, lid-print]
 show_modules = false;
 explode_height = 35;
 $fn = 16;
@@ -16,7 +16,7 @@ case_width = 120;
 deck_depth = 58;
 deck_height = 28;
 slope_angle = 60;
-slope_length = 127;
+slope_length = 137;
 rear_ledge = 18;
 wall = 2.4;
 floor_thickness = 4;
@@ -49,6 +49,7 @@ rear_mount_depth = 10;
 middle_boss_diameter = 7;
 middle_mount_y = 49.2;
 screen_gusset_thickness = 2;
+support_angle = 75; // Minimum brace slope measured from the horizontal
 small_gap_fill = 5;
 
 /* [Controls: joystick left, keyboard right] */
@@ -78,6 +79,7 @@ esp32_size = [58, 68];
 esp32_hole_spacing = [49, 58];
 esp32_hole_diameter = 3;
 esp32_standoff_height = 5;
+esp32_rear_clearance = 20;
 esp32_screw_length = 6;
 esp32_socket_depth = 5.2;
 // Provisional component height above the PCB; measure connectors and the ESP32 stack.
@@ -101,7 +103,7 @@ screen_front_clearance = 1;
 screen_back_height = 4;
 screen_back_edge_margin = 8;
 screen_window_offset = [0, 0];
-screen_shift_along = 35;
+screen_shift_along = 53;
 screen_port_clearance = 15;
 
 /* [Switch below the screen, right side] */
@@ -162,7 +164,7 @@ floor_group_rear = esp32_front_y + max(esp32_size[1], breadboard_size[1]);
 esp32_mount_z = floor_thickness + esp32_standoff_height;
 case_depth = ceil(max(screen_top_y + rear_ledge,
                       tft_rear_extent + 10 + shell_boss_diameter / 2 + module_clearance,
-                      floor_group_rear + floor_module_clearance + wall));
+                      floor_group_rear + esp32_rear_clearance + wall));
 keyboard_window_offset = [0, (keyboard_window_bottom_margin - keyboard_window_top_margin) / 2];
 keyboard_window_center = keyboard_center + keyboard_window_offset;
 keyboard_mount_z = deck_height - panel_thickness - keyboard_lid_gap;
@@ -197,8 +199,8 @@ function column_bounds(x, y) = [
     y < deck_depth ? y + shell_corner_depth / 2 : case_depth
 ];
 function rear_brace_rise(x, y) =
-    1.6 * (column_bounds(x, y)[2] - column_bounds(x, y)[0] - wall);
-// Smoothstep has maximum slope 1.5; a 1.6 rise/run ratio keeps overhangs below 45 degrees.
+    1.5 * tan(support_angle) * (column_bounds(x, y)[2] - column_bounds(x, y)[0] - wall);
+// Smoothstep's maximum derivative is 1.5; compensate so even the shallowest segment meets the angle.
 function brace_ease(t) = t * t * (3 - 2 * t);
 function column_root_z(x, y) =
     y > deck_depth ?
@@ -305,6 +307,8 @@ assert(middle_boss_diameter >= insert_diameter + 2,
        "Middle screw seats need at least 1 mm material around the nut pocket.");
 assert(floor_module_clearance >= 10 && floor_board_gap == 10,
        "Floor modules need 10 mm to other parts and exactly 10 mm between boards.");
+assert(esp32_rear_clearance >= 20, "ESP32 needs at least 20 mm to the rear panel.");
+assert(support_angle >= 45 && support_angle < 90, "Brace angle must be in [45, 90) degrees.");
 assert(floor_side_clearance > 0 && floor_side_inset >= wall + floor_side_clearance,
        "Floor modules must clear both side walls.");
 assert(breadboard_center[0] > esp32_center[0] &&
@@ -646,9 +650,10 @@ module screen_tabs() {
                       module_boss_diameter / 2 * cos(slope_angle);
             back_y = base_y + module_boss_diameter / 2 * cos(slope_angle);
             root_z = base_z - module_boss_diameter / 2 * sin(slope_angle) -
-                     reach - screen_gusset_thickness;
+                     reach * tan(support_angle) - screen_gusset_thickness;
+            assert(root_z >= floor_thickness, "Screen brace reaches below the usable floor.");
             // Cover the entire WORLD-Y projection, including directly below the hole.
-            // The root drops at least as far as the cantilever reaches inward.
+            // The entire root is below the lowest pad surface by the specified brace slope.
             hull() {
                 on_slope(0, along, base_normal)
                     screen_tab_pad(side, x, screen_tab_depth);

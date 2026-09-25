@@ -103,7 +103,7 @@ def main():
         render(args.openscad, SOURCE, output, [f'part="{part}"'])
         meshes[part] = mesh_info(output, euler)
     assert abs(meshes["bottom"][0][0][1] - 120) < 0.01
-    assert abs(meshes["bottom"][0][1][1] - 144) < 0.01
+    assert abs(meshes["bottom"][0][1][1] - 154) < 0.01
     assert abs(meshes["bottom"][0][2][0]) < 0.001, "Spherical corners lifted the bottom off Z=0."
     assert abs(meshes["lid-print"][0][2][0]) < 0.001, "Print orientation is not on Z=0."
     assert abs(meshes["lid"][1] - meshes["lid-print"][1]) < 1, "Print transform changed volume."
@@ -116,7 +116,7 @@ assert(slope_angle == 60);
 assert(abs(corner_angle(3) - 120) < 0.001 && abs(corner_angle(4) - 120) < 0.001);
 assert(bottom_radius == 12 && rim_radius == 6 && bend_radius == 10);
 assert(wall == 2.4 && floor_thickness == 4 && panel_thickness == 3);
-assert(slope_length == 127 && tft_center == [60, 81]);
+assert(slope_length == 137 && tft_center == [60, 99]);
 assert(screen_port_clearance == 15);
 assert(switch_hole_diameter == 21 && switch_center == [90, 22]);
 assert(speaker_diameter == 23 && speaker_hole_diameter == 23.5);
@@ -308,6 +308,7 @@ assert(norm(esp32_center - [37.5, 96.7]) < 0.001 && esp32_mount_z == 9);
 assert(breadboard_size == [35, 47] && norm(breadboard_center - [94, 86.2]) < 0.001);
 assert(breadboard_mount_z == 4 && breadboard_height == 10);
 assert(floor_module_clearance == 10 && floor_board_gap == 10);
+assert(esp32_rear_clearance == 20 && support_angle == 75);
 assert(breadboard_center[0] > esp32_center[0]);
 assert(abs(breadboard_center[0] - breadboard_size[0] / 2 -
            esp32_center[0] - esp32_size[0] / 2 - 10) < 0.001);
@@ -316,10 +317,8 @@ assert(abs(floor_side_inset - wall - 6.1) < 0.001 && floor_side_clearance == 1);
 assert(abs(esp32_front_y - middle_mount_y - middle_boss_diameter / 2 - 10) < 0.001);
 assert(esp32_front_y - keyboard_center[1] - keyboard_size[1] / 2 >= 10);
 assert(esp32_front_y - joystick_center[1] - joystick_size[1] / 2 >= 10);
-assert(case_depth - wall - (esp32_center[1] + esp32_size[1] / 2) >= 10);
-// A thicker optional screen can lengthen the case independently of the floor-board layout.
-if (screen_stack_above_pcb == 8)
-    assert(case_depth - wall - (esp32_center[1] + esp32_size[1] / 2) < 11);
+assert(case_depth - wall - (esp32_center[1] + esp32_size[1] / 2) >= 20);
+assert(case_depth - wall - (esp32_center[1] + esp32_size[1] / 2) < 21);
 // Independent measured footprints, expanded by 10 mm, not just collision checks.
 // Each board's own floor/posts are intentional contacts; other parts are not exempt.
 for (spec = [[[8.5, 62.7, 9], [58, 68, 11.6]],
@@ -340,7 +339,7 @@ for (spec = [[[8.5, 62.7, 9], [58, 68, 11.6]],
         let(left = max(spec[0][0], bottom_radius),
             right = min(spec[0][0] + spec[1][0], case_width - bottom_radius))
             translate([left + eps, spec[0][1] + spec[1][1] + eps, spec[0][2] + eps])
-                cube([right - left - 2 * eps, 10 - 2 * eps, spec[1][2] - 2 * eps]);
+                cube([right - left - 2 * eps, 20 - 2 * eps, spec[1][2] - 2 * eps]);
         bottom_shell();
     }
     intersection() {
@@ -491,19 +490,22 @@ intersection() {
     }
 }
 assert(rear_mount_depth == 10);
+expected_rear_rise = 1.5 * 11.1 * tan(75);
 for (x = shell_hole_x) {
-    assert(abs(column_root_z(x, case_depth - 11) - (rear_height - 30.76)) < 0.001);
-    assert(abs(rear_brace_rise(x, case_depth - 11) - 17.76) < 0.001);
-    // Every sampled segment grows less than 1 mm sideways per 1 mm upward.
+    assert(abs(column_root_z(x, case_depth - 11) -
+               (rear_height - 13 - expected_rear_rise)) < 0.001);
+    assert(abs(rear_brace_rise(x, case_depth - 11) - expected_rear_rise) < 0.001);
+    // Every sampled segment meets the requested 75-degree minimum from horizontal.
     for (i = [1 : max(8, $fn)])
         assert(11.1 * (brace_ease(i / max(8, $fn)) -
-                       brace_ease((i - 1) / max(8, $fn))) <= 17.76 / max(8, $fn));
+                       brace_ease((i - 1) / max(8, $fn))) * tan(75) <=
+               expected_rear_rise / max(8, $fn) + 0.001);
     // Both mirrored braces must follow the curved profile, not a straight wedge or a box.
     for (t = [0.25, 0.5, 0.75])
         let(reach = wall + 11.1 * t * t * (3 - 2 * t),
             edge = x < case_width / 2 ? reach : case_width - reach,
             direction = x < case_width / 2 ? 1 : -1,
-            z = rear_height - 30.76 + 17.76 * t) {
+            z = rear_height - 13 - expected_rear_rise + expected_rear_rise * t) {
             difference() {
                 translate([edge - direction * 0.25 - 0.05, case_depth - 12, z - 0.05])
                     cube([0.1, 1, 0.1]);
@@ -519,7 +521,7 @@ for (x = shell_hole_x) {
     intersection() {
         shell_mount_columns();
         translate([x - 4.5, case_depth - 14.5, floor_thickness])
-            cube([9, 14.5, rear_height - 30.76 - floor_thickness - 2 * eps]);
+            cube([9, 14.5, rear_height - 13 - expected_rear_rise - floor_thickness - 2 * eps]);
     }
     // Material beneath the 8.8 mm blind screw pocket, in the full 10 mm seat.
     difference() {
@@ -534,9 +536,11 @@ difference() {
         for (x = shell_hole_x)
             for (y = shell_hole_y)
                 translate([x < case_width / 2 ? wall - 0.8 : case_width - wall - 0.8,
-                           y - 2, max(column_root_z(x, y) + 3, bottom_radius + 1)])
+                           y - 2, max(column_root_z(x, y) +
+                                      (y > deck_depth ? expected_rear_rise * 0.2 : 3), bottom_radius + 1)])
                     cube([1.6, 4, (y < deck_depth ? deck_height : rear_height) -
-                                   panel_thickness - max(column_root_z(x, y) + 3, bottom_radius + 1) - 1]);
+                                   panel_thickness - max(column_root_z(x, y) +
+                                       (y > deck_depth ? expected_rear_rise * 0.2 : 3), bottom_radius + 1) - 1]);
     bottom_shell();
 }
 // Former narrow channels between the columns/posts and the walls must be solid.
@@ -564,6 +568,24 @@ difference() {
     }
     bottom_shell();
 }
+// All four screen braces must extend to the root required by a 75-degree slope.
+for (side = [-1, 1])
+    for (dv = [-27.45, 27.45])
+        let(along = 99 + dv,
+            root = 28 + sin(60) * along + cos(60) * (screen_mount_normal - 10) -
+                   4 * sin(60) - 10.65 * tan(75) - 2,
+            front = 58 + cos(60) * along - sin(60) * screen_mount_normal - 2,
+            x = side < 0 ? 3 : case_width - 3.2) {
+            assert(root >= esp32_mount_z + pcb_thickness + esp32_component_height + 10);
+            difference() {
+                translate([x, front + 1, root + 0.4]) cube([0.2, 0.2, 0.2]);
+                screen_tabs();
+            }
+            intersection() {
+                translate([x, front + 1, root - 0.4]) cube([0.2, 0.2, 0.2]);
+                screen_tabs();
+            }
+        }
 // Probe 5-6 mm vertically below each hole center, not along the tilted hole axis.
 // A rearward-only gusset leaves these volumes unsupported.
 difference() {
@@ -617,8 +639,8 @@ intersection() {
           "2 mm opening edge margins, 4.5/3 mm stepped counterbores, "
           "open roof, filled boss-wall gaps, connected column roots, sketch layout, 6 lid screw paths, "
           "16 module sockets, rotated ESP32 beside a 35x47 mm breadboard, "
-          "10 mm board gap, compact side gaps, 10-11 mm front-mount/rear-wall gaps, "
-          "two short rear seats with smooth printable braces and 10 mm clearance to other modules, "
+          "10 mm board gap, compact side gaps, 10 mm front gap and 20-21 mm rear gap, "
+          "75-degree braces, two shallow rear seats and 10 mm clearance to other modules, "
           "support directly below all 4 screen holes, "
           "no component-envelope or column interference at 8/12 mm screen thickness "
           "(0.02 mm contact tolerance).")
