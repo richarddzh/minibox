@@ -6,7 +6,7 @@
 */
 
 /* [View] */
-part = "exploded"; // [assembly, exploded, bottom, lid, lid-print]
+part = "bottom"; // [assembly, exploded, bottom, lid, lid-print]
 show_modules = false;
 explode_height = 35;
 $fn = 16;
@@ -45,7 +45,9 @@ module_boss_diameter = 8;
 screen_tab_depth = 10;
 shell_boss_diameter = 9;
 shell_corner_depth = 7;
+rear_mount_depth = 10;
 middle_boss_diameter = 7;
+middle_mount_y = 49.2;
 screen_gusset_thickness = 2;
 small_gap_fill = 5;
 
@@ -71,18 +73,23 @@ pcb_thickness = 1.6;
 module_clearance = 1;
 control_clearance = 2;
 
-/* [ESP32 expansion board: rear floor mount] */
-esp32_size = [68, 58];
-esp32_hole_spacing = [58, 49];
+/* [ESP32 expansion board: rotated 90 degrees on the rear floor] */
+esp32_size = [58, 68];
+esp32_hole_spacing = [49, 58];
 esp32_hole_diameter = 3;
 esp32_standoff_height = 5;
-esp32_front_clearance = 10;
-esp32_rear_clearance = 5;
-esp32_min_front_y = 59.75;
 esp32_screw_length = 6;
 esp32_socket_depth = 5.2;
 // Provisional component height above the PCB; measure connectors and the ESP32 stack.
 esp32_component_height = 10;
+
+/* [Breadboard: beside ESP32, with aligned front edges] */
+breadboard_size = [35, 47];
+floor_board_gap = 10;
+floor_module_clearance = 10;
+floor_side_clearance = 1; // Minimum at the inward-curving bottom wall, not the straight wall
+// Provisional thickness; no fixing holes or adhesive thickness have been supplied.
+breadboard_height = 10;
 
 /* [Landscape TFT: dimensions rotated together] */
 tft_size = [108.04, 61.74];
@@ -141,14 +148,21 @@ screen_mount_normal = -panel_thickness - screen_board_gap - pcb_thickness;
 tft_center = [case_width / 2, 46 + screen_shift_along];
 tft_rear_extent = deck_depth + cos(slope_angle) * (tft_center[1] + tft_size[1] / 2) -
                   sin(slope_angle) * screen_mount_normal;
-esp32_front_y = max(esp32_min_front_y,
-                    max(keyboard_center[1] + keyboard_size[1] / 2,
-                        joystick_center[1] + joystick_size[1] / 2) + esp32_front_clearance);
-esp32_center = [case_width / 2, esp32_front_y + esp32_size[1] / 2];
+floor_side_inset = (case_width - esp32_size[0] - floor_board_gap - breadboard_size[0]) / 2;
+// Above-floor parts are checked in 3D, rather than wasting their entire XY projection.
+esp32_front_y = max(keyboard_center[1] + keyboard_size[1] / 2,
+                   joystick_center[1] + joystick_size[1] / 2,
+                   middle_mount_y + middle_boss_diameter / 2) + floor_module_clearance;
+esp32_center = [floor_side_inset + esp32_size[0] / 2,
+                esp32_front_y + esp32_size[1] / 2];
+breadboard_center = [case_width - floor_side_inset - breadboard_size[0] / 2,
+                    esp32_front_y + breadboard_size[1] / 2];
+breadboard_mount_z = floor_thickness;
+floor_group_rear = esp32_front_y + max(esp32_size[1], breadboard_size[1]);
 esp32_mount_z = floor_thickness + esp32_standoff_height;
 case_depth = ceil(max(screen_top_y + rear_ledge,
                       tft_rear_extent + 10 + shell_boss_diameter / 2 + module_clearance,
-                      esp32_front_y + esp32_size[1] + esp32_rear_clearance + wall));
+                      floor_group_rear + floor_module_clearance + wall));
 keyboard_window_offset = [0, (keyboard_window_bottom_margin - keyboard_window_top_margin) / 2];
 keyboard_window_center = keyboard_center + keyboard_window_offset;
 keyboard_mount_z = deck_height - panel_thickness - keyboard_lid_gap;
@@ -182,6 +196,14 @@ function column_bounds(x, y) = [
     x < case_width / 2 ? x + shell_boss_diameter / 2 : case_width,
     y < deck_depth ? y + shell_corner_depth / 2 : case_depth
 ];
+function rear_brace_rise(x, y) =
+    1.6 * (column_bounds(x, y)[2] - column_bounds(x, y)[0] - wall);
+// Smoothstep has maximum slope 1.5; a 1.6 rise/run ratio keeps overhangs below 45 degrees.
+function brace_ease(t) = t * t * (3 - 2 * t);
+function column_root_z(x, y) =
+    y > deck_depth ?
+        rear_height - panel_thickness - rear_mount_depth - rear_brace_rise(x, y) :
+        floor_thickness;
 function distance_to_rectangle(p, bounds) = norm([
     max(bounds[0] - p[0], 0, p[0] - bounds[2]),
     max(bounds[1] - p[1], 0, p[1] - bounds[3])
@@ -226,8 +248,6 @@ function inner_path(path, depth) = [
 ];
 
 // All six screws are vertical and sit on the two horizontal portions of the lid.
-middle_mount_y = 49.2;
-
 assert(part == "assembly" || part == "exploded" || part == "bottom" ||
        part == "lid" || part == "lid-print" || part == "none", "Unknown part.");
 assert(slope_angle > 30 && slope_angle < 80, "Screen slope must be between 30 and 80 degrees.");
@@ -283,10 +303,18 @@ assert(middle_mount_y + shell_head_diameter / 2 + 0.5 <
        "Middle screws and head clearance must stay entirely on the horizontal deck.");
 assert(middle_boss_diameter >= insert_diameter + 2,
        "Middle screw seats need at least 1 mm material around the nut pocket.");
-assert(esp32_front_clearance >= 10 && esp32_rear_clearance >= 5,
-       "ESP32 requires at least 10 mm from controls and 5 mm from the rear wall.");
-assert(esp32_size[0] + 2 * (wall + module_clearance) < case_width,
-       "ESP32 board does not fit between side walls.");
+assert(floor_module_clearance >= 10 && floor_board_gap == 10,
+       "Floor modules need 10 mm to other parts and exactly 10 mm between boards.");
+assert(floor_side_clearance > 0 && floor_side_inset >= wall + floor_side_clearance,
+       "Floor modules must clear both side walls.");
+assert(breadboard_center[0] > esp32_center[0] &&
+       abs(breadboard_center[0] - breadboard_size[0] / 2 -
+           esp32_center[0] - esp32_size[0] / 2 - floor_board_gap) < eps,
+       "Place the breadboard beside ESP32 with a 10 mm edge gap.");
+assert(rear_mount_depth >= max(insert_depth, screw_tip_depth) + 1.2,
+       "Rear seats must retain at least 1.2 mm below the nut and screw-tip pockets.");
+assert(min(breadboard_size) > 0 && breadboard_height > 0,
+       "Breadboard dimensions must be positive.");
 assert(esp32_mount_z - max(insert_depth, esp32_socket_depth) >= 1.5,
        "ESP32 blind sockets must leave at least 1.5 mm of solid floor.");
 assert(esp32_screw_length > pcb_thickness &&
@@ -551,14 +579,28 @@ module shell_mount_columns() {
         for (y = shell_hole_y) {
             top = (y < deck_depth ? deck_height : rear_height) - panel_thickness;
             bounds = column_bounds(x, y);
-            translate([bounds[0], bounds[1], floor_thickness - eps])
-                cube([bounds[2] - bounds[0], bounds[3] - bounds[1],
-                      top - floor_thickness + eps]);
+            root = column_root_z(x, y);
+            width = bounds[2] - bounds[0];
+            if (y > deck_depth) {
+                rise = rear_brace_rise(x, y);
+                steps = max(8, $fn);
+                profile = concat([[0, 0], [wall, 0]],
+                    [for (i = [1 : steps])
+                        [wall + (width - wall) * brace_ease(i / steps), rise * i / steps]],
+                    [[width, top - root], [0, top - root]]);
+                translate([x < case_width / 2 ? bounds[0] : bounds[2], bounds[3], root])
+                    rotate([90, 0, 0])
+                        linear_extrude(height = bounds[3] - bounds[1])
+                            polygon([for (p = profile)
+                                [x < case_width / 2 ? p[0] : -p[0], p[1]]]);
+            } else
+                translate([bounds[0], bounds[1], floor_thickness - eps])
+                    cube([width, bounds[3] - bounds[1], top - floor_thickness + eps]);
         }
     middle_mount_columns();
 }
 
-module control_mount_footprint() {
+module control_mount_footprint(top_z) {
     radius = module_boss_diameter / 2;
     circle(d = module_boss_diameter);
     if ($hole_x - radius - wall <= small_gap_fill)
@@ -572,7 +614,8 @@ module control_mount_footprint() {
     for (x = shell_hole_x)
         for (y = shell_hole_y) {
             bounds = column_bounds(x, y);
-            if (distance_to_rectangle([$hole_x, $hole_y], bounds) - radius <= small_gap_fill)
+            if (column_root_z(x, y) <= top_z &&
+                distance_to_rectangle([$hole_x, $hole_y], bounds) - radius <= small_gap_fill)
                 hull() {
                     circle(d = module_boss_diameter);
                     translate([bounds[0] - $hole_x, bounds[1] - $hole_y])
@@ -671,11 +714,11 @@ module bottom_shell() {
                 control_holes()
                     translate([0, 0, floor_thickness - eps])
                         linear_extrude(height = $control_z - floor_thickness + eps)
-                            control_mount_footprint();
+                            control_mount_footprint($control_z);
                 hole_pattern(esp32_center, esp32_hole_spacing)
                     translate([0, 0, floor_thickness - eps])
                         linear_extrude(height = esp32_standoff_height + eps)
-                            control_mount_footprint();
+                            control_mount_footprint(esp32_mount_z);
                 screen_tabs();
                 shell_mount_columns();
             }
@@ -734,7 +777,7 @@ module lid() {
     }
 }
 
-module module_boards(inset = 0) {
+module module_boards(inset = 0, include_esp32 = true) {
     assert(inset >= 0 && 2 * inset < pcb_thickness, "Invalid PCB inspection inset.");
     for (spec = [[joystick_center, joystick_size, joystick_mount_z],
                  [keyboard_center, keyboard_size, keyboard_mount_z]])
@@ -744,7 +787,7 @@ module module_boards(inset = 0) {
     on_slope(tft_center[0] - tft_size[0] / 2 + inset,
              tft_center[1] - tft_size[1] / 2 + inset, screen_mount_normal + inset)
         cube([tft_size[0] - 2 * inset, tft_size[1] - 2 * inset, pcb_thickness - 2 * inset]);
-    difference() {
+    if (include_esp32) difference() {
         translate([esp32_center[0] - esp32_size[0] / 2 + inset,
                    esp32_front_y + inset, esp32_mount_z + inset])
             cube([esp32_size[0] - 2 * inset, esp32_size[1] - 2 * inset,
@@ -767,12 +810,23 @@ module control_envelope(center, size, mount_z, active_size, component_height, in
               size[2] - pcb_thickness - 2 * inset]);
 }
 
-module module_envelopes(inset = 0) {
-    module_boards(inset);
-    translate([esp32_center[0] - esp32_size[0] / 2 + inset,
-               esp32_front_y + inset, esp32_mount_z + pcb_thickness + inset])
-        cube([esp32_size[0] - 2 * inset, esp32_size[1] - 2 * inset,
-              esp32_component_height - 2 * inset]);
+module breadboard_envelope(inset = 0) {
+    translate([breadboard_center[0] - breadboard_size[0] / 2 + inset,
+               breadboard_center[1] - breadboard_size[1] / 2 + inset,
+               breadboard_mount_z + inset])
+        cube([breadboard_size[0] - 2 * inset, breadboard_size[1] - 2 * inset,
+              breadboard_height - 2 * inset]);
+}
+
+module module_envelopes(inset = 0, include_floor_modules = true) {
+    module_boards(inset, include_floor_modules);
+    if (include_floor_modules) {
+        breadboard_envelope(inset);
+        translate([esp32_center[0] - esp32_size[0] / 2 + inset,
+                   esp32_front_y + inset, esp32_mount_z + pcb_thickness + inset])
+            cube([esp32_size[0] - 2 * inset, esp32_size[1] - 2 * inset,
+                  esp32_component_height - 2 * inset]);
+    }
     control_envelope(keyboard_center, keyboard_size, keyboard_mount_z,
                      keyboard_window, keyboard_component_height, inset, keyboard_window_offset);
     translate([joystick_center[0] - joystick_size[0] / 2 + inset,
