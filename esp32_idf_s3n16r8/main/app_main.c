@@ -2,6 +2,7 @@
 #include "st7796.h"
 #include "test_screen.h"
 #include "app_config.h"
+#include "audio_test.h"
 
 #include <inttypes.h>
 #include "driver/gpio.h"
@@ -65,6 +66,7 @@ static void sample_joystick(void *arg) {
         if (s_input.error != ESP_OK) {
             vTaskDelete(NULL);
         }
+        audio_test_submit(&s_input.state);
         xTaskDelayUntil(&last_wake, pdMS_TO_TICKS(10));
     }
 }
@@ -90,6 +92,7 @@ void app_main(void) {
     }
     s_samples = xQueueCreate(1, sizeof(input_sample_t));
     ESP_ERROR_CHECK(s_samples ? ESP_OK : ESP_ERR_NO_MEM);
+    ESP_ERROR_CHECK(audio_test_start());
     /* Input sampling remains responsive during blocking SPI screen transfers. */
     BaseType_t created = xTaskCreate(sample_joystick, "joystick", 4096, NULL, 5, NULL);
     ESP_ERROR_CHECK(created == pdPASS ? ESP_OK : ESP_ERR_NO_MEM);
@@ -110,12 +113,12 @@ void app_main(void) {
         }
 #ifdef CONFIG_MINIBOX_LCD_STATIC_TEST
         if (first_frame) {
-            ESP_ERROR_CHECK(test_screen_update(&sample.state));
+            ESP_ERROR_CHECK(test_screen_update(&sample.state, audio_test_phase()));
             first_frame = false;
             ESP_LOGW(TAG, "STATIC DISPLAY: no further SPI writes; input sampling continues");
         }
 #else
-        ESP_ERROR_CHECK(test_screen_update(&sample.state));
+        ESP_ERROR_CHECK(test_screen_update(&sample.state, audio_test_phase()));
 #endif
         if (++log_counter >= 5) {
             log_counter = 0;

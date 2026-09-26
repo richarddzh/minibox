@@ -30,6 +30,11 @@
   Reset=GPIO13、CS=GPIO14。
 - 摇杆 X=GPIO4、Y=GPIO5，为 ADC 模拟信号；默认 X 反转、Y 不反转。
   K=GPIO6，按最新实物反馈默认高有效，可配置极性；不要继续套用最初的低有效假设。
+- INMP441 SD=GPIO18、WS=GPIO17、SCK=GPIO16，L/R 接 GND（左声道）；
+  MAX98357 DIN=GPIO15、LRC=GPIO17、BCLK=GPIO16、SD/MODE=GPIO7、
+  GAIN=GPIO8。GPIO7 播放时为高、其余时间为低，GPIO8 默认高阻；
+  摇杆只可使用 GPIO1–6。两模块半双工共用时钟，
+  先释放当前 I2S 通道再切换；K 长按 1 秒录音，最多 3 秒，松开回放。
 - GPIO48 控制板载 WS2812 RGB LED；启动时发送黑色数据熄灯。
   不要只拉低引脚，也不要误关 GPIO9 的屏幕背光。
 - 逻辑电平及摇杆供电为 3.3 V，所有模块共地；屏幕 VCC 和背光驱动须遵守模块规格。

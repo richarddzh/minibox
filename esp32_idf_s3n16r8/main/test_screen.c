@@ -34,6 +34,7 @@ static struct {
     int direction_y;
     bool pressed;
     uint32_t presses;
+    audio_phase_t audio;
     bool valid;
 } s_displayed;
 
@@ -137,7 +138,7 @@ esp_err_t test_screen_message(const char *message, const char *detail) {
     return flush_dynamic();
 }
 
-esp_err_t test_screen_update(const joystick_state_t *state) {
+esp_err_t test_screen_update(const joystick_state_t *state, audio_phase_t audio) {
     s_visual_x = stable_axis(state->percent_x, s_visual_x);
     s_visual_y = stable_axis(state->percent_y, s_visual_y);
     int64_t now = esp_timer_get_time();
@@ -152,7 +153,8 @@ esp_err_t test_screen_update(const joystick_state_t *state) {
         s_displayed.direction_x == state->direction_x &&
         s_displayed.direction_y == state->direction_y &&
         s_displayed.pressed == state->button.pressed &&
-        s_displayed.presses == state->button.presses) {
+        s_displayed.presses == state->button.presses &&
+        s_displayed.audio == audio) {
         return ESP_OK;
     }
     rect(1, 86, LCD_WIDTH - 2, 200, BLACK);
@@ -178,9 +180,14 @@ esp_err_t test_screen_update(const joystick_state_t *state) {
          state->button.pressed ? YELLOW : GREEN);
     snprintf(line, sizeof(line), "\u8ba1\u6570:%" PRIu32, state->button.presses);
     text(236, 228, line, WHITE);
-    snprintf(line, sizeof(line), "\u5f15\u811a %d %d %d",
-             JOYSTICK_X_PIN, JOYSTICK_Y_PIN, JOYSTICK_K_PIN);
-    text(236, 256, line, WHITE);
+    const char *audio_status = audio == AUDIO_HOLD ? "K \u6309\u4f4f 1 \u79d2" :
+                               audio == AUDIO_RECORDING ? "\u5f55\u97f3\u4e2d (3s max)" :
+                               audio == AUDIO_WAIT_RELEASE ? "\u5df2\u6ee1 3s \u7b49\u677e\u5f00" :
+                               audio == AUDIO_TONE_WAIT_RELEASE ? "\u97f3\u8c03\u6d4b\u8bd5 \u7b49\u677e\u5f00" :
+                               audio == AUDIO_PLAYING ? "\u64ad\u653e\u4e2d" :
+                               audio == AUDIO_ERROR ? "\u97f3\u9891\u9519\u8bef \u67e5\u4e32\u53e3" :
+                               "\u97f3\u9891: K \u6309\u4f4f 1 \u79d2";
+    text(236, 256, audio_status, audio == AUDIO_ERROR ? YELLOW : WHITE);
     ESP_RETURN_ON_ERROR(flush_dynamic(), TAG, "update display");
     s_displayed.x = s_visual_x;
     s_displayed.y = s_visual_y;
@@ -190,6 +197,7 @@ esp_err_t test_screen_update(const joystick_state_t *state) {
     s_displayed.direction_y = state->direction_y;
     s_displayed.pressed = state->button.pressed;
     s_displayed.presses = state->button.presses;
+    s_displayed.audio = audio;
     s_displayed.valid = true;
     return ESP_OK;
 }
