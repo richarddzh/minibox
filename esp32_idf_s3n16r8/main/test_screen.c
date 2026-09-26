@@ -20,7 +20,10 @@
 static const char *TAG = "screen";
 static uint8_t *s_frame;
 static uint8_t *s_sent;
-static joystick_state_t s_numbers;
+static int s_visual_x;
+static int s_visual_y;
+static int s_number_x;
+static int s_number_y;
 static int64_t s_numbers_at_us;
 
 static void rect(int x, int y, int width, int height, uint16_t color) {
@@ -40,6 +43,22 @@ static void rect(int x, int y, int width, int height, uint16_t color) {
 
 static void text(int x, int y, const char *value, uint16_t color) {
     ESP_ERROR_CHECK(bitmap_font_draw(s_frame, LCD_WIDTH, LCD_HEIGHT, x, y, value, color));
+}
+
+static int stable_axis(int value, int previous) {
+    int magnitude = value < 0 ? -value : value;
+    if (previous == 0 && magnitude < 5) return 0;
+    if (magnitude <= 2) return 0;
+    if (value > previous + 1 || value < previous - 1) return value;
+    return previous;
+}
+
+static void axis_text(int y, char axis, int value) {
+    int magnitude = value < 0 ? -value : value;
+    char line[24];
+    snprintf(line, sizeof(line), "%c: %c%d.%02d", axis, value < 0 ? '-' : '+',
+             magnitude / 100, magnitude % 100);
+    text(236, y, line, WHITE);
 }
 
 static bool tile_changed(int x, int y) {
@@ -107,9 +126,12 @@ esp_err_t test_screen_message(const char *message, const char *detail) {
 }
 
 esp_err_t test_screen_update(const joystick_state_t *state) {
+    s_visual_x = stable_axis(state->percent_x, s_visual_x);
+    s_visual_y = stable_axis(state->percent_y, s_visual_y);
     int64_t now = esp_timer_get_time();
     if (s_numbers_at_us == 0 || now - s_numbers_at_us >= 250000) {
-        s_numbers = *state;
+        s_number_x = s_visual_x;
+        s_number_y = s_visual_y;
         s_numbers_at_us = now;
     }
     rect(1, 86, LCD_WIDTH - 2, 200, BLACK);
@@ -117,17 +139,14 @@ esp_err_t test_screen_update(const joystick_state_t *state) {
     rect(18, 98, 196, 180, BLACK);
     rect(115, 98, 1, 180, GRAY);
     rect(18, 187, 196, 1, GRAY);
-    int x = 116 + state->percent_x * 90 / 100;
-    int y = 188 + state->percent_y * 82 / 100;
+    int x = 116 + s_visual_x * 90 / 100;
+    int y = 188 + s_visual_y * 82 / 100;
     rect(x - 5, y - 5, 11, 11, state->button.pressed ? YELLOW : CYAN);
 
     char line[40];
-    snprintf(line, sizeof(line), "X:%4d %4d%%", s_numbers.raw_x, s_numbers.percent_x);
-    text(236, 88, line, WHITE);
-    snprintf(line, sizeof(line), "Y:%4d %4d%%", s_numbers.raw_y, s_numbers.percent_y);
-    text(236, 116, line, WHITE);
-    snprintf(line, sizeof(line), "CX:%4d CY:%4d", state->center_x, state->center_y);
-    text(236, 144, line, WHITE);
+    axis_text(88, 'X', s_number_x);
+    axis_text(116, 'Y', s_number_y);
+    text(236, 144, "\u7cbe\u5ea6 0.01", WHITE);
     const char *horizontal = state->direction_x < 0 ? "\u5de6" :
                              state->direction_x > 0 ? "\u53f3" : "\u4e2d";
     const char *vertical = state->direction_y < 0 ? "\u4e0a" :
