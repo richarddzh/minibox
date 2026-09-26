@@ -2,7 +2,10 @@
 
 参考 `C:\gitroot\talking-alarm\esp32_idf_s3n16r8` 的原生 ESP-IDF 结构。
 使用 ESP-IDF **5.3.5**，16 MB Quad SPI Flash（DIO、80 MHz），
-8 MB Octal PSRAM（40 MHz）。不依赖参考仓库或第三方显示库。
+8 MB Octal PSRAM（40 MHz）。屏幕驱动使用乐鑫官方
+[`espressif/esp_lcd_st7796`](https://components.espressif.com/components/espressif/esp_lcd_st7796)
+1.4.0 组件，经 ESP-IDF Component Manager 获取；不依赖 Arduino 或 TFT_eSPI。
+首次构建需要访问 Espressif 组件仓库，之后由 `dependencies.lock` 锁定版本。
 启动时通过 GPIO48 的 RMT 时序将板载 WS2812 RGB LED 熄灭，
 不影响 GPIO9 控制的屏幕背光。
 
@@ -15,8 +18,9 @@
 DC=12、Reset=13、CS=14。摇杆使用已确认的 X=4、Y=5、K=6，
 摇杆供电 **3.3 V**，所有模块共地。按最新实物反馈，默认反转 X，
 Y 不反转，K 改为高电平判定按下；电平极性可配置，GPIO 上拉保持不变。
-显示使用 MV 横屏坐标交换并清除 MX/MY 镜像；默认 MADCTL=0x28，
-保持 480×320 分辨率。扫描方向以实物画面为准，不能用“旋转 180°”代替镜像排查。
+显示通过官方面板接口交换 XY 并关闭 X/Y 镜像，BGR 开启时为 MADCTL=0x28，
+保持 480×320 分辨率；SPI 默认为 40 MHz，必要时可在菜单中降频。
+扫描方向以实物画面为准，不能用“旋转 180°”代替镜像排查。
 
 摇杆引脚可在 `idf.py menuconfig` → `Minibox hardware test` 修改。
 当前限定为 GPIO1–8，三个引脚必须不同；GPIO3 是启动配置引脚，建议沿用 4/5/6。
@@ -68,9 +72,10 @@ ADC 每轴取 8 次均值，独立任务每 10 ms 采样；方向进入阈值 25
 SPI 传输不会阻塞输入采样；状态队列只保留最新快照，但按键累计计数不会丢失。
 冷启动已经按住 K 时显示按下状态，但不将它算作一次新按下。
 
-当前帧和上次已提交帧各约 300 KiB，存放在 PSRAM；SPI 使用内部 DMA
+当前帧和上次已提交帧各约 300 KiB，存放在 PSRAM；官方面板 API 使用内部 DMA
 缓冲分批传输。色条和标题只画一次；运行时比较 16×16 像素块，
 只提交变化的小矩形，不再整行重刷。相同帧不传输，不先清空物理屏幕。
+X/Y、方向和 K 状态/计数均未变化时，跳过绘制；按 K 不会被 X/Y 稳定状态阻挡。
 数字更新不超过 4 Hz，光标/按键显示最高约 10 Hz，输入仍独立以 100 Hz 采样。
 两位小数是界面输出精度，不是将芯片 ADC 配置为不支持的 2-bit 模式。
 这不是面板 VSync 驱动，高速移动时仍可能有撕裂。
@@ -90,7 +95,7 @@ SPI 传输不会阻塞输入采样；状态队列只保留最新快照，但按�
 
 ## 文件与逻辑检查
 
-- `main\st7796.c`：ST7796 初始化、地址窗口、RGB565 SPI DMA 传输。
+- `main\st7796.c`：乐鑫官方 ST7796 面板组件的 SPI 接线、方向、背光及同步 DMA 适配。
 - `main\joystick.c`：ADC、中心校准、输入采样。
 - `main\joystick_logic.c`：归一化、方向迟滞、按键去抖。
 - `main\test_screen.c`：测试图形与中英文状态文字。

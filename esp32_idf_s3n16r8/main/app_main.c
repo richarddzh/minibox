@@ -119,10 +119,11 @@ void app_main(void) {
 #endif
         if (++log_counter >= 5) {
             log_counter = 0;
-            ESP_LOGI(TAG, "X=%d (%d%% dir=%d) Y=%d (%d%% dir=%d) K_LEVEL=%d PRESSED=%d count=%" PRIu32,
+            ESP_LOGI(TAG, "X=%d (%d%% dir=%d) Y=%d (%d%% dir=%d) K_LEVEL=%d PRESSED=%d count=%" PRIu32 " LCD_TX=%" PRIu32,
                      sample.state.raw_x, sample.state.percent_x, sample.state.direction_x,
                      sample.state.raw_y, sample.state.percent_y, sample.state.direction_y,
-                     sample.state.raw_k, sample.state.button.pressed, sample.state.button.presses);
+                     sample.state.raw_k, sample.state.button.pressed, sample.state.button.presses,
+                     st7796_transfer_count());
         }
         vTaskDelay(pdMS_TO_TICKS(100));
     }

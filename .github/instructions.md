@@ -23,7 +23,9 @@
 - 使用 ESP-IDF 5.3.5、C 和 FreeRTOS，不引入 Arduino 草图结构。
 - 主控为 ESP32-S3 N16R8：16 MB Quad Flash（DIO、80 MHz），
   8 MB Octal PSRAM（40 MHz）；目标固定为 `esp32s3`。
-- 屏幕为 ST7796 SPI、横屏 480 × 320，不能套用参考项目的 ST7789 初始化。
+- 屏幕为 ST7796 SPI、横屏 480 × 320，使用乐鑫官方
+  `espressif/esp_lcd_st7796` 组件，不套用参考项目的 ST7789 初始化；
+  不引入 Arduino 或 TFT_eSPI。
 - 屏幕接线：LED=GPIO9、SCK=GPIO10、SDI=GPIO11、DC/RS=GPIO12、
   Reset=GPIO13、CS=GPIO14。
 - 摇杆 X=GPIO4、Y=GPIO5，为 ADC 模拟信号；默认 X 反转、Y 不反转。

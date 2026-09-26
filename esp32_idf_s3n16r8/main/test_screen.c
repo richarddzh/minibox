@@ -25,6 +25,17 @@ static int s_visual_y;
 static int s_number_x;
 static int s_number_y;
 static int64_t s_numbers_at_us;
+static struct {
+    int x;
+    int y;
+    int number_x;
+    int number_y;
+    int direction_x;
+    int direction_y;
+    bool pressed;
+    uint32_t presses;
+    bool valid;
+} s_displayed;
 
 static void rect(int x, int y, int width, int height, uint16_t color) {
     int right = x + width, bottom = y + height;
@@ -119,6 +130,7 @@ esp_err_t test_screen_init(void) {
 }
 
 esp_err_t test_screen_message(const char *message, const char *detail) {
+    s_displayed.valid = false;
     rect(1, 86, LCD_WIDTH - 2, 200, BLACK);
     text(16, 118, message, YELLOW);
     text(16, 152, detail, WHITE);
@@ -133,6 +145,15 @@ esp_err_t test_screen_update(const joystick_state_t *state) {
         s_number_x = s_visual_x;
         s_number_y = s_visual_y;
         s_numbers_at_us = now;
+    }
+    if (s_displayed.valid &&
+        s_displayed.x == s_visual_x && s_displayed.y == s_visual_y &&
+        s_displayed.number_x == s_number_x && s_displayed.number_y == s_number_y &&
+        s_displayed.direction_x == state->direction_x &&
+        s_displayed.direction_y == state->direction_y &&
+        s_displayed.pressed == state->button.pressed &&
+        s_displayed.presses == state->button.presses) {
+        return ESP_OK;
     }
     rect(1, 86, LCD_WIDTH - 2, 200, BLACK);
     rect(16, 96, 200, 184, GRAY);
@@ -160,5 +181,15 @@ esp_err_t test_screen_update(const joystick_state_t *state) {
     snprintf(line, sizeof(line), "\u5f15\u811a %d %d %d",
              JOYSTICK_X_PIN, JOYSTICK_Y_PIN, JOYSTICK_K_PIN);
     text(236, 256, line, WHITE);
-    return flush_dynamic();
+    ESP_RETURN_ON_ERROR(flush_dynamic(), TAG, "update display");
+    s_displayed.x = s_visual_x;
+    s_displayed.y = s_visual_y;
+    s_displayed.number_x = s_number_x;
+    s_displayed.number_y = s_number_y;
+    s_displayed.direction_x = state->direction_x;
+    s_displayed.direction_y = state->direction_y;
+    s_displayed.pressed = state->button.pressed;
+    s_displayed.presses = state->button.presses;
+    s_displayed.valid = true;
+    return ESP_OK;
 }

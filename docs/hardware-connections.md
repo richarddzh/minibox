@@ -28,7 +28,8 @@ Octal PSRAM 冲突。
 | 显示分辨率 | **480 × 320**，横屏 |
 | 显示朝向 | 横屏交换坐标轴（MV），清除 MX/MY 镜像；BGR 开启时 MADCTL=0x28 |
 | 接口 | SPI，模式 0，SPI2_HOST |
-| 默认 SPI 时钟 | 20 MHz，可配置为 1–40 MHz |
+| 默认 SPI 时钟 | 40 MHz，可配置为 1–40 MHz |
+| 屏幕驱动 | 乐鑫 `espressif/esp_lcd_st7796` 1.4.0，纯 ESP-IDF |
 | 像素格式 | RGB565，16 bit，高字节先发送 |
 | 字体 | 24 px 中英文抗锯齿字体，存放在 SPIFFS，见[字体说明](display-fonts.md) |
 | 默认色序 | BGR，可配置 |

@@ -30,7 +30,7 @@ config MINIBOX_JOYSTICK_K_ACTIVE_LOW
 config MINIBOX_LCD_SPI_MHZ
     int "ST7796 SPI clock (MHz)"
     range 1 40
-    default 20
+    default 40
 
 config MINIBOX_LCD_BGR
     bool "ST7796 BGR color order"

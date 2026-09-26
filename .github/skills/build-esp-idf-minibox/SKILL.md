@@ -18,6 +18,8 @@ use standard ESP-IDF commands, without extra build scripts or Python tests.
 - SDK: ESP-IDF 5.3.5
 - Hardware: N16R8, 16 MB Quad Flash and 8 MB Octal PSRAM
 - Current serial port: COM8 (CH343 USB-UART)
+- LCD: official `espressif/esp_lcd_st7796` 1.4.0, pinned in
+  `main/idf_component.yml` and `dependencies.lock`; no Arduino dependency
 - Wiring: [hardware-connections.md](../../../docs/hardware-connections.md)
 
 ## Environment
@@ -73,6 +75,8 @@ for routine changes. Use `idf.py reconfigure` only when configuration needs it.
 Keep generated outputs and local logs out of Git.
 The licensed prebuilt assets in `font_data` are an intentional exception:
 keep them checked in. Normal builds do not need a font download or conversion.
+The first build needs network access to resolve the official LCD component;
+later builds reuse the component manager cache.
 Keep `sdkconfig.defaults` ASCII-only.
 For hardware verification, release the joystick during startup calibration,
 then inspect ST7796 initialization, ADC readings, raw K level and pressed state.
