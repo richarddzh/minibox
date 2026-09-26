@@ -95,6 +95,9 @@ void app_main(void) {
     ESP_ERROR_CHECK(created == pdPASS ? ESP_OK : ESP_ERR_NO_MEM);
 
     unsigned log_counter = 0;
+#ifdef CONFIG_MINIBOX_LCD_STATIC_TEST
+    bool first_frame = true;
+#endif
     for (;;) {
         input_sample_t sample;
         if (xQueueReceive(s_samples, &sample, pdMS_TO_TICKS(1000)) != pdTRUE) {
@@ -105,14 +108,22 @@ void app_main(void) {
             show_input_error(sample.error);
             return;
         }
+#ifdef CONFIG_MINIBOX_LCD_STATIC_TEST
+        if (first_frame) {
+            ESP_ERROR_CHECK(test_screen_update(&sample.state));
+            first_frame = false;
+            ESP_LOGW(TAG, "STATIC DISPLAY: no further SPI writes; input sampling continues");
+        }
+#else
         ESP_ERROR_CHECK(test_screen_update(&sample.state));
+#endif
         if (++log_counter >= 5) {
             log_counter = 0;
-            ESP_LOGI(TAG, "X=%d (%d%% dir=%d) Y=%d (%d%% dir=%d) K=%d count=%" PRIu32,
+            ESP_LOGI(TAG, "X=%d (%d%% dir=%d) Y=%d (%d%% dir=%d) K_LEVEL=%d PRESSED=%d count=%" PRIu32,
                      sample.state.raw_x, sample.state.percent_x, sample.state.direction_x,
                      sample.state.raw_y, sample.state.percent_y, sample.state.direction_y,
-                     sample.state.button.pressed, sample.state.button.presses);
+                     sample.state.raw_k, sample.state.button.pressed, sample.state.button.presses);
         }
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

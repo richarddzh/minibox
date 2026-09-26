@@ -76,8 +76,8 @@ esp_err_t st7796_init(void) {
     ESP_RETURN_ON_ERROR(command(0x11, NULL, 0), TAG, "sleep out");
     vTaskDelay(pdMS_TO_TICKS(120));
 
-    /* ST7796 extended-command unlock, landscape (MV|MX), and RGB565. */
-    uint8_t madctl = 0x60;
+    /* Landscape axis swap; clear the remaining long-axis mirror (MY). */
+    uint8_t madctl = 0x20;
 #ifdef CONFIG_MINIBOX_LCD_BGR
     madctl |= 0x08;
 #endif
@@ -115,8 +115,8 @@ esp_err_t st7796_init(void) {
     ESP_RETURN_ON_ERROR(command(0x13, NULL, 0), TAG, "normal mode");
     ESP_RETURN_ON_ERROR(command(0x29, NULL, 0), TAG, "display on");
     vTaskDelay(pdMS_TO_TICKS(20));
-    ESP_LOGI(TAG, "480x320 RGB565 SPI=%d Hz LED=9 SCK=10 SDI=11 DC=12 RST=13 CS=14",
-             LCD_SPI_HZ);
+    ESP_LOGI(TAG, "480x320 RGB565 MADCTL=0x%02x SPI=%d Hz LED=9 SCK=10 SDI=11 DC=12 RST=13 CS=14",
+             madctl, LCD_SPI_HZ);
     return ESP_OK;
 }
 
@@ -129,22 +129,32 @@ esp_err_t st7796_backlight_on(void) {
 }
 
 esp_err_t st7796_draw_rows(int y, int height, const uint8_t *pixels) {
+    return st7796_draw_region(0, y, LCD_WIDTH, height, pixels, LCD_WIDTH * 2);
+}
+
+esp_err_t st7796_draw_region(int x, int y, int width, int height,
+                             const uint8_t *pixels, size_t stride_bytes) {
     ESP_RETURN_ON_FALSE(s_spi, ESP_ERR_INVALID_STATE, TAG, "not initialized");
-    ESP_RETURN_ON_FALSE(pixels && y >= 0 && y < LCD_HEIGHT && height > 0 &&
-                        height <= LCD_HEIGHT - y,
-                        ESP_ERR_INVALID_ARG, TAG, "invalid row range");
-    uint16_t end = y + height - 1;
-    const uint8_t columns[] = {0, 0, (LCD_WIDTH - 1) >> 8, (LCD_WIDTH - 1) & 0xff};
-    const uint8_t rows[] = {(uint16_t)y >> 8, y & 0xff, end >> 8, end & 0xff};
+    ESP_RETURN_ON_FALSE(pixels && x >= 0 && x < LCD_WIDTH && y >= 0 &&
+                        y < LCD_HEIGHT && width > 0 && height > 0 &&
+                        width <= LCD_WIDTH - x && height <= LCD_HEIGHT - y &&
+                        stride_bytes >= (size_t)width * 2,
+                        ESP_ERR_INVALID_ARG, TAG, "invalid rectangle");
+    uint16_t end_x = x + width - 1, end_y = y + height - 1;
+    const uint8_t columns[] = {(uint16_t)x >> 8, x & 0xff, end_x >> 8, end_x & 0xff};
+    const uint8_t rows[] = {(uint16_t)y >> 8, y & 0xff, end_y >> 8, end_y & 0xff};
     ESP_RETURN_ON_ERROR(command(0x2A, columns, sizeof(columns)), TAG, "columns");
     ESP_RETURN_ON_ERROR(command(0x2B, rows, sizeof(rows)), TAG, "rows");
     ESP_RETURN_ON_ERROR(command(0x2C, NULL, 0), TAG, "memory write");
     for (int row = 0; row < height; row += TRANSFER_ROWS) {
         int count = height - row;
         if (count > TRANSFER_ROWS) count = TRANSFER_ROWS;
-        size_t bytes = count * LCD_WIDTH * 2;
+        size_t bytes = count * width * 2;
         /* PSRAM cannot be used directly by this SPI DMA path. */
-        memcpy(s_transfer, pixels + row * LCD_WIDTH * 2, bytes);
+        for (int line = 0; line < count; ++line) {
+            memcpy(s_transfer + line * width * 2,
+                   pixels + (row + line) * stride_bytes, width * 2);
+        }
         ESP_RETURN_ON_ERROR(transmit(true, s_transfer, bytes), TAG, "pixels");
     }
     return ESP_OK;

@@ -6,6 +6,7 @@
 typedef struct {
     int raw_x;
     int raw_y;
+    int raw_k;
     int center_x;
     int center_y;
     int percent_x;

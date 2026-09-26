@@ -67,12 +67,16 @@ for routine changes. Use `idf.py reconfigure` only when configuration needs it.
 
 - `build\minibox_hardware_test.bin`
 - `build\minibox_hardware_test.elf`
+- `build\fonts.bin` (SPIFFS image; included automatically in `idf.py flash`)
 - Bootloader and partition data are flashed by `idf.py`; do not hand-code offsets.
 
 Keep generated outputs and local logs out of Git.
+The licensed prebuilt assets in `font_data` are an intentional exception:
+keep them checked in. Normal builds do not need a font download or conversion.
 Keep `sdkconfig.defaults` ASCII-only.
 For hardware verification, release the joystick during startup calibration,
-then inspect ST7796 initialization, ADC readings and active-low K state.
+then inspect ST7796 initialization, ADC readings, raw K level and pressed state.
+The current board settings invert X and use active-high K based on physical feedback.
 GPIO48 should receive the black/off RGB command at startup.
 Report build, flash and hardware observations separately; serial logs alone
 cannot prove the visible display or all physical inputs work.

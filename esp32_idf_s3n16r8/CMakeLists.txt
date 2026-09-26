@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 set(IDF_TARGET "esp32s3")
+set(COMPONENTS main)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(minibox_hardware_test)
+spiffs_create_partition_image(fonts "${CMAKE_CURRENT_SOURCE_DIR}/font_data" FLASH_IN_PROJECT)
