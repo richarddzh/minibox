@@ -275,6 +275,9 @@ OpenSCAD 参数化模型见 [`minibox-enclosure.scad`](minibox-enclosure.scad)�
 
 ### STL 导出与朝向
 
+模型、导出文件及检查脚本均位于仓库的 `models` 目录。本文所有命令均先执行
+`Set-Location C:\gitroot\minibox\models`，再运行；相对链接以本文所在目录为准。
+
 仓库中的 `bottom.stl` 为底壳，底面位于 Z=0；`lid.stl` 为独立上盖，使用 `part="lid-print"` 的侧立落地朝向，**不是装配坐标**。两者均为毫米单位的二进制 STL，采用 `$fn=32`，不含模块预览实体。装配查看请使用 SCAD 的 `"assembly"` 模式。
 
 **网站兼容版本：`bottom-y-up.stl`、`lid-y-up.stl`。** 根据“带两个 Type-C 孔的后壁显示在顶部，底面显示在后方，而左右方向正常”的描述，网站可能使用 Y 向上坐标。兼容版相对原 STL 绕 X 轴旋转 **−90°**，再平移至非负坐标；坐标变换为 X 保持、原 Z 变为新 Y、原 Y 反向变为新 Z。因此底面位于 **Y=0**，底壳后壁朝 −Z，左右不变。这是旋转，不是镜像，尺寸、孔位及实体体积不变。STL 本身不携带“哪个轴朝上”的元数据，网站是否适用仍需上传确认。

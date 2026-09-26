@@ -1,0 +1,43 @@
+menu "Minibox hardware test"
+
+config MINIBOX_JOYSTICK_X_PIN
+    int "Joystick VRx GPIO (ADC1)"
+    range 1 8
+    default 4
+
+config MINIBOX_JOYSTICK_Y_PIN
+    int "Joystick VRy GPIO (ADC1)"
+    range 1 8
+    default 5
+
+config MINIBOX_JOYSTICK_K_PIN
+    int "Joystick K GPIO (active low)"
+    range 1 8
+    default 6
+
+config MINIBOX_JOYSTICK_X_INVERTED
+    bool "Invert joystick X"
+    default n
+
+config MINIBOX_JOYSTICK_Y_INVERTED
+    bool "Invert joystick Y"
+    default n
+
+config MINIBOX_LCD_SPI_MHZ
+    int "ST7796 SPI clock (MHz)"
+    range 1 40
+    default 20
+
+config MINIBOX_LCD_BGR
+    bool "ST7796 BGR color order"
+    default y
+
+config MINIBOX_LCD_INVERTED
+    bool "ST7796 display inversion"
+    default n
+
+config MINIBOX_LCD_BACKLIGHT_ACTIVE_LOW
+    bool "Backlight active low"
+    default n
+
+endmenu
