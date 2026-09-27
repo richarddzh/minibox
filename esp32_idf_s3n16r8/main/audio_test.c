@@ -8,18 +8,12 @@
 #include "driver/i2s_std.h"
 #include "esp_check.h"
 #include "esp_heap_caps.h"
-#include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
 
 #define AUDIO_FRAMES (AUDIO_SAMPLE_RATE * AUDIO_MAX_SECONDS)
 #define AUDIO_BLOCK_FRAMES 256
-
-typedef struct {
-    joystick_button_t button;
-    int direction_x;
-} audio_input_t;
 
 static const char *TAG = "audio";
 static int16_t *s_recording;
@@ -140,7 +134,7 @@ static void log_recording_levels(size_t frames) {
     }
 }
 
-static esp_err_t play_recording(size_t frames, bool tone) {
+static esp_err_t play_recording(size_t frames) {
     i2s_chan_handle_t channel = NULL;
     esp_err_t error = open_channel(false, &channel);
     if (error != ESP_OK) {
@@ -156,13 +150,7 @@ static esp_err_t play_recording(size_t frames, bool tone) {
         size_t count = frames - offset;
         if (count > AUDIO_BLOCK_FRAMES) count = AUDIO_BLOCK_FRAMES;
         for (size_t i = 0; i < count; ++i) {
-            int16_t sample;
-            if (tone) {
-                int phase = (offset + i) % 32;
-                sample = ((phase < 16 ? phase : 32 - phase) - 8) * 256;
-            } else {
-                sample = s_recording[offset + i];
-            }
+            int16_t sample = s_recording[offset + i];
             stereo[2 * i] = sample;
             stereo[2 * i + 1] = sample;
         }
@@ -192,33 +180,23 @@ static void audio_task(void *arg) {
     (void)arg;
     audio_test_logic_t logic = {0};
     joystick_button_t button = {0};
-    int direction_x = 0;
-    bool tone_mode = false;
     i2s_chan_handle_t mic = NULL;
     size_t frames = 0;
     esp_err_t error = ESP_OK;
     for (;;) {
-        audio_input_t latest;
+        joystick_button_t latest;
         TickType_t wait = logic.phase == AUDIO_RECORDING ? 0 : pdMS_TO_TICKS(20);
         if (xQueueReceive(s_buttons, &latest, wait) == pdTRUE) {
-            button = latest.button;
-            direction_x = latest.direction_x;
+            button = latest;
         }
-        int64_t now_ms = esp_timer_get_time() / 1000;
         bool full = frames == AUDIO_FRAMES;
-        audio_action_t action = audio_test_logic_step(&logic, &button, now_ms, full);
+        audio_action_t action = audio_test_logic_step(&logic, &button, full);
         if (action == AUDIO_START_RECORD) {
             frames = 0;
-            tone_mode = direction_x > 0;
-            if (tone_mode) {
-                logic.phase = AUDIO_TONE_WAIT_RELEASE;
-                ESP_LOGI(TAG, "Speaker test: release K to play 500 Hz tone");
-            } else {
-                error = open_channel(true, &mic);
-                if (error == ESP_OK) {
-                    ESP_LOGI(TAG, "Recording (max %d s, %d Hz)", AUDIO_MAX_SECONDS,
-                             AUDIO_SAMPLE_RATE);
-                }
+            error = open_channel(true, &mic);
+            if (error == ESP_OK) {
+                ESP_LOGI(TAG, "Recording (max %d s, %d Hz)", AUDIO_MAX_SECONDS,
+                         AUDIO_SAMPLE_RATE);
             }
         } else if (action == AUDIO_STOP_RECORD || action == AUDIO_STOP_AND_PLAY) {
             error = close_channel(&mic);
@@ -227,13 +205,8 @@ static void audio_task(void *arg) {
         if (error == ESP_OK &&
             (action == AUDIO_STOP_AND_PLAY || action == AUDIO_START_PLAY)) {
             set_phase(AUDIO_PLAYING);
-            if (tone_mode) {
-                ESP_LOGI(TAG, "Playing 500 Hz test tone");
-            } else {
-                ESP_LOGI(TAG, "Playing %u samples", (unsigned)frames);
-            }
-            error = play_recording(tone_mode ? AUDIO_SAMPLE_RATE / 2 : frames,
-                                   tone_mode);
+            ESP_LOGI(TAG, "Playing %u samples", (unsigned)frames);
+            error = play_recording(frames);
             logic.phase = AUDIO_WAIT_RESET;
         }
         if (error == ESP_OK && logic.phase == AUDIO_RECORDING && mic) {
@@ -270,7 +243,7 @@ esp_err_t audio_test_start(void) {
     s_recording = heap_caps_malloc(AUDIO_FRAMES * sizeof(int16_t),
                                    MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     ESP_RETURN_ON_FALSE(s_recording, ESP_ERR_NO_MEM, TAG, "96000-byte PSRAM audio buffer");
-    s_buttons = xQueueCreate(1, sizeof(audio_input_t));
+    s_buttons = xQueueCreate(1, sizeof(joystick_button_t));
     if (!s_buttons) {
         free(s_recording);
         return ESP_ERR_NO_MEM;
@@ -293,10 +266,6 @@ esp_err_t audio_test_start(void) {
     return ESP_OK;
 }
 
-void audio_test_submit(const joystick_state_t *state) {
-    audio_input_t input = {
-        .button = state->button,
-        .direction_x = state->direction_x,
-    };
-    xQueueOverwrite(s_buttons, &input);
+void audio_test_submit(const joystick_button_t *button) {
+    xQueueOverwrite(s_buttons, button);
 }

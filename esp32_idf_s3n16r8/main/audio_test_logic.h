@@ -26,9 +26,7 @@ typedef enum {
 typedef struct {
     audio_phase_t phase;
     uint32_t seen_presses;
-    int64_t pressed_at_ms;
 } audio_test_logic_t;
 
 audio_action_t audio_test_logic_step(audio_test_logic_t *logic,
-                                     const joystick_button_t *button,
-                                     int64_t now_ms, bool buffer_full);
+                                     const joystick_button_t *button, bool buffer_full);

@@ -1,27 +1,24 @@
-#include "joystick.h"
-#include "st7796.h"
-#include "test_screen.h"
 #include "app_config.h"
 #include "audio_test.h"
+#include "joystick_logic.h"
+#include "st7796.h"
+#include "test_screen.h"
 
-#include <inttypes.h>
 #include "driver/gpio.h"
 #include "driver/rmt_tx.h"
 #include "esp_check.h"
 #include "esp_psram.h"
+#include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 #include "freertos/task.h"
 
 static const char *TAG = "minibox";
+static QueueHandle_t s_button_states;
 
 typedef struct {
-    joystick_state_t state;
-    esp_err_t error;
-} input_sample_t;
-
-static QueueHandle_t s_samples;
-static input_sample_t s_input;
+    bool pressed[3];
+} button_snapshot_t;
 
 static void onboard_led_off(void) {
     rmt_channel_handle_t channel;
@@ -34,7 +31,7 @@ static void onboard_led_off(void) {
         .trans_queue_depth = 1,
     };
     ESP_ERROR_CHECK(rmt_new_tx_channel(&config, &channel));
-    const rmt_copy_encoder_config_t copy = {0};
+    const rmt_copy_encoder_config_t copy = {};
     ESP_ERROR_CHECK(rmt_new_copy_encoder(&copy, &encoder));
     ESP_ERROR_CHECK(rmt_enable(channel));
     /* WS2812 retains its color when the pin is merely pulled low. Send black. */
@@ -54,80 +51,68 @@ static void onboard_led_off(void) {
     ESP_ERROR_CHECK(rmt_del_channel(channel));
     ESP_ERROR_CHECK(gpio_set_direction(ONBOARD_LED_PIN, GPIO_MODE_OUTPUT));
     ESP_ERROR_CHECK(gpio_set_level(ONBOARD_LED_PIN, 0));
-    ESP_LOGI(TAG, "Onboard RGB LED off (GPIO%d)", ONBOARD_LED_PIN);
 }
 
-static void sample_joystick(void *arg) {
+static void sample_buttons(void *arg) {
     (void)arg;
+    const gpio_num_t pins[] = {BUTTON_1_PIN, RECORD_BUTTON_PIN, BUTTON_3_PIN};
+    joystick_button_t buttons[3] = {0};
     TickType_t last_wake = xTaskGetTickCount();
     for (;;) {
-        s_input.error = joystick_read(&s_input.state);
-        xQueueOverwrite(s_samples, &s_input);
-        if (s_input.error != ESP_OK) {
-            vTaskDelete(NULL);
+        button_snapshot_t snapshot;
+        int64_t now_ms = esp_timer_get_time() / 1000;
+        for (int i = 0; i < 3; ++i) {
+            bool pressed = gpio_get_level(pins[i]) ==
+#ifdef CONFIG_MINIBOX_BUTTON_ACTIVE_LOW
+                           0;
+#else
+                           1;
+#endif
+            bool before = buttons[i].pressed;
+            joystick_button_update(&buttons[i], pressed, now_ms);
+            snapshot.pressed[i] = buttons[i].pressed;
+            if (before != buttons[i].pressed) {
+                ESP_LOGI(TAG, "GPIO%d %s", pins[i], buttons[i].pressed ? "pressed" : "released");
+            }
         }
-        audio_test_submit(&s_input.state);
+        audio_test_submit(&buttons[1]);
+        xQueueOverwrite(s_button_states, &snapshot);
         xTaskDelayUntil(&last_wake, pdMS_TO_TICKS(10));
     }
 }
 
-static void show_input_error(esp_err_t error) {
-    ESP_LOGE(TAG, "Joystick stopped: %s; check wiring, release stick and reset",
-             esp_err_to_name(error));
-    ESP_ERROR_CHECK(test_screen_message("JOYSTICK ERROR", "CHECK WIRING - RESET"));
-}
-
 void app_main(void) {
     onboard_led_off();
-    ESP_LOGI(TAG, "ESP32-S3 N16R8 hardware test; PSRAM=%u bytes",
+    ESP_LOGI(TAG, "ESP32-S3 N16R8 microphone test; PSRAM=%u bytes",
              (unsigned)esp_psram_get_size());
     ESP_ERROR_CHECK(st7796_init());
-    ESP_ERROR_CHECK(test_screen_init());
-    ESP_ERROR_CHECK(test_screen_message("CALIBRATING", "RELEASE STICK AND K"));
-    vTaskDelay(pdMS_TO_TICKS(1500));
-    esp_err_t error = joystick_init(&s_input.state);
-    if (error != ESP_OK) {
-        show_input_error(error);
-        return;
-    }
-    s_samples = xQueueCreate(1, sizeof(input_sample_t));
-    ESP_ERROR_CHECK(s_samples ? ESP_OK : ESP_ERR_NO_MEM);
-    ESP_ERROR_CHECK(audio_test_start());
-    /* Input sampling remains responsive during blocking SPI screen transfers. */
-    BaseType_t created = xTaskCreate(sample_joystick, "joystick", 4096, NULL, 5, NULL);
-    ESP_ERROR_CHECK(created == pdPASS ? ESP_OK : ESP_ERR_NO_MEM);
-
-    unsigned log_counter = 0;
-#ifdef CONFIG_MINIBOX_LCD_STATIC_TEST
-    bool first_frame = true;
-#endif
-    for (;;) {
-        input_sample_t sample;
-        if (xQueueReceive(s_samples, &sample, pdMS_TO_TICKS(1000)) != pdTRUE) {
-            show_input_error(ESP_ERR_TIMEOUT);
-            return;
-        }
-        if (sample.error != ESP_OK) {
-            show_input_error(sample.error);
-            return;
-        }
-#ifdef CONFIG_MINIBOX_LCD_STATIC_TEST
-        if (first_frame) {
-            ESP_ERROR_CHECK(test_screen_update(&sample.state, audio_test_phase()));
-            first_frame = false;
-            ESP_LOGW(TAG, "STATIC DISPLAY: no further SPI writes; input sampling continues");
-        }
+    ESP_ERROR_CHECK(test_screen_audio_init());
+    const gpio_config_t inputs = {
+        .pin_bit_mask = (1ULL << BUTTON_1_PIN) |
+                        (1ULL << RECORD_BUTTON_PIN) |
+                        (1ULL << BUTTON_3_PIN),
+        .mode = GPIO_MODE_INPUT,
+#ifdef CONFIG_MINIBOX_BUTTON_ACTIVE_LOW
+        .pull_up_en = GPIO_PULLUP_ENABLE,
 #else
-        ESP_ERROR_CHECK(test_screen_update(&sample.state, audio_test_phase()));
+        .pull_down_en = GPIO_PULLDOWN_ENABLE,
 #endif
-        if (++log_counter >= 5) {
-            log_counter = 0;
-            ESP_LOGI(TAG, "X=%d (%d%% dir=%d) Y=%d (%d%% dir=%d) K_LEVEL=%d PRESSED=%d count=%" PRIu32 " LCD_TX=%" PRIu32,
-                     sample.state.raw_x, sample.state.percent_x, sample.state.direction_x,
-                     sample.state.raw_y, sample.state.percent_y, sample.state.direction_y,
-                     sample.state.raw_k, sample.state.button.pressed, sample.state.button.presses,
-                     st7796_transfer_count());
+    };
+    ESP_ERROR_CHECK(gpio_config(&inputs));
+    s_button_states = xQueueCreate(1, sizeof(button_snapshot_t));
+    ESP_ERROR_CHECK(s_button_states ? ESP_OK : ESP_ERR_NO_MEM);
+    ESP_ERROR_CHECK(audio_test_start());
+    BaseType_t created = xTaskCreate(sample_buttons, "buttons", 4096,
+                                     NULL, 5, NULL);
+    ESP_ERROR_CHECK(created == pdPASS ? ESP_OK : ESP_ERR_NO_MEM);
+    ESP_LOGI(TAG, "Buttons GPIO40/41/42 ready; hold GPIO41 to record (max 3s)");
+    for (;;) {
+        button_snapshot_t snapshot;
+        if (xQueueReceive(s_button_states, &snapshot, pdMS_TO_TICKS(1000)) != pdTRUE) {
+            ESP_LOGE(TAG, "Button sampling stopped");
+            ESP_ERROR_CHECK(test_screen_message("BUTTON ERROR", "CHECK GPIO40/41/42"));
+            return;
         }
-        vTaskDelay(pdMS_TO_TICKS(100));
+        ESP_ERROR_CHECK(test_screen_audio_update(snapshot.pressed, audio_test_phase()));
     }
 }

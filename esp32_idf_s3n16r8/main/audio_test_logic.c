@@ -1,24 +1,15 @@
 #include "audio_test_logic.h"
 
 audio_action_t audio_test_logic_step(audio_test_logic_t *logic,
-                                     const joystick_button_t *button,
-                                     int64_t now_ms, bool buffer_full) {
+                                     const joystick_button_t *button, bool buffer_full) {
     switch (logic->phase) {
     case AUDIO_IDLE:
         if (button->pressed && button->presses != logic->seen_presses) {
             logic->seen_presses = button->presses;
-            logic->pressed_at_ms = now_ms;
-            logic->phase = AUDIO_HOLD;
-        } else if (!button->pressed) {
-            logic->seen_presses = button->presses;
-        }
-        break;
-    case AUDIO_HOLD:
-        if (!button->pressed) {
-            logic->phase = AUDIO_IDLE;
-        } else if (now_ms - logic->pressed_at_ms >= 1000) {
             logic->phase = AUDIO_RECORDING;
             return AUDIO_START_RECORD;
+        } else if (!button->pressed) {
+            logic->seen_presses = button->presses;
         }
         break;
     case AUDIO_RECORDING:
@@ -32,7 +23,6 @@ audio_action_t audio_test_logic_step(audio_test_logic_t *logic,
         }
         break;
     case AUDIO_WAIT_RELEASE:
-    case AUDIO_TONE_WAIT_RELEASE:
         if (!button->pressed) {
             logic->phase = AUDIO_PLAYING;
             return AUDIO_START_PLAY;
@@ -45,6 +35,8 @@ audio_action_t audio_test_logic_step(audio_test_logic_t *logic,
         }
         break;
     case AUDIO_PLAYING:
+    case AUDIO_HOLD:
+    case AUDIO_TONE_WAIT_RELEASE:
     case AUDIO_ERROR:
         break;
     }

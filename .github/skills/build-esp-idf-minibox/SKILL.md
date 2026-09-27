@@ -78,9 +78,10 @@ keep them checked in. Normal builds do not need a font download or conversion.
 The first build needs network access to resolve the official LCD component;
 later builds reuse the component manager cache.
 Keep `sdkconfig.defaults` ASCII-only.
-For hardware verification, release the joystick during startup calibration,
-then inspect ST7796 initialization, ADC readings, raw K level and pressed state.
-The current board settings invert X and use active-high K based on physical feedback.
+For hardware verification, inspect ST7796 initialization and the displayed
+GPIO40/41/42 button states. GPIO41 starts microphone recording while held
+(maximum 3 seconds) and plays the recording after release. Buttons default
+to active-low with internal pull-ups; use menuconfig for active-high modules.
 GPIO48 should receive the black/off RGB command at startup.
 Report build, flash and hardware observations separately; serial logs alone
 cannot prove the visible display or all physical inputs work.

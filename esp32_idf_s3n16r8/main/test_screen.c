@@ -25,6 +25,9 @@ static int s_visual_y;
 static int s_number_x;
 static int s_number_y;
 static int64_t s_numbers_at_us;
+static bool s_audio_valid;
+static bool s_audio_buttons[3];
+static audio_phase_t s_audio_phase;
 static struct {
     int x;
     int y;
@@ -105,7 +108,7 @@ static esp_err_t flush_dynamic(void) {
     return ESP_OK;
 }
 
-esp_err_t test_screen_init(void) {
+static esp_err_t init_frames(void) {
     ESP_RETURN_ON_ERROR(bitmap_font_init(), TAG, "load filesystem font");
     s_frame = heap_caps_calloc(LCD_WIDTH * LCD_HEIGHT, 2,
                                MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
@@ -113,6 +116,11 @@ esp_err_t test_screen_init(void) {
     s_sent = heap_caps_malloc(LCD_WIDTH * LCD_HEIGHT * 2,
                               MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     ESP_RETURN_ON_FALSE(s_sent, ESP_ERR_NO_MEM, TAG, "PSRAM previous frame");
+    return ESP_OK;
+}
+
+esp_err_t test_screen_init(void) {
+    ESP_RETURN_ON_ERROR(init_frames(), TAG, "screen framebuffers");
     rect(0, 0, LCD_WIDTH, 1, WHITE);
     rect(0, LCD_HEIGHT - 1, LCD_WIDTH, 1, WHITE);
     rect(0, 0, 1, LCD_HEIGHT, WHITE);
@@ -128,6 +136,51 @@ esp_err_t test_screen_init(void) {
     ESP_RETURN_ON_ERROR(st7796_draw_rows(0, LCD_HEIGHT, s_frame), TAG, "initial frame");
     memcpy(s_sent, s_frame, LCD_WIDTH * LCD_HEIGHT * 2);
     return st7796_backlight_on();
+}
+
+esp_err_t test_screen_audio_init(void) {
+    ESP_RETURN_ON_ERROR(init_frames(), TAG, "screen framebuffers");
+    rect(0, 0, LCD_WIDTH, 1, WHITE);
+    rect(0, LCD_HEIGHT - 1, LCD_WIDTH, 1, WHITE);
+    rect(0, 0, 1, LCD_HEIGHT, WHITE);
+    rect(LCD_WIDTH - 1, 0, 1, LCD_HEIGHT, WHITE);
+    text(16, 14, "Minibox MIC TEST", WHITE);
+    text(16, 48, "GPIO40 / 41 / 42", CYAN);
+    text(16, 288, "HOLD GPIO41 TO RECORD", WHITE);
+    ESP_RETURN_ON_ERROR(st7796_draw_rows(0, LCD_HEIGHT, s_frame), TAG, "initial frame");
+    memcpy(s_sent, s_frame, LCD_WIDTH * LCD_HEIGHT * 2);
+    s_audio_valid = false;
+    return st7796_backlight_on();
+}
+
+esp_err_t test_screen_audio_update(const bool pressed[3], audio_phase_t audio) {
+    if (s_audio_valid && s_audio_phase == audio &&
+        memcmp(s_audio_buttons, pressed, sizeof(s_audio_buttons)) == 0) {
+        return ESP_OK;
+    }
+    rect(1, 80, LCD_WIDTH - 2, 208, BLACK);
+    const int pins[3] = {BUTTON_1_PIN, RECORD_BUTTON_PIN, BUTTON_3_PIN};
+    for (int i = 0; i < 3; ++i) {
+        int y = 90 + i * 43;
+        rect(16, y, 25, 25, pressed[i] ? GREEN : GRAY);
+        char label[48];
+        snprintf(label, sizeof(label), "GPIO%d %s%s", pins[i],
+                 i == 1 ? "REC " : "",
+                 pressed[i] ? "PRESSED" : "RELEASED");
+        text(55, y, label, pressed[i] ? YELLOW : WHITE);
+    }
+    const char *status = audio == AUDIO_RECORDING ? "RECORDING (MAX 3s)" :
+                         audio == AUDIO_WAIT_RELEASE ? "FULL - RELEASE GPIO41" :
+                         audio == AUDIO_PLAYING ? "PLAYING RECORDING" :
+                         audio == AUDIO_ERROR ? "AUDIO ERROR - SEE SERIAL" :
+                         audio == AUDIO_WAIT_RESET ? "PLAY DONE - RELEASE" :
+                         "PRESS GPIO41 TO RECORD";
+    text(16, 237, status, audio == AUDIO_ERROR ? YELLOW : CYAN);
+    ESP_RETURN_ON_ERROR(flush_dynamic(), TAG, "audio status");
+    memcpy(s_audio_buttons, pressed, sizeof(s_audio_buttons));
+    s_audio_phase = audio;
+    s_audio_valid = true;
+    return ESP_OK;
 }
 
 esp_err_t test_screen_message(const char *message, const char *detail) {
