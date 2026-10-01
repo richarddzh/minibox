@@ -20,6 +20,8 @@ def point(x, y):
 
 board = pcb.BOARD()
 board.SetCopperLayerCount(4)
+board.GetDesignSettings().m_SolderMaskExpansion = pcb.FromMM(0.05)
+board.GetDesignSettings().m_SolderMaskMinWidth = pcb.FromMM(0.1)
 nets = {}
 
 
@@ -43,8 +45,7 @@ def socket(reference, count, x, y, labels, value, orientation=0):
     footprint.SetOrientationDegrees(orientation)
     footprint.SetPosition(point(x, y))
     footprint.Reference().SetPosition(point(x + 2, y - 2))
-    if reference in ("J8", "J11", "J12"):
-        footprint.Reference().SetVisible(False)
+    footprint.Reference().SetVisible(False)
     footprint.Value().SetVisible(False)
     for pad in footprint.Pads():
         label = labels[int(pad.GetNumber()) - 1]
@@ -204,9 +205,9 @@ for label, x, y, size in [
     ("MIC 2x3", 50, 78, 1), ("AMP", 69, 32, 1),
     ("RTC", 80, 7, 1), ("LCD", 110, 53, 1),
     ("SW", 105, 85, 1), ("5V IN", 97, 7, 1),
-    ("3V3", 65, 101, 0.8), ("KEYS", 77, 81, 1),
-    ("JOY", 17, 81, 1), ("SPK: USE AMP TERMINAL", 80, 64, 0.85),
-    ("PROTOTYPE - VERIFY PIN PITCH AND ORDER", 63, 112, 0.85),
+    ("3V3", 65, 101, 1), ("KEYS", 77, 81, 1),
+    ("JOY", 17, 81, 1), ("SPK: USE AMP TERMINAL", 80, 64, 1),
+    ("PROTOTYPE - VERIFY PIN PITCH AND ORDER", 63, 112, 1),
 ]:
     text(label, x, y, size)
 
@@ -255,12 +256,12 @@ for footprint in board.GetFootprints():
             label_x, label_y = (59 if number % 2 else 33), y
         else:
             label_x = {
-                "J1": 15, "J2": 58.5, "J4": 96, "J5": 88,
+                "J1": 15, "J2": 58.5, "J4": 96, "J5": 86,
                 "J6": 103 if number <= 2 else 116,
                 "J7": 113, "J8": 93,
             }[reference]
             label_y = y
-        text(pin_names[reference][number - 1], label_x, label_y, 0.8)
+        text(pin_names[reference][number - 1], label_x, label_y, 1)
 
 for start, end in [
     ((3, 3), (123, 3)),

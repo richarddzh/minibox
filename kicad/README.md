@@ -34,8 +34,40 @@ complete. To regenerate and check it on Windows from this directory, run:
 ```powershell
 & "C:\Program Files\KiCad\10.0\bin\python.exe" .\generate_board.py
 & "C:\Program Files\KiCad\10.0\bin\python.exe" .\route_board.py
-& "C:\Program Files\KiCad\10.0\bin\kicad-cli.exe" pcb drc --refill-zones --save-board .\minibox-carrier.kicad_pcb
+& "C:\Program Files\KiCad\10.0\bin\kicad-cli.exe" pcb drc --refill-zones --severity-all --exit-code-violations .\minibox-carrier.kicad_pcb
 ```
+
+## Fabrication rule check
+
+The [EasyEDA Pro design-rule guide](https://prodocs.lceda.cn/cn/pcb/design-design-rule/)
+explains how to configure and run DRC; it is **not** the PCB factory's
+numeric capability table. Against the separate
+[JLCPCB manufacturing requirements](https://www.jlc.com/portal/1/serviceGuide),
+this KiCad project explicitly checks 0.30 mm minimum copper clearance,
+0.45 mm drill-to-drill clearance, and at least 1.0 mm-high/0.15 mm-stroke
+silkscreen with 0.15 mm clearance. The saved copper uses 0.35 mm signal,
+0.65 mm 3V3 and 0.8 mm 5V traces; all three ground zones use 0.35 mm
+local clearance. Board setup requires 0.5 mm copper-to-edge clearance;
+ground fill starts 1 mm in from the routed outline. The 25 vias are
+ordinary **0.8 mm pad / 0.4 mm drill through-vias** (0.2 mm annular
+ring). All 92 socket holes are 1.0 mm plated drills with 1.7 mm pads
+(0.35 mm annular ring); the four M3 holes are 3.0 mm NPTH, with 3.5 mm
+radius copper keepouts. Solder-mask openings expand 0.05 mm per side
+from exposed pads (0.1 mm overall), with a 0.1 mm minimum mask web.
+The nominal board thickness is 1.6 mm. Visible front-side text measures
+at least 1.0 mm high with 0.15 mm strokes; the smallest text-to-exposed-pad
+clearance measured from text/pad bounding boxes (including mask expansion)
+is about 0.60 mm.
+
+The tightened project rules report **zero KiCad DRC violations and zero
+unconnected pads** after regenerating and filling the board. This checks
+geometry, not parts: confirm the microphone's provisional 7.62 mm row
+spacing/pin order, ESP32 row separation, screen module identity, keyboard
+cable orientation, switch pin order and 3.3V regulator load before ordering.
+The 3.0 mm M3 drill is nominally tight, not a clearance fit. Export the
+final Gerber and separate PTH/NPTH drill files only after those checks,
+then inspect the actual upload in JLCPCB's DFM/manufacturing preview;
+KiCad DRC alone does not constitute vendor approval.
 
 | Socket | Module/interface | Pin 1 to last pin (J11/J12 left to right; other rows top to bottom) |
 |---|---|---|

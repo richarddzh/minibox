@@ -4,6 +4,7 @@ This is a deterministic layout aid, not a substitute for KiCad DRC or
 measuring the actual mating modules.
 """
 
+import json
 from collections import defaultdict
 from heapq import heappop, heappush
 from math import ceil, hypot
@@ -297,11 +298,42 @@ for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.B_Cu):
     zone.SetLayer(layer)
     zone.SetNet(board.FindNet("GND"))
     zone.SetPadConnection(pcb.ZONE_CONNECTION_FULL)
-    zone.SetLocalClearance(pcb.FromMM(CLEARANCE))
+    zone.SetLocalClearance(pcb.FromMM(0.35))
     zone.SetMinThickness(pcb.FromMM(0.25))
     zone.Outline().NewOutline()
     for x, y in ((4, 4), (122, 4), (122, 114), (4, 114)):
         zone.Outline().Append(pcb.FromMM(x), pcb.FromMM(y))
     board.Add(zone)
 
+if not pcb.ZONE_FILLER(board).Fill(board.Zones()):
+    raise RuntimeError("KiCad failed to fill the ground zones")
 pcb.SaveBoard(str(FILE), board)
+
+project_file = FILE.with_suffix(".kicad_pro")
+project = json.loads(project_file.read_text(encoding="utf-8"))
+settings = project["board"]["design_settings"]
+settings["defaults"].update({
+    "copper_line_width": 0.35,
+    "silk_line_width": 0.15,
+    "silk_text_thickness": 0.15,
+})
+settings["rules"].update({
+    "min_clearance": 0.3,
+    "min_hole_to_hole": 0.45,
+    "min_silk_clearance": 0.15,
+    "min_text_height": 1.0,
+    "min_text_thickness": 0.15,
+    "min_track_width": 0.3,
+    "min_via_annular_width": 0.18,
+})
+settings["track_widths"] = [0.35, 0.65, 0.8]
+settings["via_dimensions"] = [{"diameter": 0.8, "drill": 0.4}]
+project["net_settings"]["classes"][0].update({
+    "clearance": 0.3,
+    "track_width": 0.35,
+    "via_diameter": 0.8,
+    "via_drill": 0.4,
+})
+if not FILE.with_suffix(".kicad_sch").exists():
+    project["schematic"]["top_level_sheets"] = []
+project_file.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
