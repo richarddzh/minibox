@@ -1,7 +1,7 @@
 """Generate the provisional Minibox carrier in KiCad 10 using its bundled Python."""
 
 from pathlib import Path
-from math import cos, pi, sin
+from math import cos, pi, sin, sqrt
 
 import pcbnew as pcb
 
@@ -11,6 +11,7 @@ SOCKETS = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints\Connector_Pi
 CUSTOM = HERE / "Minibox.pretty"
 MOUNTING = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints\MountingHole.pretty")
 TESTPOINTS = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints\TestPoint.pretty")
+TERMINALS = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints\TerminalBlock_Phoenix.pretty")
 BOARD_FILE = HERE / "minibox-carrier.kicad_pcb"
 
 
@@ -73,6 +74,25 @@ def double_socket(reference, x, y, labels, value):
     return footprint
 
 
+def terminal(reference, count, x, y, labels, orientation=0):
+    assert len(labels) == count
+    name = f"TerminalBlock_Phoenix_MKDS-1,5-{count}-5.08_1x{count:02d}_P5.08mm_Horizontal"
+    footprint = pcb.FootprintLoad(str(TERMINALS), name)
+    if footprint is None:
+        raise RuntimeError(f"Missing KiCad footprint: {name}")
+    footprint.SetFPIDAsString(f"TerminalBlock_Phoenix:{name}")
+    footprint.SetReference(reference)
+    footprint.SetValue("5.08mm wire terminal")
+    footprint.SetOrientationDegrees(orientation)
+    footprint.SetPosition(point(x, y))
+    footprint.Reference().SetVisible(False)
+    footprint.Value().SetVisible(False)
+    for pad in footprint.Pads():
+        pad.SetNet(net(labels[int(pad.GetNumber()) - 1]))
+    board.Add(footprint)
+    return footprint
+
+
 def mounting_hole(reference, x, y):
     name = "MountingHole_3mm"
     footprint = pcb.FootprintLoad(str(MOUNTING), name)
@@ -99,6 +119,22 @@ def mounting_hole(reference, x, y):
                 pcb.FromMM(x + 3.5 * cos(angle)),
                 pcb.FromMM(y + 3.5 * sin(angle)))
         board.Add(keepout)
+
+
+def antenna_keepout(x1, y1, x2, y2):
+    for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.In2_Cu, pcb.B_Cu):
+        keepout = pcb.ZONE(board)
+        keepout.SetLayer(layer)
+        keepout.SetIsRuleArea(True)
+        keepout.SetDoNotAllowPads(True)
+        keepout.SetDoNotAllowTracks(True)
+        keepout.SetDoNotAllowVias(True)
+        keepout.SetDoNotAllowZoneFills(True)
+        keepout.Outline().NewOutline()
+        for x, y in ((x1, y1), (x2, y1), (x2, y2), (x1, y2)):
+            keepout.Outline().Append(pcb.FromMM(x), pcb.FromMM(y))
+        board.Add(keepout)
+    envelope(x1, y1, x2, y2)
 
 
 def test_point(reference, x, y):
@@ -146,32 +182,41 @@ def line(x1, y1, x2, y2, layer, width):
     board.Add(item)
 
 
-# The reference photo shows 22 pins per side, viewed from the component side
-# with both USB sockets at the bottom. Pin 1 is at the top of each column.
-socket("J1", 22, 24, 12, [
+def arc(start, mid, end):
+    item = pcb.PCB_SHAPE(board)
+    item.SetShape(pcb.SHAPE_T_ARC)
+    item.SetArcGeometry(point(*start), point(*mid), point(*end))
+    item.SetLayer(pcb.Edge_Cuts)
+    item.SetWidth(pcb.FromMM(0.05))
+    board.Add(item)
+
+
+# The reference pinout is viewed with USB at the bottom. Rotate both
+# complete socket rows 180 degrees in the board plane so USB faces up.
+socket("J1", 22, 74.8, 66, [
     "3V3", "3V3", None, "GPIO4", "GPIO5", "GPIO6", "AMP_SD",
     "AUDIO_DIN", "I2S_BCLK", "I2S_WS", "MIC_SD", "AMP_GAIN",
     "GPIO3", "GPIO46", "LCD_BL", "LCD_SCK", "LCD_MOSI",
     "LCD_DC", "LCD_RST", "LCD_CS", "5V_SW", "GND",
-], "ESP32-S3 LEFT - USB AT BOTTOM")
-socket("J2", 22, 49.4, 12, [
+], "ESP32-S3 LEFT - USB AT TOP", orientation=180)
+socket("J2", 22, 49.4, 66, [
     "GND", "GPIO43", "GPIO44", "RTC_SDA", "RTC_SCL",
     "BUTTON3", "RECORD", "BUTTON1", "GPIO39", "GPIO38",
     None, None, None, "GPIO0", "GPIO45", "GPIO48", "GPIO47",
     "GPIO21", None, None, "GND", "GND",
-], "ESP32-S3 RIGHT - USB AT BOTTOM")
+], "ESP32-S3 RIGHT - USB AT TOP", orientation=180)
 
 # Standard two-row, three-pin socket. KiCad numbers alternate by column:
 # 1 2 / 3 4 / 5 6. Verify the actual microphone's pin order before insertion.
-double_socket("J3", 50, 90,
+double_socket("J3", 50, 97,
               ["3V3", "GND", "I2S_BCLK", "I2S_WS", "MIC_SD", "GND"],
               "INMP441 2x3 VDD GND / SCK WS / SD LR")
-socket("J4", 7, 68, 39,
+socket("J4", 7, 16, 38,
        ["I2S_WS", "I2S_BCLK", "AUDIO_DIN", "AMP_GAIN",
         "AMP_SD", "GND", "5V_SW"],
        "MAX98357A LRC BCLK DIN GAIN SD GND VIN")
-envelope(64, 35, 91, 59)  # Body and on-module speaker screw terminal.
-socket("J5", 6, 80, 10,
+envelope(11, 34, 38, 58)  # Body and on-module speaker screw terminal.
+socket("J5", 6, 16, 12,
        [None, None, "RTC_SDA", "RTC_SCL", "3V3", "GND"],
        "PCF8563T CLK INT SDA SCL VCC GND")
 
@@ -182,10 +227,8 @@ socket("J6", 14, 110, 10,
         "LCD_MOSI", "LCD_SCK", "LCD_BL", None, None, None,
         None, None, None],
        "ST7796 14-PIN DISPLAY HEADER")
-socket("J7", 3, 105, 88, ["5V_IN", "5V_SW", "GND"],
-       "SWITCH IN LOAD GND - VERIFY ORDER")
-socket("J8", 2, 97, 10, ["5V_IN", "GND"],
-       "EXTERNAL 5V INPUT + GND")
+terminal("J7", 3, 105, 88, ["5V_IN", "5V_SW", "GND"], orientation=-90)
+terminal("J8", 2, 97, 12, ["5V_IN", "GND"])
 test_point("TP1", 65, 104)
 socket("J11", 5, 72, 90,
        ["BUTTON1", "RECORD", "BUTTON3", "3V3", "GND"],
@@ -198,15 +241,16 @@ for reference, x, y in (
     ("H3", 8, 110), ("H4", 118, 110),
 ):
     mounting_hole(reference, x, y)
+antenna_keepout(52, 67, 73.5, 84)
 
 # The amplifier module exposes speaker outputs on its own screw terminal.
 for label, x, y, size in [
-    ("ESP32-S3", 36.7, 8, 1), ("USB v", 36.7, 73, 1),
-    ("MIC 2x3", 50, 78, 1), ("AMP", 69, 32, 1),
-    ("RTC", 80, 7, 1), ("LCD", 110, 53, 1),
-    ("SW", 105, 85, 1), ("5V IN", 97, 7, 1),
+    ("ESP32-S3", 62, 16, 1), ("USB ^", 62, 20, 1),
+    ("MIC 2x3", 61, 89, 1), ("AMP", 16, 33, 1),
+    ("RTC", 16, 9, 1), ("LCD", 110, 53, 1),
+    ("SW", 116, 83, 1), ("5V IN", 90, 8, 1),
     ("3V3", 65, 101, 1), ("KEYS", 77, 81, 1),
-    ("JOY", 17, 81, 1), ("SPK: USE AMP TERMINAL", 80, 64, 1),
+    ("JOY", 17, 81, 1), ("SPK: USE AMP TERMINAL", 19, 63, 1),
     ("PROTOTYPE - VERIFY PIN PITCH AND ORDER", 63, 112, 1),
 ]:
     text(label, x, y, size)
@@ -228,7 +272,7 @@ pin_names = {
     "J4": ["LRC", "BCLK", "DIN", "GAIN", "SD", "GND", "VIN 5V"],
     "J5": ["CLK NC", "INT NC", "SDA", "SCL", "VCC 3V3", "GND"],
     "J6": [
-        "VCC 3V3", "GND", "CS", "RESET", "DC/RS", "SDI/MOSI",
+        "3V3", "GND", "CS", "RESET", "DC/RS", "SDI/MOSI",
         "SCK", "LED", "SDO NC", "T_CLK NC", "T_CS NC",
         "T_DIN NC", "T_DO NC", "T_IRQ NC",
     ],
@@ -248,7 +292,9 @@ for footprint in board.GetFootprints():
         number = int(pad.GetNumber())
         position = pad.GetPosition()
         x, y = pcb.ToMM(position.x), pcb.ToMM(position.y)
-        if reference == "J11":
+        if reference == "J8":
+            label_x, label_y = x, y + 7
+        elif reference == "J11":
             label_x, label_y = x, y - (4.5 if number % 2 else 6.5)
         elif reference == "J12":
             label_x, label_y = x, y - 4.5
@@ -256,20 +302,25 @@ for footprint in board.GetFootprints():
             label_x, label_y = (59 if number % 2 else 33), y
         else:
             label_x = {
-                "J1": 15, "J2": 58.5, "J4": 96, "J5": 86,
-                "J6": 103 if number <= 2 else 116,
-                "J7": 113, "J8": 93,
+                "J1": 83, "J2": 39, "J4": 31, "J5": 31,
+                "J6": 116,
+                "J7": 114,
             }[reference]
             label_y = y
         text(pin_names[reference][number - 1], label_x, label_y, 1)
 
 for start, end in [
-    ((3, 3), (123, 3)),
-    ((123, 3), (123, 115)),
-    ((123, 115), (3, 115)),
-    ((3, 115), (3, 3)),
+    ((8, 3), (118, 3)),
+    ((123, 8), (123, 110)),
+    ((118, 115), (8, 115)),
+    ((3, 110), (3, 8)),
 ]:
     line(*start, *end, pcb.Edge_Cuts, 0.05)
+offset = 5 / sqrt(2)
+arc((118, 3), (118 + offset, 8 - offset), (123, 8))
+arc((123, 110), (118 + offset, 110 + offset), (118, 115))
+arc((8, 115), (8 - offset, 110 + offset), (3, 110))
+arc((3, 8), (8 - offset, 8 - offset), (8, 3))
 
 pcb.SaveBoard(str(BOARD_FILE), board)
 print(BOARD_FILE)

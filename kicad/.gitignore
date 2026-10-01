@@ -2,3 +2,4 @@
 ~*.kicad_*.lck
 *-backups/
 *.kicad_pcb-bak
+fabrication/export/

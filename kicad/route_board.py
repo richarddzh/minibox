@@ -1,4 +1,4 @@
-"""Route the carrier's assigned nets on two layers with conservative grid clearance.
+"""Route the carrier's assigned nets with grid clearance.
 
 This is a deterministic layout aid, not a substitute for KiCad DRC or
 measuring the actual mating modules.
@@ -87,7 +87,19 @@ for pad in all_pads:
         max(mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2)
     for coordinate in disk(px, py, via_radius +
                            VIA_DIAMETER / 2 + CLEARANCE + STEP / 2):
-        via_pad_blocks[coordinate].add(pad.GetNetname() or "UNASSIGNED")
+        via_pad_blocks[coordinate].add("PAD")
+
+# Match the board's two-sided antenna rule area, including trace radius.
+for x in range(NX):
+    for y in range(NY):
+        px, py = xy(x, y)
+        if 52 - WIDTH / 2 - CLEARANCE <= px <= 73.5 + WIDTH / 2 + CLEARANCE and \
+                67 - WIDTH / 2 - CLEARANCE <= py <= 84 + WIDTH / 2 + CLEARANCE:
+            for layer in blocked:
+                layer[(x, y)].add("ANTENNA")
+        if 52 - VIA_DIAMETER / 2 - CLEARANCE <= px <= 73.5 + VIA_DIAMETER / 2 + CLEARANCE and \
+                67 - VIA_DIAMETER / 2 - CLEARANCE <= py <= 84 + VIA_DIAMETER / 2 + CLEARANCE:
+            via_pad_blocks[(x, y)].add("ANTENNA")
 
 
 def free(layer, x, y, name):
@@ -220,13 +232,13 @@ def apply(route, source, name, from_position=None):
 
 
 priority = [
-    "RTC_SDA", "RTC_SCL",
-    "LCD_BL", "LCD_CS", "LCD_RST", "LCD_DC", "LCD_MOSI", "LCD_SCK",
-    "I2S_WS", "I2S_BCLK", "AUDIO_DIN", "AMP_GAIN", "AMP_SD", "MIC_SD",
-    "GPIO4", "GPIO5", "GPIO6",
     "BUTTON1", "RECORD", "BUTTON3",
-    "3V3",
+    "LCD_BL", "LCD_CS", "LCD_RST", "LCD_DC", "LCD_MOSI", "LCD_SCK",
     "5V_IN", "5V_SW",
+    "RTC_SDA", "RTC_SCL",
+    "AMP_GAIN", "AMP_SD", "AUDIO_DIN", "I2S_WS", "I2S_BCLK", "MIC_SD",
+    "GPIO4", "GPIO5", "GPIO6",
+    "3V3",
 ]
 assert set(priority) | {"GND"} == {
     name for name, group in pads.items() if len(group) > 1}
@@ -235,13 +247,13 @@ for pad in all_pads:
     reference = pad.GetParentFootprint().GetReference()
     number = int(pad.GetNumber()) if pad.GetNumber().isdigit() else 0
     if reference == "J4" and pad.GetNetname() != "GND":
-        dx, dy = 5, 0
+        dx, dy = (5.5 if number == 7 else 5), 0
     elif reference == "J12" and number >= 3:
         dx, dy = 0, -5
     elif reference == "J1" and number in (4, 5, 6):
-        dx, dy = -5, 0
-    elif reference == "J2" and number in (6, 7, 8):
         dx, dy = 5, 0
+    elif reference == "J2" and number in (6, 7, 8):
+        dx, dy = -5, 0
     elif reference == "J11" and number in (1, 2, 3):
         dx, dy = 0, -5
     elif reference == "J1" and 15 <= number <= 20:
@@ -300,6 +312,7 @@ for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.B_Cu):
     zone.SetPadConnection(pcb.ZONE_CONNECTION_FULL)
     zone.SetLocalClearance(pcb.FromMM(0.35))
     zone.SetMinThickness(pcb.FromMM(0.25))
+    zone.SetIslandRemovalMode(pcb.ISLAND_REMOVAL_MODE_ALWAYS)
     zone.Outline().NewOutline()
     for x, y in ((4, 4), (122, 4), (122, 114), (4, 114)):
         zone.Outline().Append(pcb.FromMM(x), pcb.FromMM(y))
