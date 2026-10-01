@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name "Minibox")(type "KiCad")(uri "${KIPRJMOD}/Minibox.pretty")(options "")(descr "Minibox module carrier footprints"))
+)

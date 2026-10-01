@@ -1,0 +1,307 @@
+"""Route the carrier's assigned nets on two layers with conservative grid clearance.
+
+This is a deterministic layout aid, not a substitute for KiCad DRC or
+measuring the actual mating modules.
+"""
+
+from collections import defaultdict
+from heapq import heappop, heappush
+from math import ceil, hypot
+from pathlib import Path
+
+import pcbnew as pcb
+
+
+FILE = Path(__file__).with_name("minibox-carrier.kicad_pcb")
+board = pcb.LoadBoard(str(FILE))
+STEP = 0.5
+X0, Y0 = 5.0, 5.0
+NX, NY = 233, 217
+WIDTH = 0.35
+CLEARANCE = 0.25
+VIA_DIAMETER = 0.8
+VIA_DRILL = 0.4
+ROUTE_LAYERS = (pcb.F_Cu, pcb.B_Cu, pcb.In2_Cu)
+POWER_WIDTHS = {"3V3": 0.65, "5V_IN": 0.8, "5V_SW": 0.8}
+
+
+def width_for(name):
+    return POWER_WIDTHS.get(name, WIDTH)
+
+
+def mm(value):
+    return pcb.ToMM(value)
+
+
+def point(x, y):
+    return pcb.VECTOR2I(pcb.FromMM(x), pcb.FromMM(y))
+
+
+def cell(position):
+    return (round((mm(position.x) - X0) / STEP),
+            round((mm(position.y) - Y0) / STEP))
+
+
+def xy(x, y):
+    return X0 + x * STEP, Y0 + y * STEP
+
+
+def neighbors(x, y):
+    for dx, dy in ((0, 1), (1, 0), (0, -1), (-1, 0)):
+        a, b = x + dx, y + dy
+        if 0 <= a < NX and 0 <= b < NY:
+            yield a, b
+
+
+def disk(x, y, radius):
+    reach = ceil(radius / STEP)
+    for a in range(max(0, x - reach), min(NX, x + reach + 1)):
+        for b in range(max(0, y - reach), min(NY, y + reach + 1)):
+            if hypot(a - x, b - y) * STEP <= radius:
+                yield a, b
+
+
+pads = defaultdict(list)
+all_pads = []
+for footprint in board.GetFootprints():
+    for pad in footprint.Pads():
+        if pad.GetNetname():
+            pads[pad.GetNetname()].append(pad)
+        all_pads.append(pad)
+
+blocked = [defaultdict(set) for _ in ROUTE_LAYERS]
+via_pad_blocks = defaultdict(set)
+for pad in all_pads:
+    px, py = cell(pad.GetPosition())
+    radius = max(mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2
+    if pad.GetParentFootprint().GetReference().startswith("H"):
+        radius = 3.5
+    radius += WIDTH / 2 + CLEARANCE + STEP / 2
+    for layer in range(len(ROUTE_LAYERS)):
+        if not pad.IsOnLayer(ROUTE_LAYERS[layer]):
+            continue
+        for coordinate in disk(px, py, radius):
+            blocked[layer][coordinate].add(pad.GetNetname() or "UNASSIGNED")
+    via_radius = 3.5 if pad.GetParentFootprint().GetReference().startswith("H") else (
+        max(mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2)
+    for coordinate in disk(px, py, via_radius +
+                           VIA_DIAMETER / 2 + CLEARANCE + STEP / 2):
+        via_pad_blocks[coordinate].add(pad.GetNetname() or "UNASSIGNED")
+
+
+def free(layer, x, y, name):
+    return not (blocked[layer][(x, y)] - {name})
+
+
+def via_free(x, y, name):
+    if via_pad_blocks[(x, y)] - {name}:
+        return False
+    for layer in range(len(ROUTE_LAYERS)):
+        for a, b in disk(x, y, VIA_DIAMETER / 2 + WIDTH / 2 + CLEARANCE):
+            if not free(layer, a, b, name):
+                return False
+    return True
+
+
+def search(start, targets, name, start_layers=range(len(ROUTE_LAYERS))):
+    sx, sy = start
+    goals = set(targets)
+    positions = {(x, y) for _, x, y in goals}
+    bounds = (min(x for x, _ in positions), max(x for x, _ in positions),
+              min(y for _, y in positions), max(y for _, y in positions))
+
+    def heuristic(x, y):
+        left, right, top, bottom = bounds
+        return max(left - x, 0, x - right) + max(top - y, 0, y - bottom)
+
+    queue = []
+    previous = {}
+    costs = {}
+    for layer in start_layers:
+        state = (layer, sx, sy)
+        costs[state] = 0
+        heappush(queue, (heuristic(sx, sy), 0, state))
+    while queue:
+        _, cost, state = heappop(queue)
+        if cost != costs.get(state):
+            continue
+        layer, x, y = state
+        if state in goals:
+            route = [state]
+            while state in previous:
+                state = previous[state]
+                route.append(state)
+            return list(reversed(route))
+        for nx, ny in neighbors(x, y):
+            if not free(layer, nx, ny, name):
+                continue
+            # The extra turn cost makes routes less jagged.
+            parent = previous.get(state)
+            turn = 1 if parent and (parent[1] - x, parent[2] - y) != (x - nx, y - ny) else 0
+            nxt = (layer, nx, ny)
+            new_cost = cost + 10 + turn
+            if new_cost < costs.get(nxt, 10**12):
+                costs[nxt] = new_cost
+                previous[nxt] = state
+                heappush(queue, (new_cost + 10 * heuristic(nx, ny), new_cost, nxt))
+        if via_free(x, y, name):
+            for next_layer in range(len(ROUTE_LAYERS)):
+                if next_layer == layer:
+                    continue
+                other = (next_layer, x, y)
+                if cost + 50 < costs.get(other, 10**12):
+                    costs[other] = cost + 50
+                    previous[other] = state
+                    heappush(queue, (cost + 50 + 10 * heuristic(x, y), cost + 50, other))
+    raise RuntimeError(
+        f"No path for {name} starting at {start}; explored {len(costs)} cells; "
+        f"goals {len(goals)}")
+
+
+def track(start, end, layer, name):
+    if start == end:
+        return
+    item = pcb.PCB_TRACK(board)
+    item.SetStart(point(*start))
+    item.SetEnd(point(*end))
+    item.SetWidth(pcb.FromMM(width_for(name)))
+    item.SetLayer(ROUTE_LAYERS[layer])
+    item.SetNet(board.FindNet(name))
+    board.Add(item)
+
+
+def via(x, y, name):
+    item = pcb.PCB_VIA(board)
+    item.SetPosition(point(*xy(x, y)))
+    item.SetWidth(pcb.FromMM(VIA_DIAMETER))
+    item.SetDrill(pcb.FromMM(VIA_DRILL))
+    item.SetLayerPair(pcb.F_Cu, pcb.B_Cu)
+    item.SetNet(board.FindNet(name))
+    board.Add(item)
+
+
+def mark(route, name):
+    for layer, x, y in route:
+        radius = max(WIDTH + CLEARANCE + STEP / 2,
+                     (width_for(name) + WIDTH) / 2 + CLEARANCE + STEP / 2)
+        for a, b in disk(x, y, radius):
+            blocked[layer][(a, b)].add(name)
+    for before, after in zip(route, route[1:]):
+        if before[0] != after[0]:
+            x, y = before[1:]
+            for layer in range(len(ROUTE_LAYERS)):
+                for a, b in disk(x, y, VIA_DIAMETER / 2 + WIDTH / 2 +
+                                  CLEARANCE + STEP / 2):
+                    blocked[layer][(a, b)].add(name)
+
+
+def apply(route, source, name, from_position=None):
+    start = xy(*route[0][1:])
+    pad = from_position or source.GetPosition()
+    track((mm(pad.x), mm(pad.y)), start, route[0][0], name)
+    run_start = route[0]
+    direction = None
+    for before, after in zip(route, route[1:]):
+        if before[0] != after[0]:
+            track(xy(*run_start[1:]), xy(*before[1:]), before[0], name)
+            via(before[1], before[2], name)
+            run_start = after
+            direction = None
+            continue
+        step = (after[1] - before[1], after[2] - before[2])
+        if direction is not None and step != direction:
+            track(xy(*run_start[1:]), xy(*before[1:]), before[0], name)
+            run_start = before
+        direction = step
+    track(xy(*run_start[1:]), xy(*route[-1][1:]), route[-1][0], name)
+    mark(route, name)
+    return route[-1][1:]
+
+
+priority = [
+    "RTC_SDA", "RTC_SCL",
+    "LCD_BL", "LCD_CS", "LCD_RST", "LCD_DC", "LCD_MOSI", "LCD_SCK",
+    "I2S_WS", "I2S_BCLK", "AUDIO_DIN", "AMP_GAIN", "AMP_SD", "MIC_SD",
+    "GPIO4", "GPIO5", "GPIO6",
+    "BUTTON1", "RECORD", "BUTTON3",
+    "3V3",
+    "5V_IN", "5V_SW",
+]
+assert set(priority) | {"GND"} == {
+    name for name, group in pads.items() if len(group) > 1}
+escapes = {}
+for pad in all_pads:
+    reference = pad.GetParentFootprint().GetReference()
+    number = int(pad.GetNumber()) if pad.GetNumber().isdigit() else 0
+    if reference == "J4" and pad.GetNetname() != "GND":
+        dx, dy = 5, 0
+    elif reference == "J12" and number >= 3:
+        dx, dy = 0, -5
+    elif reference == "J1" and number in (4, 5, 6):
+        dx, dy = -5, 0
+    elif reference == "J2" and number in (6, 7, 8):
+        dx, dy = 5, 0
+    elif reference == "J11" and number in (1, 2, 3):
+        dx, dy = 0, -5
+    elif reference == "J1" and 15 <= number <= 20:
+        dx, dy = 5, 0
+    elif reference == "J6" and 3 <= number <= 8:
+        dx, dy = -5, 0
+    else:
+        continue
+    position = pad.GetPosition()
+    x, y = mm(position.x), mm(position.y)
+    end = (x + dx, y + dy)
+    track((x, y), end, 0, pad.GetNetname())
+    escapes[id(pad)] = point(*end)
+    sx, sy = cell(position)
+    ex, ey = cell(escapes[id(pad)])
+    if dx:
+        cells = [(0, ix, sy) for ix in range(min(sx, ex), max(sx, ex) + 1)]
+    else:
+        cells = [(0, sx, iy) for iy in range(min(sy, ey), max(sy, ey) + 1)]
+    mark(cells, pad.GetNetname())
+
+for name in priority:
+    group = sorted(pads[name], key=lambda pad: (
+        pad.GetParentFootprint().GetReference() not in ("J1", "J2"),
+        pad.GetParentFootprint().GetReference(),
+        int(pad.GetNumber())))
+    first = group.pop(0)
+    first_escape = escapes.get(id(first))
+    px, py = cell(first_escape or first.GetPosition())
+    tree = {(layer, px, py) for layer in (
+        (0,) if first_escape else range(len(ROUTE_LAYERS)))}
+    while group:
+        source = min(group, key=lambda p: min(
+            abs(cell(escapes.get(id(p), p.GetPosition()))[0] - x) +
+            abs(cell(escapes.get(id(p), p.GetPosition()))[1] - y)
+            for _, x, y in tree))
+        group.remove(source)
+        escape = escapes.get(id(source))
+        layers = (0,) if escape or source.GetAttribute() == pcb.PAD_ATTRIB_SMD else range(len(ROUTE_LAYERS))
+        route = search(cell(escape or source.GetPosition()), tree, name,
+                       start_layers=layers)
+        tip = apply(route, source, name, from_position=escape)
+        tree.update(route)
+        if tip == cell(first_escape or first.GetPosition()):
+            end = first_escape or first.GetPosition()
+            track(xy(*tip), (mm(end.x), mm(end.y)), route[-1][0], name)
+        print(name, source.GetParentFootprint().GetReference(),
+              source.GetNumber(), "->", len(route), "cells",
+              sum(a[0] != b[0] for a, b in zip(route, route[1:])), "vias",
+              flush=True)
+
+for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.B_Cu):
+    zone = pcb.ZONE(board)
+    zone.SetLayer(layer)
+    zone.SetNet(board.FindNet("GND"))
+    zone.SetPadConnection(pcb.ZONE_CONNECTION_FULL)
+    zone.SetLocalClearance(pcb.FromMM(CLEARANCE))
+    zone.SetMinThickness(pcb.FromMM(0.25))
+    zone.Outline().NewOutline()
+    for x, y in ((4, 4), (122, 4), (122, 114), (4, 114)):
+        zone.Outline().Append(pcb.FromMM(x), pcb.FromMM(y))
+    board.Add(zone)
+
+pcb.SaveBoard(str(FILE), board)
