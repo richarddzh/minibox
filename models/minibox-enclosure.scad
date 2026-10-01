@@ -1,23 +1,22 @@
 /*
   Sketch-based enclosure. Units: mm.
   X = left/right, Y = front/back, Z = up.
-  Both halves use the same tangent, rounded side profile.
+  The front screen, rear quarter-arc cover and screen bracket print separately.
   Unmeasured radii, component heights and control windows are provisional.
 */
 
 /* [View] */
-part = "assembly"; // [assembly, exploded, bottom, lid, lid-print, bottom-y-up, lid-y-up]
+part = "screen-bracket"; // [assembly, exploded, bottom, lid, rear-lid, screen-bracket, screen-bracket-print, lid-print, rear-lid-print, bottom-y-up, lid-y-up, rear-lid-y-up, screen-bracket-y-up]
 show_modules = false;
 explode_height = 35;
-$fn = 32;
+$fn = 24;
 
 /* [Enclosure] */
 case_width = 120;
-deck_depth = 58;
-deck_height = 28;
-slope_angle = 60;
+deck_depth = 60;
+deck_height = 32;
+slope_angle = 90;
 slope_length = 111;
-rear_ledge = 18;
 wall = 2.4;
 floor_thickness = 4;
 panel_thickness = 3;
@@ -29,11 +28,12 @@ support_lip_thickness = 1.5;
 /* [Rounded corners] */
 bottom_radius = 12;
 rim_radius = 6;
-bend_radius = 10;
+bend_radius = 6;
 
 /* [M2.5 fasteners] */
 screw_clearance = 2.8;
 lid_screw_diameter = 3;
+rear_lid_screw_diameter = 3.2;
 lid_counterbore_diameter = 4.5;
 lid_counterbore_depth = 1.4;
 lid_min_edge = 2;
@@ -42,15 +42,11 @@ insert_diameter = 4.7;
 insert_depth = 5.2;
 screw_tip_depth = 8.8;
 module_boss_diameter = 8;
-screen_tab_depth = 10;
 shell_boss_diameter = 9;
 shell_corner_depth = 7;
 rear_mount_depth = 10;
 middle_boss_diameter = 7;
 middle_mount_y = 49.2;
-screen_gusset_thickness = 2;
-screen_brace_clearance = 2.5; // Compact side-wall brace clearance to floor-mounted modules
-support_angle = 75; // Minimum brace slope measured from the horizontal
 small_gap_fill = 5;
 
 /* [Controls: joystick left, keyboard right] */
@@ -108,6 +104,16 @@ screen_back_height = 4;
 screen_back_edge_margin = 8;
 screen_shift_along = 26.62;
 screen_port_clearance = 8;
+screen_bracket_thickness = 3;
+screen_bracket_bottom = 25;
+screen_bracket_top = 135;
+screen_bracket_front_y = 78;
+screen_bracket_side_width = 13;
+screen_bracket_right_width = 14;
+screen_bracket_top_width = 6;
+screen_bracket_clearance = 0.3;
+screen_bracket_rail_depth = 2.5;
+screen_header_opening = [10, 43];
 
 /* [Switch below the screen, right side] */
 switch_hole_diameter = 21;
@@ -143,9 +149,16 @@ cable_opening_z = 10;
 
 /* [Hidden] */
 eps = 0.02;
-screen_top_y = deck_depth + cos(slope_angle) * slope_length;
+screen_top_y = deck_depth;
 rear_height = deck_height + sin(slope_angle) * slope_length;
-typec_center_z = rear_height / 2;
+rear_arc_radius = slope_length;
+screen_bracket_left = 4.5;
+screen_bracket_right = case_width - 4.5;
+rear_seam_angle = 20;
+rear_seam_gap = 0.5;
+rear_hole_stagger = 0;
+rear_seam_y = deck_depth + rear_arc_radius * sin(rear_seam_angle);
+typec_center_z = 21;
 // Conservative envelope if the quoted hex size is across flats rather than corners.
 typec_nut_envelope = typec_nut_outer_size / cos(30);
 screen_board_gap = screen_stack_above_pcb + screen_front_clearance;
@@ -153,8 +166,7 @@ screen_mount_gap = screen_pcb_thickness + screen_board_gap;
 screen_mount_normal = -panel_thickness - screen_mount_gap;
 screen_window_offset = [(tft_view_side_margins[0] - tft_view_side_margins[1]) / 2, 0];
 tft_center = [case_width / 2, 46 + screen_shift_along];
-tft_rear_extent = deck_depth + cos(slope_angle) * (tft_center[1] + tft_size[1] / 2) -
-                  sin(slope_angle) * screen_mount_normal;
+tft_rear_extent = deck_depth - screen_mount_normal;
 floor_side_inset = (case_width - esp32_size[0] - floor_board_gap - breadboard_size[0]) / 2;
 // Above-floor parts are checked in 3D, rather than wasting their entire XY projection.
 esp32_front_y = max(keyboard_center[1] + keyboard_size[1] / 2,
@@ -167,7 +179,7 @@ breadboard_center = [case_width - floor_side_inset - breadboard_size[0] / 2,
 breadboard_mount_z = floor_thickness;
 floor_group_rear = esp32_front_y + max(esp32_size[1], breadboard_size[1]);
 esp32_mount_z = floor_thickness + esp32_standoff_height;
-case_depth = ceil(max(screen_top_y + rear_ledge,
+case_depth = ceil(max(screen_top_y + rear_arc_radius,
                       tft_rear_extent + 10 + shell_boss_diameter / 2 + module_clearance,
                       floor_group_rear + esp32_rear_clearance + wall));
 keyboard_window_offset = [0, (keyboard_window_bottom_margin - keyboard_window_top_margin) / 2];
@@ -184,10 +196,10 @@ joystick_mount_z = deck_height - panel_thickness - joystick_lid_gap;
 joystick_standoff_height = joystick_mount_z - floor_thickness;
 joystick_component_height = joystick_lid_gap - pcb_thickness - module_clearance;
 shell_hole_x = [9, case_width - 9];
-shell_hole_y = [11, case_depth - 11];
+shell_hole_y = [11, 114, case_depth - 32];
 shell_head_diameter = lid_counterbore_diameter;
 profile_vertices = [
-    [0, 0], [case_depth, 0], [case_depth, rear_height],
+    [0, 0], [case_depth, 0], [case_depth, deck_height],
     [screen_top_y, rear_height], [deck_depth, deck_height], [0, deck_height]
 ];
 profile_radii = [
@@ -203,13 +215,9 @@ function column_bounds(x, y) = [
     x < case_width / 2 ? x + shell_boss_diameter / 2 : case_width,
     y < deck_depth ? y + shell_corner_depth / 2 : case_depth
 ];
-function rear_brace_rise(x, y) =
-    1.5 * tan(support_angle) * (column_bounds(x, y)[2] - column_bounds(x, y)[0] - wall);
-// Smoothstep's maximum derivative is 1.5; compensate so even the shallowest segment meets the angle.
-function brace_ease(t) = t * t * (3 - 2 * t);
 function column_root_z(x, y) =
     y > deck_depth ?
-        rear_height - panel_thickness - rear_mount_depth - rear_brace_rise(x, y) :
+        rear_arc_z(y) - panel_thickness - rear_mount_depth :
         floor_thickness;
 function distance_to_rectangle(p, bounds) = norm([
     max(bounds[0] - p[0], 0, p[0] - bounds[2]),
@@ -222,6 +230,16 @@ function corner_angle(i) =
         v = unit(profile_vertices[(i + 1) % 6] - p))
     acos(max(-1, min(1, u * v)));
 function tangent_length(i) = profile_radii[i] / tan(corner_angle(i) / 2);
+function rear_arc_z(y) = deck_height +
+    sqrt(rear_arc_radius * rear_arc_radius - (y - deck_depth) * (y - deck_depth));
+function rear_arc_angle(y) = asin((y - deck_depth) / rear_arc_radius);
+function rear_hole_y(x, y) = y + (x < case_width / 2 ? -rear_hole_stagger : rear_hole_stagger);
+function rear_arc_points() = [
+    for (i = [0 : 24])
+        let(angle = 90 * i / 24)
+            [round((deck_depth + rear_arc_radius * sin(angle)) * 1000000) / 1000000,
+             round((deck_height + rear_arc_radius * cos(angle)) * 1000000) / 1000000]
+];
 
 function corner_points(i) =
     let(p = profile_vertices[i],
@@ -242,8 +260,7 @@ function corner_points(i) =
 function top_path(trim = 0) = concat(
     [[rim_radius + trim, deck_height]],
     reverse_list(corner_points(4)),
-    reverse_list(corner_points(3)),
-    [[case_depth - rim_radius - trim, rear_height]]
+    rear_arc_points()
 );
 
 function inward_normal(v) = let(d = unit(v)) [d[1], -d[0]];
@@ -258,9 +275,13 @@ function inner_path(path, depth) = [
 
 // All six screws are vertical and sit on the two horizontal portions of the lid.
 assert(part == "assembly" || part == "exploded" || part == "bottom" ||
-       part == "lid" || part == "lid-print" || part == "bottom-y-up" ||
-       part == "lid-y-up" || part == "none", "Unknown part.");
-assert(slope_angle > 30 && slope_angle < 80, "Screen slope must be between 30 and 80 degrees.");
+       part == "lid" || part == "rear-lid" ||
+       part == "lid-print" || part == "rear-lid-print" ||
+       part == "bottom-y-up" || part == "lid-y-up" ||
+       part == "rear-lid-y-up" || part == "screen-bracket" ||
+       part == "screen-bracket-print" ||
+       part == "screen-bracket-y-up" || part == "none", "Unknown part.");
+assert(slope_angle == 90, "The screen panel must be vertical.");
 assert(min(bottom_radius, rim_radius) > wall && bend_radius > panel_thickness,
        "Corner radii must exceed their wall/panel thickness.");
 assert(floor_thickness >= wall, "Floor thickness must be at least the wall thickness.");
@@ -276,13 +297,11 @@ assert(tft_window_clearance >= 2, "Screen aperture needs at least 1 mm per side.
 assert(tft_window_radius > 0 &&
        2 * tft_window_radius <= min(tft_view) + tft_window_clearance,
        "Screen window corner radius does not fit its aperture.");
-assert(screen_brace_clearance >= floor_side_clearance,
-       "Screen side braces must retain at least the side-wall assembly clearance.");
 assert(switch_center[1] + max(switch_hole_diameter, switch_body_diameter) / 2 +
        screen_port_clearance <= tft_center[1] - tft_size[1] / 2,
        "Switch must clear the entire screen PCB, not just the display window.");
-assert(tft_center[1] + tft_size[1] / 2 + module_clearance <
-       slope_length - tangent_length(3), "Raised screen overlaps the top bend.");
+assert(tft_center[1] + tft_size[1] / 2 + 5 < slope_length,
+       "Screen overlaps the upper edge.");
 assert(switch_body_depth > 0 && switch_body_diameter > 0,
        "Switch envelope dimensions must be positive.");
 assert(speaker_center[0] < microphone_center[0] && microphone_center[0] < switch_center[0],
@@ -304,7 +323,7 @@ assert(typec_thread_length > wall + typec_nut_thickness &&
        typec_hole_spacing > max(typec_head_diameter, typec_nut_envelope),
        "Type-C sockets need room for both nuts and thread engagement.");
 assert(typec_center_z - typec_nut_envelope / 2 > bottom_radius &&
-       typec_center_z + typec_nut_envelope / 2 < rear_height - rim_radius,
+       typec_center_z + typec_nut_envelope / 2 < deck_height,
        "Type-C fittings must remain on the flat rear wall.");
 assert(lid_corner_radius > joint_clearance && support_lip_width > joint_clearance,
        "The rounded opening and support lip must retain lid clearance and bearing overlap.");
@@ -325,7 +344,6 @@ assert(middle_boss_diameter >= insert_diameter + 2,
 assert(floor_module_clearance >= 10 && floor_board_gap == 10,
        "Floor modules need 10 mm to other parts and exactly 10 mm between boards.");
 assert(esp32_rear_clearance >= 20, "ESP32 needs at least 20 mm to the rear panel.");
-assert(support_angle >= 45 && support_angle < 90, "Brace angle must be in [45, 90) degrees.");
 assert(floor_side_clearance > 0 && floor_side_inset >= wall + floor_side_clearance,
        "Floor modules must clear both side walls.");
 assert(breadboard_center[0] > esp32_center[0] &&
@@ -382,10 +400,20 @@ assert(joystick_center[0] - joystick_size[0] / 2 >=
        keyboard_center[1] - keyboard_size[1] / 2 >=
        shell_hole_y[0] + shell_corner_depth / 2 + control_clearance,
        "Controls are too close to the front lid columns.");
-assert(screen_tab_depth > screw_tip_depth &&
-       deck_height - panel_thickness - floor_thickness > screw_tip_depth,
-       "Mounting tabs need blind clearance for the screw tips.");
-assert(screen_gusset_thickness >= 2, "Screen gussets must be at least 2 mm thick.");
+assert(screen_bracket_thickness > 0 && screen_bracket_clearance > 0 &&
+       screen_bracket_front_y - tft_rear_extent >= screen_back_height + 0.5,
+       "The bracket must clear the rear of the screen.");
+assert(screen_bracket_bottom > esp32_mount_z + pcb_thickness + esp32_component_height &&
+       screen_bracket_top < rear_arc_z(screen_bracket_front_y + screen_bracket_thickness) -
+                            panel_thickness,
+       "Bracket rails must clear the floor boards and curved lid.");
+assert(screen_bracket_right_width - screen_header_opening[0] >= 4 &&
+       screen_bracket_top_width >= 6 && screen_bracket_thickness >= 3,
+       "Bracket frame needs substantial printable webs around the cable opening.");
+assert(screen_bracket_left > wall + support_lip_width + screen_bracket_clearance &&
+       screen_bracket_right < case_width - wall - support_lip_width -
+                              screen_bracket_clearance,
+       "The complete bracket must pass vertically through the open lid seat.");
 assert(screw_length - pcb_thickness <= screw_tip_depth &&
        screw_length - screen_pcb_thickness <= screw_tip_depth &&
        screw_length - (panel_thickness - lid_counterbore_depth) <= screw_tip_depth,
@@ -394,14 +422,14 @@ assert(insert_depth < screw_tip_depth && insert_diameter < module_boss_diameter 
        "Insufficient insert depth or boss wall.");
 assert(tft_size[0] + 2 * (wall + joint_clearance) < case_width,
        "Landscape screen does not fit between the side walls.");
-assert(tft_size[1] + 2 * tangent_length(3) + 8 < slope_length,
-       "TFT overlaps the curved transitions.");
-assert(rear_ledge > tangent_length(2) + tangent_length(3) + 4,
-       "Rear ledge is too short.");
-for (i = [0 : 5])
-    assert(tangent_length(i) + tangent_length((i + 1) % 6) <
-           norm(profile_vertices[(i + 1) % 6] - profile_vertices[i]),
-           "Fillets overlap: reduce radii or enlarge the profile.");
+assert(tft_size[1] / 2 + tft_center[1] + 5 < slope_length,
+       "TFT overlaps the upper curved transition.");
+assert(case_depth == deck_depth + rear_arc_radius,
+       "The back must be a complete quarter-circle.");
+assert(rear_seam_angle > 10 && rear_seam_angle < 35 &&
+       shell_hole_y[1] + shell_boss_diameter / 2 < shell_hole_y[2] - shell_boss_diameter / 2 &&
+       rear_seam_gap > 0 && rear_seam_gap < support_lip_width,
+       "Rear cover split and screw seats must have room.");
 for (spec = [[joystick_center, joystick_size], [keyboard_center, keyboard_size]])
     assert(spec[0][0] - spec[1][0] / 2 > wall &&
            spec[0][0] + spec[1][0] / 2 < case_width - wall &&
@@ -425,10 +453,10 @@ module rounded_rectangle(size, radius) {
 }
 
 module outer_profile() {
-    // The spherical volume alone defines the lower fillets; a second sampled
-    // bottom arc would intersect the same surface at almost coincident points.
+    // A single sampled arc joins the upright screen face to the rear vertical wall.
     polygon(concat([[0, -bottom_radius], [case_depth, -bottom_radius]],
-                   [for (i = [2 : 5]) each corner_points(i)]));
+                   reverse_list(rear_arc_points()),
+                   corner_points(4), corner_points(5)));
 }
 
 module corner_sphere(radius) {
@@ -543,6 +571,12 @@ module support_lip() {
                     opening_plan();
                 }
         }
+        intersection() {
+            extrude_along_x(case_width)
+                panel_band(panel_thickness, panel_thickness + support_lip_thickness);
+            translate([0, rear_seam_y - 5, 0])
+                cube([case_width, 10, rear_height + eps]);
+        }
     }
 }
 
@@ -583,44 +617,51 @@ module control_holes() {
 }
 
 // The opening is at Z=0; screw and insert extend into negative Z.
-module insert_socket(tip_depth = screw_tip_depth) {
-    translate([0, 0, -insert_depth])
-        cylinder(d = insert_diameter, h = insert_depth + eps);
-    translate([0, 0, -tip_depth])
-        cylinder(d = screw_clearance, h = tip_depth + eps);
+module insert_socket(tip_depth = screw_tip_depth, extension = 0) {
+    translate([0, 0, -insert_depth - extension])
+        cylinder(d = insert_diameter, h = insert_depth + extension + eps);
+    translate([0, 0, -tip_depth - extension])
+        cylinder(d = screw_clearance, h = tip_depth + extension + eps);
 }
 
-module shell_fasteners() {
+module shell_fasteners(offset = 0) {
+    front_fasteners(offset) children();
     for (x = shell_hole_x)
-        for (y = shell_hole_y)
-            translate([x, y, (y < deck_depth ? deck_height : rear_height) - panel_thickness])
-                children();
-    middle_fasteners() children();
+        for (y = [shell_hole_y[1], shell_hole_y[2]])
+            on_rear(x, rear_hole_y(x, y), -panel_thickness + offset) children();
+}
+
+module front_fasteners(offset = 0) {
+    for (x = shell_hole_x)
+        translate([x, shell_hole_y[0], deck_height - panel_thickness + offset]) children();
+    middle_fasteners() translate([0, 0, offset]) children();
+}
+
+module on_rear(x, y, normal = 0) {
+    angle = rear_arc_angle(y);
+    translate([x, y, rear_arc_z(y)])
+        rotate([-angle, 0, 0])
+            translate([0, 0, normal]) children();
 }
 
 module shell_mount_columns() {
     for (x = shell_hole_x)
-        for (y = shell_hole_y) {
-            top = (y < deck_depth ? deck_height : rear_height) - panel_thickness;
+        for (y = [shell_hole_y[0]]) {
+            top = deck_height - panel_thickness;
             bounds = column_bounds(x, y);
-            root = column_root_z(x, y);
             width = bounds[2] - bounds[0];
-            if (y > deck_depth) {
-                rise = rear_brace_rise(x, y);
-                steps = max(8, $fn);
-                profile = concat([[0, 0], [wall, 0]],
-                    [for (i = [1 : steps])
-                        [wall + (width - wall) * brace_ease(i / steps), rise * i / steps]],
-                    [[width, top - root], [0, top - root]]);
-                translate([x < case_width / 2 ? bounds[0] : bounds[2], bounds[3], root])
-                    rotate([90, 0, 0])
-                        linear_extrude(height = bounds[3] - bounds[1])
-                            polygon([for (p = profile)
-                                [x < case_width / 2 ? p[0] : -p[0], p[1]]]);
-            } else
-                translate([bounds[0], bounds[1], floor_thickness - eps])
-                    cube([width, bounds[3] - bounds[1], top - floor_thickness + eps]);
+            translate([bounds[0], bounds[1], floor_thickness - eps])
+                cube([width, bounds[3] - bounds[1], top - floor_thickness + eps]);
         }
+    for (x = shell_hole_x)
+        for (y = [shell_hole_y[1], shell_hole_y[2]])
+            hull() {
+                on_rear(x, rear_hole_y(x, y), -panel_thickness - rear_mount_depth)
+                    cylinder(d = shell_boss_diameter, h = rear_mount_depth + eps);
+                on_rear(x < case_width / 2 ? wall / 2 : case_width - wall / 2,
+                        rear_hole_y(x, y), -panel_thickness - rear_mount_depth)
+                    cylinder(d = wall, h = rear_mount_depth + eps);
+            }
     middle_mount_columns();
 }
 
@@ -649,40 +690,65 @@ module control_mount_footprint(top_z) {
         }
 }
 
-module screen_tab_pad(side, x, height) {
-    hull() {
-        translate([x, 0, 0]) cylinder(d = module_boss_diameter, h = height);
-        translate([side < 0 ? wall / 2 : case_width - wall / 2, 0, 0])
-            cylinder(d = wall, h = height);
+module screen_bracket() {
+    difference() {
+        union() {
+            translate([screen_bracket_left, screen_bracket_front_y, screen_bracket_bottom])
+                cube([screen_bracket_side_width, screen_bracket_thickness,
+                      screen_bracket_top - screen_bracket_bottom]);
+            translate([screen_bracket_right - screen_bracket_right_width,
+                       screen_bracket_front_y, screen_bracket_bottom])
+                cube([screen_bracket_right_width, screen_bracket_thickness,
+                      screen_bracket_top - screen_bracket_bottom]);
+            translate([screen_bracket_left, screen_bracket_front_y,
+                       screen_bracket_top - screen_bracket_top_width])
+                cube([screen_bracket_right - screen_bracket_left,
+                      screen_bracket_thickness,
+                      screen_bracket_top_width]);
+            for (dx = [-tft_hole_spacing[0] / 2, tft_hole_spacing[0] / 2])
+                for (dv = [-tft_hole_spacing[1] / 2, tft_hole_spacing[1] / 2])
+                    on_slope(tft_center[0] + dx, tft_center[1] + dv,
+                             screen_mount_normal - screen_bracket_front_y - 0.4 +
+                             tft_rear_extent)
+                        cylinder(d = module_boss_diameter,
+                                 h = screen_bracket_front_y - tft_rear_extent + 0.4);
+        }
+        for (dx = [-tft_hole_spacing[0] / 2, tft_hole_spacing[0] / 2])
+            for (dv = [-tft_hole_spacing[1] / 2, tft_hole_spacing[1] / 2])
+                on_slope(tft_center[0] + dx, tft_center[1] + dv, screen_mount_normal)
+                    insert_socket();
+        translate([screen_bracket_right - screen_bracket_right_width,
+                   screen_bracket_front_y - eps,
+                   deck_height + tft_center[1] - screen_header_opening[1] / 2])
+            cube([screen_header_opening[0],
+                  screen_bracket_thickness + 2 * eps, screen_header_opening[1]]);
     }
 }
 
-module screen_tabs() {
-    for (side = [-1, 1])
-        for (v = [-tft_hole_spacing[1] / 2, tft_hole_spacing[1] / 2]) {
-            x = tft_center[0] + side * tft_hole_spacing[0] / 2;
-            along = tft_center[1] + v;
-            base_normal = screen_mount_normal - screen_tab_depth;
-            reach = (side < 0 ? x : case_width - x) + module_boss_diameter / 2 - wall;
-            base_y = deck_depth + cos(slope_angle) * along - sin(slope_angle) * base_normal;
-            base_z = deck_height + sin(slope_angle) * along + cos(slope_angle) * base_normal;
-            front_y = deck_depth + cos(slope_angle) * along -
-                      sin(slope_angle) * screen_mount_normal -
-                      module_boss_diameter / 2 * cos(slope_angle);
-            back_y = base_y + module_boss_diameter / 2 * cos(slope_angle);
-            root_z = base_z - module_boss_diameter / 2 * sin(slope_angle) -
-                     reach * tan(support_angle) - screen_gusset_thickness;
-            assert(root_z >= floor_thickness, "Screen brace reaches below the usable floor.");
-            // Cover the entire WORLD-Y projection, including directly below the hole.
-            // The entire root is below the lowest pad surface by the specified brace slope.
-            hull() {
-                on_slope(0, along, base_normal)
-                    screen_tab_pad(side, x, screen_tab_depth);
-                translate([side < 0 ? 0 : case_width - wall,
-                           front_y, root_z])
-                    cube([wall, back_y - front_y, screen_gusset_thickness]);
-            }
-        }
+module screen_bracket_tracks() {
+    rail_width = 6.1;
+    rail_thickness = 1.5;
+    header_bottom = deck_height + tft_center[1] - screen_header_opening[1] / 2;
+    header_top = header_bottom + screen_header_opening[1];
+    lower_hole = deck_height + tft_center[1] - tft_hole_spacing[1] / 2;
+    for (x = [wall - eps, case_width - wall - rail_width]) {
+        translate([x, screen_bracket_front_y - screen_bracket_clearance -
+                       rail_thickness, screen_bracket_bottom - screen_bracket_rail_depth])
+            cube([rail_width + eps,
+                  screen_bracket_thickness + 2 * screen_bracket_clearance +
+                  2 * rail_thickness, screen_bracket_rail_depth]);
+        translate([x, screen_bracket_front_y - screen_bracket_clearance -
+                   rail_thickness, screen_bracket_bottom - eps])
+            cube([rail_width + eps, rail_thickness,
+                  lower_hole - 6 - screen_bracket_bottom + eps]);
+        for (range = x < case_width / 2 ?
+             [[screen_bracket_bottom, screen_bracket_top]] :
+             [[screen_bracket_bottom, header_bottom], [header_top, screen_bracket_top]])
+            translate([x, screen_bracket_front_y + screen_bracket_thickness +
+                       screen_bracket_clearance, range[0] - eps])
+                cube([rail_width + eps, rail_thickness,
+                      range[1] - range[0] + eps]);
+    }
 }
 
 module rear_typec_positions() {
@@ -745,18 +811,14 @@ module bottom_shell() {
                     translate([0, 0, floor_thickness - eps])
                         linear_extrude(height = esp32_standoff_height + eps)
                             control_mount_footprint(esp32_mount_z);
-                screen_tabs();
+                screen_bracket_tracks();
                 shell_mount_columns();
             }
         }
         control_holes() translate([0, 0, $control_z]) insert_socket();
         hole_pattern(esp32_center, esp32_hole_spacing)
             translate([0, 0, esp32_mount_z]) insert_socket(esp32_socket_depth);
-        for (dx = [-tft_hole_spacing[0] / 2, tft_hole_spacing[0] / 2])
-            for (dv = [-tft_hole_spacing[1] / 2, tft_hole_spacing[1] / 2])
-                on_slope(tft_center[0] + dx, tft_center[1] + dv, screen_mount_normal)
-                    insert_socket();
-        shell_fasteners() insert_socket();
+        shell_fasteners(0.6) insert_socket(screw_tip_depth, 0.6);
         rear_typec_positions()
             translate([0, 0, -eps])
                 cylinder(d = typec_hole_diameter, h = wall + 2 * eps);
@@ -789,18 +851,41 @@ module lid_openings() {
             linear_extrude(height = panel_thickness + 2 * eps)
                 rounded_rectangle(tft_view + [tft_window_clearance, tft_window_clearance],
                                   tft_window_radius);
-        shell_fasteners()
+        front_fasteners()
             translate([0, 0, -eps])
                 cylinder(d = lid_screw_diameter, h = panel_thickness + wall);
-        shell_fasteners()
+        for (x = shell_hole_x)
+            for (y = [shell_hole_y[1], shell_hole_y[2]])
+                on_rear(x, rear_hole_y(x, y), -panel_thickness - 1)
+                    cylinder(d = rear_lid_screw_diameter,
+                             h = panel_thickness + wall + 2);
+        front_fasteners()
             translate([0, 0, panel_thickness - lid_counterbore_depth])
                 cylinder(d = lid_counterbore_diameter, h = lid_counterbore_depth + eps);
 }
 
-module lid() {
+module complete_lid() {
     difference() {
         lid_blank();
         lid_openings();
+    }
+}
+
+module lid() {
+    intersection() {
+        complete_lid();
+        translate([-eps, -eps, -eps])
+            cube([case_width + 2 * eps, rear_seam_y - rear_seam_gap / 2 + eps,
+                  rear_height + 2 * eps]);
+    }
+}
+
+module rear_lid() {
+    intersection() {
+        complete_lid();
+        translate([-eps, rear_seam_y + rear_seam_gap / 2, -eps])
+            cube([case_width + 2 * eps, case_depth - rear_seam_y + eps,
+                  rear_height + 2 * eps]);
     }
 }
 
@@ -885,22 +970,51 @@ module printable_lid() {
         rotate([0, -90, 0]) lid();
 }
 
+module printable_rear_lid() {
+    translate([rear_height, -rim_radius - joint_clearance, -wall - joint_clearance])
+        rotate([0, -90, 0]) rear_lid();
+}
+
+module printable_screen_bracket() {
+    translate([0, -screen_bracket_bottom,
+               screen_bracket_front_y + screen_bracket_thickness])
+        rotate([-90, 0, 0]) screen_bracket();
+}
+
 if (part == "bottom") {
     bottom_shell();
 } else if (part == "lid") {
     lid();
+} else if (part == "rear-lid") {
+    rear_lid();
 } else if (part == "lid-print") {
     printable_lid();
+} else if (part == "rear-lid-print") {
+    printable_rear_lid();
+} else if (part == "screen-bracket") {
+    screen_bracket();
+} else if (part == "screen-bracket-print") {
+    printable_screen_bracket();
 } else if (part == "bottom-y-up") {
     translate([0, 0, case_depth])
         rotate([-90, 0, 0]) bottom_shell();
 } else if (part == "lid-y-up") {
     translate([0, 0, case_depth - 2 * (rim_radius + joint_clearance)])
         rotate([-90, 0, 0]) printable_lid();
+} else if (part == "rear-lid-y-up") {
+    translate([0, 0, case_depth - 2 * (rim_radius + joint_clearance)])
+        rotate([-90, 0, 0]) printable_rear_lid();
+} else if (part == "screen-bracket-y-up") {
+    translate([0, 0, screen_bracket_front_y + screen_bracket_thickness])
+        rotate([-90, 0, 0]) screen_bracket();
 } else if (part == "assembly" || part == "exploded") {
     color([0.82, 0.82, 0.84]) bottom_shell();
     translate([0, 0, part == "exploded" ? explode_height : 0])
         color([0.95, 0.68, 0.2]) lid();
+    translate([0, 0, part == "exploded" ? explode_height : 0])
+        color([0.92, 0.6, 0.15]) rear_lid();
+    translate([0, 0, part == "exploded" ? explode_height / 2 : 0])
+        color([0.2, 0.6, 0.8]) screen_bracket();
     if (show_modules) {
         %module_envelopes();
         %typec_envelopes();

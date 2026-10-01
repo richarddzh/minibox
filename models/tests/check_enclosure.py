@@ -282,7 +282,8 @@ def split_clearance_checks(checks):
     return groups
 
 
-def main():
+def legacy_main():
+    """Historical two-piece layout checks, retained for the old sketch."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--openscad", default=shutil.which("openscad"))
     parser.add_argument("--output", type=Path, required=True)
@@ -967,4 +968,6 @@ intersection() {
 
 
 if __name__ == "__main__":
+    from export_enclosure import main
+
     main()
