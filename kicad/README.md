@@ -28,8 +28,14 @@ the physical antenna location and required RF clearance before
 manufacture. Do not put a metal enclosure, cable or another module
 over the antenna. The RTC and
 amplifier sit left of it, the display cable on the far right, the 5V
-input at the upper edge, and the joystick, microphone, keyboard and
-switch along the lower area. The microphone's estimated 19.5 mm
+input at the upper edge. J12 joystick and J11 keyboard pad rows are
+aligned at **Y=73 mm**, just above the estimated antenna tip near Y=74.4:
+J12 stays at X=12 mm, while J11 moved right to X=90 mm.
+J7 moved right to X=115 mm (pin 1 remains at Y=72 mm); its stock footprint
+extent ends at X=120.735, leaving about 2.265 mm to the X=123 board edge.
+The antenna keepout itself is unchanged, and both socket rows sit outside
+its X=52–73.5 span. The microphone remains at **(50,100) mm**.
+The microphone's estimated 19.5 mm
 courtyard begins at Y=92.79 mm; all other connectors and components
 sit above that line, except for the four mounting holes. J11 and J12 are
 horizontal 1x5 sockets, numbered **left to right** on the component side.
@@ -50,20 +56,23 @@ module headers remain 2.54 mm female sockets.
 The routed traces use 0.35 mm signals, 0.65 mm 3V3, and 0.8 mm 5V.
 `F.Cu` and `B.Cu` carry signals and power with filled GND zones.
 Ground connections are routed first to keep the pours connected.
-Through-hole pads and 51 standard through-vias connect the layers;
+Through-hole pads and 34 standard through-vias connect the layers;
 there are no blind or buried vias. To reduce sharp bends, the routing
-step chamfers 105 eligible orthogonal corners into 45-degree segments.
+step chamfers 90 eligible orthogonal corners into 45-degree segments.
 Each diagonal is extended as far as half the shorter adjoining leg allows,
 then reduced if needed to clear other nets, pads, vias and keepouts.
-Against the previous short-chamfer routing, total routed copper length
-decreased from 3260.7 to 3114.8 mm (4.47%); LCD SCK decreased from
-91.4 to 87.5 mm. About 426.7 mm of routing is now diagonal, with the
-same 51 vias. This is a clearance-checked local optimization, not a
+With the layout-aware GPIO allocation, total routed copper length
+decreased from the previous delivered 3114.8 mm to 2075.3 mm (33.4%);
+LCD SCK decreased from 87.5 to 39.7 mm. About 264.0 mm of routing is
+diagonal, with 34 vias instead of 51. Joystick X/Y traces measure
+45.9/46.1 mm before the external cable. Local SPI and analog joystick
+routes are prioritized before I2S, controls and power.
+This is a clearance-checked routing optimization, not a
 globally shortest routing solution.
 Tiny connector fanout stubs and endpoints at pads/vias are left intact;
 silk/edge geometry is unchanged.
 The two-layer design has no uninterrupted inner GND reference plane:
-the PCB-only LCD SCK route is about 87.5 mm. Verify screen SPI reliability
+the PCB-only LCD SCK route is about 39.7 mm. Verify screen SPI reliability
 at the configured clock and with the actual cable, and lower the clock
 if required.
 **KiCad DRC has no violations or unconnected pads**, but DRC cannot
@@ -97,7 +106,7 @@ Other pads and routing keep the existing rules, including 0.35 mm
 ground-zone clearance. These overrides do not increase the GND pads'
 thermal gaps or expand clearance along every 5V trace.
 Board setup requires 0.5 mm copper-to-edge clearance;
-ground fill starts 1 mm in from the routed outline. The 51 vias are
+ground fill starts 1 mm in from the routed outline. The 34 vias are
 ordinary **0.8 mm pad / 0.4 mm drill through-vias** (0.2 mm annular
 ring). All 87 socket holes are 1.0 mm plated drills with 1.7 mm pads
 (0.35 mm annular ring); J7/J8 have five 1.3 mm plated terminal holes
@@ -188,14 +197,26 @@ The legend helper uses Pillow and the Windows Microsoft YaHei font;
 |---|---|---|
 | J1 | ESP32-S3 DevKit left row | 3V3, 3V3, RST (NC), GPIO4, GPIO5, GPIO6, GPIO7, GPIO15, GPIO16, GPIO17, GPIO18, GPIO8, GPIO3, GPIO46, GPIO9, GPIO10, GPIO11, GPIO12, GPIO13, GPIO14, 5V, GND |
 | J2 | ESP32-S3 DevKit right row | GND, GPIO43, GPIO44, GPIO1, GPIO2, GPIO42, GPIO41, GPIO40, GPIO39, GPIO38, GPIO37 (NC), GPIO36 (NC), GPIO35 (NC), GPIO0, GPIO45, GPIO48, GPIO47, GPIO21, GPIO20 (NC), GPIO19 (NC), GND, GND |
-| J3 | INMP441 two-row socket | 1 VDD, 2 GND / 3 SCK, 4 WS / 5 SD, 6 L/R (GND); pin numbers alternate by column |
-| J4 | MAX98357A | LRC, BCLK, DIN, GAIN, SD, GND, VIN |
-| J5 | PCF8563T | CLK (NC), INT (NC), SDA, SCL, VCC, GND |
+| J3 | INMP441 two-row socket | 1 VDD, 2 GND / 3 SCK (GPIO40), 4 WS (GPIO39) / 5 SD (GPIO15), 6 L/R (GND); pin numbers alternate by column |
+| J4 | MAX98357A | LRC (GPIO39), BCLK (GPIO40), DIN (GPIO41), GAIN (GPIO8), SD (GPIO7), GND, VIN |
+| J5 | PCF8563T | CLK (NC), INT (NC), SDA (GPIO47), SCL (GPIO21), VCC, GND |
 | J6 | ST7796 screen header | VCC (3V3), GND, CS, RESET, DC/RS, SDI/MOSI, SCK, LED, SDO/MISO (NC), T_CLK (NC), T_CS (NC), T_DIN (NC), T_DO (NC), T_IRQ (NC) |
 | J7 | 3-position 5.08 mm switch screw terminal | external 5V input, switched 5V load, GND |
 | J8 | 2-position 5.08 mm external-power screw terminal | 5V, GND |
-| J11 | Three-key keyboard cable | KeyA (GPIO40), KeyB (GPIO41), KeyC (GPIO42), Vcc (3V3), Gnd |
-| J12 | Joystick cable | G, V (3V3), X (GPIO4), Y (GPIO5), K (GPIO6) |
+| J11 | Three-key keyboard cable | KeyA (GPIO4), KeyB (GPIO5), KeyC (GPIO6), Vcc (3V3), Gnd |
+| J12 | Joystick cable | G, V (3V3), X (GPIO1), Y (GPIO2), K (GPIO42) |
+
+GPIO assignments follow the
+[official ESP32-S3-DevKitC-1 v1.1 header table](https://docs.espressif.com/projects/esp-dev-kits/zh_CN/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html#user-guide-s3-devkitc-1-v1-1-header-blocks).
+GPIO40/41 have no ADC: they cannot replace the joystick's analog X/Y.
+ADC1 GPIO1/2 are on the physical left header, along with the amplifier's
+GPIO39/40/41 I2S signals and RTC GPIO47/21; keypad GPIO4/5/6 and display
+GPIO9–14 are on the right. Amplifier enable/gain remain on GPIO7/8.
+GPIO0/3/45/46 boot straps, GPIO19/20 USB, GPIO43/44 UART0, GPIO35/36/37
+Octal memory and GPIO38/48 RGB candidates have no external module loads.
+GPIO16/17/18 remain available as unused header positions.
+This remap changes existing hardware wiring: use the matching updated
+firmware and carrier, not the old audio/keyboard/joystick/RTC wiring.
 
 J1/J2 follow the repository's `assets/esp32s3_devkit.jpg` pinout (pictured USB
 at bottom), then both rows are rotated 180 degrees on the carrier so USB
@@ -214,7 +235,8 @@ J4 has a provisional
 27 x 24 mm module-body envelope on `Dwgs.User`,
 including the amplifier's speaker terminal; leave this space unobstructed.
 J5 follows `assets/pcf8563t_rtc.jpg` and mounts upright, but the
-RTC's GPIO1/GPIO2 I2C assignment is **proposed**, not implemented in firmware.
+RTC's SDA=GPIO47/SCL=GPIO21 constants are reserved in firmware,
+but the current application has no RTC driver or initialization.
 J7/J8 use stock KiCad Phoenix 5.08 mm horizontal screw-terminal
 footprints. The supplied [`terminal image`](../assets/crimp_terminal.jpg)
 shows 5.08 mm pitch, approximately 0.9 mm pins, and 15 / 9.9 mm
@@ -234,7 +256,7 @@ matching cable adapter with male ends; it cannot directly mate to that
 connector. J11 likewise needs a cable with male ends to mate to its female
 socket. The
 remote module bodies need no carrier-board footprint. Joystick
-GPIO4/5/6 support is present in legacy firmware but is not currently
+GPIO1/2/42 support is present in legacy firmware but is not currently
 initialized. Unused pins remain as unconnected socket positions; do not
 bridge them merely to make a DRC report smaller.
 The owner confirmed the screen header follows `assets/tft_spi.jpg`:
@@ -254,7 +276,7 @@ GND; J7 switched load -> ESP32 J1 5V and amplifier J4 VIN. The development
 board's onboard regulator (not the ESP32-S3 chip) produces 3V3, which
 powers the microphone, RTC, screen, keyboard and joystick. No screen pin
 is connected to 5V. The amplifier alone uses switched 5V among the
-peripheral modules. GPIO/SPI are 3.3V logic. LCD SCK is roughly 87.5 mm
+peripheral modules. GPIO/SPI are 3.3V logic. LCD SCK is roughly 39.7 mm
 on this PCB before accounting for the cable; test the real screen at a
 reduced SPI clock if 40 MHz proves unreliable, rather than assuming DRC
 guarantees signal integrity.

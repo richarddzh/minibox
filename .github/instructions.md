@@ -28,14 +28,15 @@
   不引入 Arduino 或 TFT_eSPI。
 - 屏幕接线：LED=GPIO9、SCK=GPIO10、SDI=GPIO11、DC/RS=GPIO12、
   Reset=GPIO13、CS=GPIO14。
-- 当前按钮模块 OUT 分别接 GPIO40/41/42，VCC=3.3 V，共地；
+- 当前按钮模块 OUT 分别接 GPIO4/5/6，VCC=3.3 V，共地；
   默认低有效并使用内部上拉，可在菜单中切换为高有效。
-  旧摇杆 X=GPIO4、Y=GPIO5、K=GPIO6 的代码保留，但当前测试不启用。
-- INMP441 SD=GPIO18、WS=GPIO17、SCK=GPIO16，L/R 接 GND（左声道）；
-  MAX98357 DIN=GPIO15、LRC=GPIO17、BCLK=GPIO16、SD/MODE=GPIO7、
+  摇杆 X=GPIO1、Y=GPIO2、K=GPIO42 的代码保留，但当前测试不启用。
+  RTC SDA=GPIO47、SCL=GPIO21，仅预留配置，当前未实现驱动。
+- INMP441 SD=GPIO15、WS=GPIO39、SCK=GPIO40，L/R 接 GND（左声道）；
+  MAX98357 DIN=GPIO41、LRC=GPIO39、BCLK=GPIO40、SD/MODE=GPIO7、
   GAIN=GPIO8。GPIO7 播放时为高、其余时间为低，GPIO8 默认高阻；
   两模块半双工共用时钟，先释放当前 I2S 通道再切换；
-  GPIO41 按住录音（最多 3 秒）、松开回放。
+  GPIO5 按住录音（最多 3 秒）、松开回放。
 - GPIO48 控制板载 WS2812 RGB LED；启动时发送黑色数据熄灯。
   不要只拉低引脚，也不要误关 GPIO9 的屏幕背光。
 - 逻辑电平及摇杆供电为 3.3 V，所有模块共地；屏幕 VCC 和背光驱动须遵守模块规格。
@@ -52,7 +53,7 @@
 - 优先增量构建，不随意执行 `fullclean`、删除构建缓存或重复 `set-target`。
 - 使用最小必要验证。已有模型检查用标准库 unittest，不新增 Python 测试框架。
 - 构建成功、烧录成功、初始化成功与肉眼确认屏幕/按键正常是不同结果，不能混为一谈。
-- 当前测试无需摇杆校准；观察三个按钮的屏幕状态及 GPIO41 的录放音日志。
+- 当前测试无需摇杆校准；观察三个按钮的屏幕状态及 GPIO5 的录放音日志。
 
 ## 代码风格
 

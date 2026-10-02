@@ -234,12 +234,13 @@ def apply(route, source, name, from_position=None):
 
 priority = [
     "GND",
-    "BUTTON1", "RECORD", "BUTTON3",
     "LCD_BL", "LCD_CS", "LCD_RST", "LCD_DC", "LCD_MOSI", "LCD_SCK",
-    "5V_IN", "5V_SW",
+    "GPIO1", "GPIO2", "GPIO42",
     "RTC_SDA", "RTC_SCL",
-    "AMP_GAIN", "AMP_SD", "AUDIO_DIN", "I2S_WS", "I2S_BCLK", "MIC_SD",
-    "GPIO4", "GPIO5", "GPIO6",
+    "I2S_WS", "I2S_BCLK", "AUDIO_DIN", "MIC_SD",
+    "BUTTON1", "RECORD", "BUTTON3",
+    "AMP_SD", "AMP_GAIN",
+    "5V_IN", "5V_SW",
     "3V3",
 ]
 assert set(priority) == {

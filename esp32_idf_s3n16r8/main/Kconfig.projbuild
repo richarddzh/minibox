@@ -1,7 +1,7 @@
 menu "Minibox hardware test"
 
 config MINIBOX_BUTTON_ACTIVE_LOW
-    bool "GPIO40/41/42 buttons pressed at low level (internal pull-ups)"
+    bool "GPIO4/5/6 buttons pressed at low level (internal pull-ups)"
     default y
     help
         Use 3.3 V button modules with active-low OUT and common ground.
@@ -19,18 +19,21 @@ config MINIBOX_WIFI_PASSWORD
 
 config MINIBOX_JOYSTICK_X_PIN
     int "Joystick VRx GPIO (ADC1)"
-    range 1 6
-    default 4
+    range 1 2
+    default 1
 
 config MINIBOX_JOYSTICK_Y_PIN
     int "Joystick VRy GPIO (ADC1)"
-    range 1 6
-    default 5
+    range 1 2
+    default 2
 
 config MINIBOX_JOYSTICK_K_PIN
-    int "Joystick K GPIO"
-    range 1 6
-    default 6
+    int "Joystick K GPIO (carrier wiring)"
+    range 42 42
+    default 42
+    help
+        The carrier routes the joystick button to GPIO42.
+        Other GPIOs are reserved for peripherals or development-board functions.
 
 config MINIBOX_JOYSTICK_X_INVERTED
     bool "Invert joystick X"

@@ -105,12 +105,13 @@ void app_main(void) {
     BaseType_t created = xTaskCreate(sample_buttons, "buttons", 4096,
                                      NULL, 5, NULL);
     ESP_ERROR_CHECK(created == pdPASS ? ESP_OK : ESP_ERR_NO_MEM);
-    ESP_LOGI(TAG, "Buttons GPIO40/41/42 ready; hold GPIO41 to record (max 3s)");
+    ESP_LOGI(TAG, "Buttons " BUTTON_GPIO_LABELS " ready; hold " RECORD_GPIO_LABEL
+             " to record (max 3s)");
     for (;;) {
         button_snapshot_t snapshot;
         if (xQueueReceive(s_button_states, &snapshot, pdMS_TO_TICKS(1000)) != pdTRUE) {
             ESP_LOGE(TAG, "Button sampling stopped");
-            ESP_ERROR_CHECK(test_screen_message("BUTTON ERROR", "CHECK GPIO40/41/42"));
+            ESP_ERROR_CHECK(test_screen_message("BUTTON ERROR", "CHECK " BUTTON_GPIO_LABELS));
             return;
         }
         ESP_ERROR_CHECK(test_screen_audio_update(snapshot.pressed, audio_test_phase()));

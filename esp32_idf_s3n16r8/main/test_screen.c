@@ -145,8 +145,8 @@ esp_err_t test_screen_audio_init(void) {
     rect(0, 0, 1, LCD_HEIGHT, WHITE);
     rect(LCD_WIDTH - 1, 0, 1, LCD_HEIGHT, WHITE);
     text(16, 14, "Minibox MIC TEST", WHITE);
-    text(16, 48, "GPIO40 / 41 / 42", CYAN);
-    text(16, 288, "HOLD GPIO41 TO RECORD", WHITE);
+    text(16, 48, BUTTON_GPIO_LABELS, CYAN);
+    text(16, 288, "HOLD " RECORD_GPIO_LABEL " TO RECORD", WHITE);
     ESP_RETURN_ON_ERROR(st7796_draw_rows(0, LCD_HEIGHT, s_frame), TAG, "initial frame");
     memcpy(s_sent, s_frame, LCD_WIDTH * LCD_HEIGHT * 2);
     s_audio_valid = false;
@@ -170,11 +170,11 @@ esp_err_t test_screen_audio_update(const bool pressed[3], audio_phase_t audio) {
         text(55, y, label, pressed[i] ? YELLOW : WHITE);
     }
     const char *status = audio == AUDIO_RECORDING ? "RECORDING (MAX 3s)" :
-                         audio == AUDIO_WAIT_RELEASE ? "FULL - RELEASE GPIO41" :
+                         audio == AUDIO_WAIT_RELEASE ? "FULL - RELEASE " RECORD_GPIO_LABEL :
                          audio == AUDIO_PLAYING ? "PLAYING RECORDING" :
                          audio == AUDIO_ERROR ? "AUDIO ERROR - SEE SERIAL" :
                          audio == AUDIO_WAIT_RESET ? "PLAY DONE - RELEASE" :
-                         "PRESS GPIO41 TO RECORD";
+                         "PRESS " RECORD_GPIO_LABEL " TO RECORD";
     text(16, 237, status, audio == AUDIO_ERROR ? YELLOW : CYAN);
     ESP_RETURN_ON_ERROR(flush_dynamic(), TAG, "audio status");
     memcpy(s_audio_buttons, pressed, sizeof(s_audio_buttons));

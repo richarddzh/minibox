@@ -79,7 +79,7 @@ The first build needs network access to resolve the official LCD component;
 later builds reuse the component manager cache.
 Keep `sdkconfig.defaults` ASCII-only.
 For hardware verification, inspect ST7796 initialization and the displayed
-GPIO40/41/42 button states. GPIO41 starts microphone recording while held
+GPIO4/5/6 button states. GPIO5 starts microphone recording while held
 (maximum 3 seconds) and plays the recording after release. Buttons default
 to active-low with internal pull-ups; use menuconfig for active-high modules.
 GPIO48 should receive the black/off RGB command at startup.

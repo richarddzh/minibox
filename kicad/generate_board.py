@@ -187,16 +187,16 @@ def arc(start, mid, end):
 # The reference pinout is viewed with USB at the bottom. Rotate both
 # complete socket rows 180 degrees in the board plane so USB faces up.
 socket("J1", 22, 74.8, 66, [
-    "3V3", "3V3", None, "GPIO4", "GPIO5", "GPIO6", "AMP_SD",
-    "AUDIO_DIN", "I2S_BCLK", "I2S_WS", "MIC_SD", "AMP_GAIN",
+    "3V3", "3V3", None, "BUTTON1", "RECORD", "BUTTON3", "AMP_SD",
+    "MIC_SD", "GPIO16", "GPIO17", "GPIO18", "AMP_GAIN",
     "GPIO3", "GPIO46", "LCD_BL", "LCD_SCK", "LCD_MOSI",
     "LCD_DC", "LCD_RST", "LCD_CS", "5V_SW", "GND",
 ], "ESP32-S3 LEFT - USB AT TOP", orientation=180)
 socket("J2", 22, 49.4, 66, [
-    "GND", "GPIO43", "GPIO44", "RTC_SDA", "RTC_SCL",
-    "BUTTON3", "RECORD", "BUTTON1", "GPIO39", "GPIO38",
-    None, None, None, "GPIO0", "GPIO45", "GPIO48", "GPIO47",
-    "GPIO21", None, None, "GND", "GND",
+    "GND", "GPIO43", "GPIO44", "GPIO1", "GPIO2",
+    "GPIO42", "AUDIO_DIN", "I2S_BCLK", "I2S_WS", "GPIO38",
+    None, None, None, "GPIO0", "GPIO45", "GPIO48", "RTC_SDA",
+    "RTC_SCL", None, None, "GND", "GND",
 ], "ESP32-S3 RIGHT - USB AT TOP", orientation=180)
 
 # Standard two-row, three-pin socket. KiCad numbers alternate by column:
@@ -220,13 +220,13 @@ socket("J6", 14, 110, 18,
         "LCD_MOSI", "LCD_SCK", "LCD_BL", None, None, None,
         None, None, None],
        "ST7796 14-PIN DISPLAY HEADER")
-terminal("J7", 3, 105, 72, ["5V_IN", "5V_SW", "GND"], orientation=-90)
+terminal("J7", 3, 115, 72, ["5V_IN", "5V_SW", "GND"], orientation=-90)
 terminal("J8", 2, 97, 12, ["5V_IN", "GND"])
-socket("J11", 5, 82, 88,
+socket("J11", 5, 90, 73,
        ["BUTTON1", "RECORD", "BUTTON3", "3V3", "GND"],
        "THREE-KEY CABLE KeyA KeyB KeyC Vcc Gnd", orientation=90)
-socket("J12", 5, 12, 90,
-       ["GND", "3V3", "GPIO4", "GPIO5", "GPIO6"],
+socket("J12", 5, 12, 73,
+       ["GND", "3V3", "GPIO1", "GPIO2", "GPIO42"],
        "JOYSTICK CABLE G V X Y K", orientation=90)
 for reference, x, y in (
     ("H1", 8, 8), ("H2", 118, 8),
@@ -240,9 +240,9 @@ for label, x, y, size in [
     ("ESP32-S3", 62, 16, 1), ("USB ^", 62, 20, 1),
     ("MIC 2x3", 61, 88, 1), ("AMP", 12, 33, 1),
     ("RTC", 16, 9, 1), ("LCD", 110, 61, 1),
-    ("SW", 116, 67, 1), ("5V IN", 90, 8, 1),
-    ("KEYS", 87, 73.5, 1),
-    ("JOY", 17, 77, 1), ("SPK: USE AMP TERMINAL", 19, 63, 1),
+    ("SW", 115, 67, 1), ("5V IN", 90, 8, 1),
+    ("KEYS", 95, 79, 1),
+    ("JOY", 17, 79, 1), ("SPK: USE AMP TERMINAL", 19, 60, 1),
     ("PROTOTYPE - VERIFY PIN PITCH AND ORDER", 92, 112, 1),
 ]:
     text(label, x, y, size)
@@ -299,16 +299,16 @@ for footprint in board.GetFootprints():
         if reference == "J8":
             label_x, label_y = x, y + 7
         elif reference == "J11":
-            label_x, label_y, angle = x, 81, 90
+            label_x, label_y, angle = x, y - 7, 90
         elif reference == "J12":
-            label_x, label_y, angle = x, 83, 90
+            label_x, label_y, angle = x, y - 7, 90
         elif reference == "J3":
             label_x, label_y = (64 if number % 2 else 30), y
         else:
             label_x = {
                 "J1": 83, "J2": 39, "J4": 25, "J5": 27,
                 "J6": 98 if 3 <= number <= 8 else 116,
-                "J7": 114,
+                "J7": 105,
             }[reference]
             label_y = y
         label = pin_names[reference][number - 1]
