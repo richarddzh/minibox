@@ -372,6 +372,22 @@ def diagonal_clear(start, end, original):
 
 
 def chamfer_corners():
+    def add_segment(start, end, original):
+        item = pcb.PCB_TRACK(board)
+        item.SetStart(start)
+        item.SetEnd(end)
+        item.SetLayer(original.GetLayer())
+        item.SetWidth(original.GetWidth())
+        item.SetNet(original.GetNet())
+        board.Add(item)
+
+    def on_segment(item, x, y):
+        start, end = item.GetStart(), item.GetEnd()
+        return ((end.x - start.x) * (y - start.y) ==
+                (end.y - start.y) * (x - start.x) and
+                min(start.x, end.x) <= x <= max(start.x, end.x) and
+                min(start.y, end.y) <= y <= max(start.y, end.y))
+
     tracks = [item for item in board.GetTracks()
               if isinstance(item, pcb.PCB_TRACK) and not isinstance(item, pcb.PCB_VIA)]
     junctions = defaultdict(list)
@@ -381,27 +397,77 @@ def chamfer_corners():
     fixed = {(item.GetPosition().x, item.GetPosition().y)
              for item in board.GetTracks() if isinstance(item, pcb.PCB_VIA)}
     fixed.update((pad.GetPosition().x, pad.GetPosition().y) for pad in all_pads)
+    anchors = defaultdict(set)
+    for layer, net_code, x, y in junctions:
+        anchors[(layer, net_code)].add((x, y))
     changed = 0
-    for (_, _, x, y), pair in list(junctions.items()):
-        if len(pair) != 2 or (x, y) in fixed:
+    for (layer, net_code, x, y), pair in list(junctions.items()):
+        if len(pair) != 2:
             continue
         a, b = pair
         if a.GetWidth() != b.GetWidth():
             continue
+        anchored = (x, y) in fixed or any(
+            item not in pair and not isinstance(item, pcb.PCB_VIA) and
+            item.GetLayer() == layer and item.GetNetCode() == net_code and
+            on_segment(item, x, y) for item in board.GetTracks())
         def vector(item):
             other = item.GetEnd() if item.GetStart().x == x and item.GetStart().y == y else item.GetStart()
             return other.x - x, other.y - y
 
         ax, ay = vector(a)
         bx, by = vector(b)
-        if not ((ax == 0 and by == 0 and ay * bx != 0) or
-                (ay == 0 and bx == 0 and ax * by != 0)):
+        if ax * bx + ay * by != 0:
             continue
-        shortest = min(abs(ax) + abs(ay), abs(bx) + abs(by))
-        if shortest < pcb.FromMM(0.5):
+        if not all(vx == 0 or vy == 0 or abs(vx) == abs(vy)
+                   for vx, vy in ((ax, ay), (bx, by))):
+            continue
+        shortest = min(max(abs(ax), abs(ay)), max(abs(bx), abs(by)))
+        if shortest < 2:
+            continue
+        if anchored:
+            original, u, v = ((a, (ax, ay), (bx, by))
+                              if max(abs(ax), abs(ay)) >= max(abs(bx), abs(by))
+                              else (b, (bx, by), (ax, ay)))
+            jog = min(pcb.FromMM(0.25), max(abs(u[0]), abs(u[1])) // 4)
+            for ox, oy in fixed | anchors[(layer, net_code)]:
+                dx, dy = ox - x, oy - y
+                if (u[0] * dy == u[1] * dx and
+                        0 < u[0] * dx + u[1] * dy < u[0] * u[0] + u[1] * u[1]):
+                    jog = min(jog, max(abs(dx), abs(dy)) // 3)
+            ux, uy = (1 if n > 0 else -1 if n < 0 else 0 for n in u)
+            vx, vy = (1 if n > 0 else -1 if n < 0 else 0 for n in v)
+            while jog > 0:
+                points = (
+                    pcb.VECTOR2I(x, y),
+                    pcb.VECTOR2I(x + jog * (ux + vx), y + jog * (uy + vy)),
+                    pcb.VECTOR2I(x + jog * (2 * ux + vx), y + jog * (2 * uy + vy)),
+                    pcb.VECTOR2I(x + 3 * jog * ux, y + 3 * jog * uy),
+                )
+                if all(diagonal_clear(start, end, original)
+                       for start, end in zip(points, points[1:])):
+                    break
+                jog //= 2
+            else:
+                continue
+            # Keep the via/pad/tee anchor and ease one outgoing leg instead.
+            if original.GetStart().x == x and original.GetStart().y == y:
+                original.SetStart(points[-1])
+            else:
+                original.SetEnd(points[-1])
+            for start, end in zip(points, points[1:]):
+                add_segment(start, end, original)
+            changed += 1
             continue
         cut = shortest // 2
-        while cut >= pcb.FromMM(0.05):
+        # Tree branches and vias can join a leg between its endpoints.
+        for ox, oy in fixed | anchors[(layer, net_code)]:
+            dx, dy = ox - x, oy - y
+            for vx, vy in ((ax, ay), (bx, by)):
+                if (vx * dy == vy * dx and
+                        0 < vx * dx + vy * dy < vx * vx + vy * vy):
+                    cut = min(cut, max(abs(dx), abs(dy)))
+        while cut > 0:
             p1 = pcb.VECTOR2I(x + (cut if ax > 0 else -cut if ax < 0 else 0),
                               y + (cut if ay > 0 else -cut if ay < 0 else 0))
             p2 = pcb.VECTOR2I(x + (cut if bx > 0 else -cut if bx < 0 else 0),
@@ -419,18 +485,30 @@ def chamfer_corners():
             b.SetStart(p2)
         else:
             b.SetEnd(p2)
-        diagonal = pcb.PCB_TRACK(board)
-        diagonal.SetStart(p1)
-        diagonal.SetEnd(p2)
-        diagonal.SetLayer(a.GetLayer())
-        diagonal.SetWidth(a.GetWidth())
-        diagonal.SetNet(a.GetNet())
-        board.Add(diagonal)
+        add_segment(p1, p2, a)
         changed += 1
     return changed
 
 
 print("45-degree corners:", chamfer_corners(), flush=True)
+
+remaining_junctions = defaultdict(list)
+for item in board.GetTracks():
+    if isinstance(item, pcb.PCB_VIA):
+        continue
+    for endpoint in (item.GetStart(), item.GetEnd()):
+        remaining_junctions[(item.GetLayer(), item.GetNetCode(),
+                             endpoint.x, endpoint.y)].append(item)
+for (_, _, x, y), pair in remaining_junctions.items():
+    if len(pair) != 2:
+        continue
+    vectors = []
+    for item in pair:
+        other = item.GetEnd() if item.GetStart().x == x and item.GetStart().y == y else item.GetStart()
+        vectors.append((other.x - x, other.y - y))
+    if all(vector != (0, 0) for vector in vectors) and (
+            vectors[0][0] * vectors[1][0] + vectors[0][1] * vectors[1][1] == 0):
+        raise RuntimeError(f"Unresolved right-angle bend at ({mm(x)}, {mm(y)})")
 
 for layer in (pcb.F_Cu, pcb.B_Cu):
     zone = pcb.ZONE(board)

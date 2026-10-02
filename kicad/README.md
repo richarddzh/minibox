@@ -31,7 +31,10 @@ amplifier sit left of it, the display cable on the far right, the 5V
 input at the upper edge. J12 joystick and J11 keyboard pad rows are
 aligned at **Y=73 mm**, just above the estimated antenna tip near Y=74.4:
 J12 stays at X=12 mm, while J11 moved right to X=90 mm.
-J7 moved right to X=115 mm (pin 1 remains at Y=72 mm); its stock footprint
+J7 moved right to X=115 mm and up to **Y=61.57 mm** (pin 1), a 10.43 mm
+lift from Y=72. The switch, joystick and keyboard **F.Fab body lower
+edges all align at Y=74.27 mm**; this compares physical body outlines,
+not their slightly different courtyard padding. Its stock footprint
 extent ends at X=120.735, leaving about 2.265 mm to the X=123 board edge.
 The antenna keepout itself is unchanged, and both socket rows sit outside
 its X=52–73.5 span. The microphone remains at **(50,100) mm**.
@@ -56,23 +59,29 @@ module headers remain 2.54 mm female sockets.
 The routed traces use 0.35 mm signals, 0.65 mm 3V3, and 0.8 mm 5V.
 `F.Cu` and `B.Cu` carry signals and power with filled GND zones.
 Ground connections are routed first to keep the pours connected.
-Through-hole pads and 34 standard through-vias connect the layers;
+Through-hole pads and 33 standard through-vias connect the layers;
 there are no blind or buried vias. To reduce sharp bends, the routing
-step chamfers 90 eligible orthogonal corners into 45-degree segments.
+step eases 131 right-angle corners into 45-degree transitions.
 Each diagonal is extended as far as half the shorter adjoining leg allows,
 then reduced if needed to clear other nets, pads, vias and keepouts.
+Cuts also preserve connections to vias and tree branches inside the
+original legs, not only at their endpoints.
 With the layout-aware GPIO allocation, total routed copper length
-decreased from the previous delivered 3114.8 mm to 2075.3 mm (33.4%);
-LCD SCK decreased from 87.5 to 39.7 mm. About 264.0 mm of routing is
-diagonal, with 34 vias instead of 51. Joystick X/Y traces measure
+decreased from the pre-remap 3114.8 mm to 2059.7 mm (33.9%);
+LCD SCK decreased from 87.5 to 39.6 mm. About 258.8 mm of routing is
+diagonal, with 33 vias instead of 51. Joystick X/Y traces measure
 45.9/46.1 mm before the external cable. Local SPI and analog joystick
 routes are prioritized before I2S, controls and power.
 This is a clearance-checked routing optimization, not a
 globally shortest routing solution.
-Tiny connector fanout stubs and endpoints at pads/vias are left intact;
-silk/edge geometry is unchanged.
+Short connector-to-grid elbows are included, rather than leaving small
+right angles. Pad/via anchors remain fixed; a short 45-degree dogleg eases
+the outgoing leg where moving a corner would disconnect an anchor.
+The router rejects remaining two-track 90-degree elbows before saving.
+Electrical multiway junctions and rectangular pads are not trace elbows.
+The routing step leaves silkscreen and board outline unchanged.
 The two-layer design has no uninterrupted inner GND reference plane:
-the PCB-only LCD SCK route is about 39.7 mm. Verify screen SPI reliability
+the PCB-only LCD SCK route is about 39.6 mm. Verify screen SPI reliability
 at the configured clock and with the actual cable, and lower the clock
 if required.
 **KiCad DRC has no violations or unconnected pads**, but DRC cannot
@@ -106,7 +115,7 @@ Other pads and routing keep the existing rules, including 0.35 mm
 ground-zone clearance. These overrides do not increase the GND pads'
 thermal gaps or expand clearance along every 5V trace.
 Board setup requires 0.5 mm copper-to-edge clearance;
-ground fill starts 1 mm in from the routed outline. The 34 vias are
+ground fill starts 1 mm in from the routed outline. The 33 vias are
 ordinary **0.8 mm pad / 0.4 mm drill through-vias** (0.2 mm annular
 ring). All 87 socket holes are 1.0 mm plated drills with 1.7 mm pads
 (0.35 mm annular ring); J7/J8 have five 1.3 mm plated terminal holes
@@ -182,16 +191,26 @@ Regenerate these after changing the saved board (from this directory):
 
 ```powershell
 $cli = "C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
-& $cli pcb render --side top --width 2200 --height 2200 --quality high --background opaque --output .\renders\minibox-carrier-front.png .\minibox-carrier.kicad_pcb
-if ($LASTEXITCODE -ne 0) { throw "Front render failed" }
-& $cli pcb render --side bottom --width 2200 --height 2200 --quality high --background opaque --output .\renders\minibox-carrier-back.png .\minibox-carrier.kicad_pcb
-if ($LASTEXITCODE -ne 0) { throw "Back render failed" }
+$front = Join-Path $env:TEMP ("minibox-front-" + [guid]::NewGuid() + ".png")
+$back = Join-Path $env:TEMP ("minibox-back-" + [guid]::NewGuid() + ".png")
+& $cli pcb render --side top --width 2200 --height 2200 --quality high --background opaque --output $front .\minibox-carrier.kicad_pcb
+if ($LASTEXITCODE -ne 0 -or !(Test-Path $front)) { throw "Front render failed" }
+python -c "from pathlib import Path; from PIL import Image; im=Image.open(r'$front'); im.verify(); im.close(); Path(r'$front').replace(Path(r'.\renders\minibox-carrier-front.png'))"
+if ($LASTEXITCODE -ne 0) { throw "Front PNG replacement failed" }
+& $cli pcb render --side bottom --width 2200 --height 2200 --quality high --background opaque --output $back .\minibox-carrier.kicad_pcb
+if ($LASTEXITCODE -ne 0 -or !(Test-Path $back)) { throw "Back render failed" }
+python -c "from pathlib import Path; from PIL import Image; im=Image.open(r'$back'); im.verify(); im.close(); Path(r'$back').replace(Path(r'.\renders\minibox-carrier-back.png'))"
+if ($LASTEXITCODE -ne 0) { throw "Back PNG replacement failed" }
 python .\add_render_legends.py
 if ($LASTEXITCODE -ne 0) { throw "Legend generation failed" }
 ```
 
 The legend helper uses Pillow and the Windows Microsoft YaHei font;
 `--font` accepts another Chinese font file if needed.
+Rendering to fresh files and replacing the images atomically avoids
+Windows refusing to truncate a PNG that an open viewer has memory-mapped.
+Check that the new output exists: KiCad may report success even after
+an image-writing error. The legend helper also saves via atomic replacement.
 
 | Connector | Module/interface | Pin 1 to last pin (J8 left to right; J1/J2 bottom to top; other rows top to bottom; J11/J12 left to right) |
 |---|---|---|
@@ -270,13 +289,13 @@ the current firmware does not use them.
 Likewise, the switch's three-pin order and whether its GND is a control
 return must be checked before plugging in.
 
-The supply path is upper-edge J8 +5V -> lower-edge J7 switch power input;
+The supply path is upper-edge J8 +5V -> right-side J7 switch power input;
 J8 GND -> J7 switch
 GND; J7 switched load -> ESP32 J1 5V and amplifier J4 VIN. The development
 board's onboard regulator (not the ESP32-S3 chip) produces 3V3, which
 powers the microphone, RTC, screen, keyboard and joystick. No screen pin
 is connected to 5V. The amplifier alone uses switched 5V among the
-peripheral modules. GPIO/SPI are 3.3V logic. LCD SCK is roughly 39.7 mm
+peripheral modules. GPIO/SPI are 3.3V logic. LCD SCK is roughly 39.6 mm
 on this PCB before accounting for the cable; test the real screen at a
 reduced SPI clock if 40 MHz proves unreliable, rather than assuming DRC
 guarantees signal integrity.

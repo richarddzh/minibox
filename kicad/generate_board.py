@@ -220,7 +220,7 @@ socket("J6", 14, 110, 18,
         "LCD_MOSI", "LCD_SCK", "LCD_BL", None, None, None,
         None, None, None],
        "ST7796 14-PIN DISPLAY HEADER")
-terminal("J7", 3, 115, 72, ["5V_IN", "5V_SW", "GND"], orientation=-90)
+terminal("J7", 3, 115, 61.57, ["5V_IN", "5V_SW", "GND"], orientation=-90)
 terminal("J8", 2, 97, 12, ["5V_IN", "GND"])
 socket("J11", 5, 90, 73,
        ["BUTTON1", "RECORD", "BUTTON3", "3V3", "GND"],
@@ -239,8 +239,8 @@ antenna_keepout(52, 67, 73.5, 84)
 for label, x, y, size in [
     ("ESP32-S3", 62, 16, 1), ("USB ^", 62, 20, 1),
     ("MIC 2x3", 61, 88, 1), ("AMP", 12, 33, 1),
-    ("RTC", 16, 9, 1), ("LCD", 110, 61, 1),
-    ("SW", 115, 67, 1), ("5V IN", 90, 8, 1),
+    ("RTC", 16, 9, 1), ("LCD", 110, 55.5, 1),
+    ("SW", 115, 56.57, 1), ("5V IN", 90, 8, 1),
     ("KEYS", 95, 79, 1),
     ("JOY", 17, 79, 1), ("SPK: USE AMP TERMINAL", 19, 60, 1),
     ("PROTOTYPE - VERIFY PIN PITCH AND ORDER", 92, 112, 1),
@@ -333,11 +333,21 @@ arc((8, 115), (8 - offset, 110 + offset), (3, 110))
 arc((3, 8), (8 - offset, 8 - offset), (8, 3))
 
 microphone_top = 100 + 2.54 - 9.75
+interface_bottoms = []
 for footprint in board.GetFootprints():
+    if footprint.GetReference() in ("J7", "J11", "J12"):
+        # Align the physical body outlines, not the differently padded courtyards.
+        interface_bottoms.append(max(
+            pcb.ToMM(position.y)
+            for item in footprint.GraphicalItems()
+            if isinstance(item, pcb.PCB_SHAPE) and item.GetLayer() == pcb.F_Fab
+            for position in (item.GetStart(), item.GetEnd())))
     if footprint.GetReference() in ("J3", "H1", "H2", "H3", "H4"):
         continue
     if pcb.ToMM(footprint.GetBoundingBox(False, False).GetBottom()) >= microphone_top:
         raise RuntimeError(f"{footprint.GetReference()} intrudes below the microphone top")
+if max(interface_bottoms) - min(interface_bottoms) > 0.001:
+    raise RuntimeError("Switch, keyboard and joystick body lower edges are not aligned")
 
 silk = [item for item in board.GetDrawings()
         if item.GetLayer() in (pcb.F_SilkS, pcb.B_SilkS)]

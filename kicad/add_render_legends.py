@@ -2,6 +2,7 @@
 
 import argparse
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -64,7 +65,13 @@ def add_legend(side, font_path):
                         "颜色用于区分材料，不代表层数。\n图例不属于 PCB 丝印或 Gerber。",
                         font=body, fill="#536170", spacing=round(9 * scale))
     output = source.with_stem(source.stem + "-legend")
-    result.save(output, dpi=(200, 200))
+    with NamedTemporaryFile(dir=output.parent, suffix=".png", delete=False) as staging:
+        temporary = Path(staging.name)
+    try:
+        result.save(temporary, dpi=(200, 200))
+        temporary.replace(output)
+    finally:
+        temporary.unlink(missing_ok=True)
     print(output)
 
 
