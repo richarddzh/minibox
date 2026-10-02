@@ -19,10 +19,10 @@ STEP = 0.5
 X0, Y0 = 5.0, 5.0
 NX, NY = 233, 217
 WIDTH = 0.35
-CLEARANCE = 0.25
+CLEARANCE = 0.3
 VIA_DIAMETER = 0.8
 VIA_DRILL = 0.4
-ROUTE_LAYERS = (pcb.F_Cu, pcb.B_Cu, pcb.In2_Cu)
+ROUTE_LAYERS = (pcb.F_Cu, pcb.B_Cu)
 POWER_WIDTHS = {"3V3": 0.65, "5V_IN": 0.8, "5V_SW": 0.8}
 
 
@@ -232,6 +232,7 @@ def apply(route, source, name, from_position=None):
 
 
 priority = [
+    "GND",
     "BUTTON1", "RECORD", "BUTTON3",
     "LCD_BL", "LCD_CS", "LCD_RST", "LCD_DC", "LCD_MOSI", "LCD_SCK",
     "5V_IN", "5V_SW",
@@ -240,7 +241,7 @@ priority = [
     "GPIO4", "GPIO5", "GPIO6",
     "3V3",
 ]
-assert set(priority) | {"GND"} == {
+assert set(priority) == {
     name for name, group in pads.items() if len(group) > 1}
 escapes = {}
 for pad in all_pads:
@@ -305,11 +306,136 @@ for name in priority:
               sum(a[0] != b[0] for a, b in zip(route, route[1:])), "vias",
               flush=True)
 
-for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.B_Cu):
+
+def segment_distance(a, b, c, d):
+    def point_distance(p, start, end):
+        dx, dy = end[0] - start[0], end[1] - start[1]
+        length_squared = dx * dx + dy * dy
+        t = 0 if not length_squared else max(0, min(1, (
+            (p[0] - start[0]) * dx + (p[1] - start[1]) * dy) / length_squared))
+        return hypot(p[0] - start[0] - t * dx, p[1] - start[1] - t * dy)
+
+    def cross(p, q, r):
+        return (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])
+
+    if cross(a, b, c) * cross(a, b, d) < 0 and cross(c, d, a) * cross(c, d, b) < 0:
+        return 0
+    return min(point_distance(a, c, d), point_distance(b, c, d),
+               point_distance(c, a, b), point_distance(d, a, b))
+
+
+def rectangle_distance(start, end, left, top, right, bottom):
+    if any(left <= x <= right and top <= y <= bottom for x, y in (start, end)):
+        return 0
+    corners = ((left, top), (right, top), (right, bottom), (left, bottom))
+    return min(segment_distance(start, end, a, b)
+               for a, b in zip(corners, corners[1:] + corners[:1]))
+
+
+def diagonal_clear(start, end, original):
+    def coords(position):
+        return mm(position.x), mm(position.y)
+
+    start, end = coords(start), coords(end)
+    radius = mm(original.GetWidth()) / 2
+    clearance = radius + CLEARANCE + 0.02
+    if rectangle_distance(start, end, 52, 67, 73.5, 84) <= clearance:
+        return False
+    for pad in all_pads:
+        if pad.GetParentFootprint().GetReference().startswith("H"):
+            center = coords(pad.GetPosition())
+            if segment_distance(start, end, center, center) <= 3.5 + radius:
+                return False
+        elif pad.GetNetCode() != original.GetNetCode() and pad.IsOnLayer(original.GetLayer()):
+            box = pad.GetBoundingBox()
+            if rectangle_distance(start, end, mm(box.GetLeft()), mm(box.GetTop()),
+                                  mm(box.GetRight()), mm(box.GetBottom())) <= clearance:
+                return False
+    for item in board.GetTracks():
+        if item.GetNetCode() == original.GetNetCode():
+            continue
+        if isinstance(item, pcb.PCB_VIA):
+            center = coords(item.GetPosition())
+            distance = segment_distance(start, end, center, center)
+            item_width = item.GetWidth(original.GetLayer())
+        elif item.GetLayer() == original.GetLayer():
+            distance = segment_distance(start, end, coords(item.GetStart()), coords(item.GetEnd()))
+            item_width = item.GetWidth()
+        else:
+            continue
+        if distance <= clearance + mm(item_width) / 2:
+            return False
+    return True
+
+
+def chamfer_corners():
+    tracks = [item for item in board.GetTracks()
+              if isinstance(item, pcb.PCB_TRACK) and not isinstance(item, pcb.PCB_VIA)]
+    junctions = defaultdict(list)
+    for item in tracks:
+        for endpoint in (item.GetStart(), item.GetEnd()):
+            junctions[(item.GetLayer(), item.GetNetCode(), endpoint.x, endpoint.y)].append(item)
+    fixed = {(item.GetPosition().x, item.GetPosition().y)
+             for item in board.GetTracks() if isinstance(item, pcb.PCB_VIA)}
+    fixed.update((pad.GetPosition().x, pad.GetPosition().y) for pad in all_pads)
+    changed = 0
+    for (_, _, x, y), pair in list(junctions.items()):
+        if len(pair) != 2 or (x, y) in fixed:
+            continue
+        a, b = pair
+        if a.GetWidth() != b.GetWidth():
+            continue
+        def vector(item):
+            other = item.GetEnd() if item.GetStart().x == x and item.GetStart().y == y else item.GetStart()
+            return other.x - x, other.y - y
+
+        ax, ay = vector(a)
+        bx, by = vector(b)
+        if not ((ax == 0 and by == 0 and ay * bx != 0) or
+                (ay == 0 and bx == 0 and ax * by != 0)):
+            continue
+        shortest = min(abs(ax) + abs(ay), abs(bx) + abs(by))
+        if shortest < pcb.FromMM(0.5):
+            continue
+        cut = shortest // 2
+        while cut >= pcb.FromMM(0.05):
+            p1 = pcb.VECTOR2I(x + (cut if ax > 0 else -cut if ax < 0 else 0),
+                              y + (cut if ay > 0 else -cut if ay < 0 else 0))
+            p2 = pcb.VECTOR2I(x + (cut if bx > 0 else -cut if bx < 0 else 0),
+                              y + (cut if by > 0 else -cut if by < 0 else 0))
+            if diagonal_clear(p1, p2, a):
+                break
+            cut //= 2
+        else:
+            continue
+        if a.GetStart().x == x and a.GetStart().y == y:
+            a.SetStart(p1)
+        else:
+            a.SetEnd(p1)
+        if b.GetStart().x == x and b.GetStart().y == y:
+            b.SetStart(p2)
+        else:
+            b.SetEnd(p2)
+        diagonal = pcb.PCB_TRACK(board)
+        diagonal.SetStart(p1)
+        diagonal.SetEnd(p2)
+        diagonal.SetLayer(a.GetLayer())
+        diagonal.SetWidth(a.GetWidth())
+        diagonal.SetNet(a.GetNet())
+        board.Add(diagonal)
+        changed += 1
+    return changed
+
+
+print("45-degree corners:", chamfer_corners(), flush=True)
+
+for layer in (pcb.F_Cu, pcb.B_Cu):
     zone = pcb.ZONE(board)
     zone.SetLayer(layer)
     zone.SetNet(board.FindNet("GND"))
-    zone.SetPadConnection(pcb.ZONE_CONNECTION_FULL)
+    zone.SetPadConnection(pcb.ZONE_CONNECTION_THERMAL)
+    zone.SetThermalReliefGap(pcb.FromMM(0.3))
+    zone.SetThermalReliefSpokeWidth(pcb.FromMM(0.35))
     zone.SetLocalClearance(pcb.FromMM(0.35))
     zone.SetMinThickness(pcb.FromMM(0.25))
     zone.SetIslandRemovalMode(pcb.ISLAND_REMOVAL_MODE_ALWAYS)
@@ -317,6 +443,12 @@ for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.B_Cu):
     for x, y in ((4, 4), (122, 4), (122, 114), (4, 114)):
         zone.Outline().Append(pcb.FromMM(x), pcb.FromMM(y))
     board.Add(zone)
+
+# This pad's bottom-side pour is an isolated sliver; use its routed GND
+# connection rather than retaining a starved thermal island.
+for pad in all_pads:
+    if pad.GetParentFootprint().GetReference() == "J1" and pad.GetNumber() == "22":
+        pad.SetLocalZoneConnection(pcb.ZONE_CONNECTION_NONE)
 
 if not pcb.ZONE_FILLER(board).Fill(board.Zones()):
     raise RuntimeError("KiCad failed to fill the ground zones")
@@ -347,6 +479,4 @@ project["net_settings"]["classes"][0].update({
     "via_diameter": 0.8,
     "via_drill": 0.4,
 })
-if not FILE.with_suffix(".kicad_sch").exists():
-    project["schematic"]["top_level_sheets"] = []
 project_file.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")

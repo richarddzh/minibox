@@ -1,11 +1,11 @@
 # Minibox KiCad carrier (provisional)
 
 Open `minibox-carrier.kicad_pro` in KiCad 10. This PCB-only project (no
-schematic) has a **120 x 112 mm, R5 rounded** outline, 4 copper layers,
+schematic) has a **120 x 112 mm, R5 rounded** outline, 2 copper layers,
 routed female sockets and two wire terminals. The four **3.0 mm
 non-plated** M3 holes are at (8,8),
 (118,8), (8,110) and (118,110) mm in KiCad board coordinates: spacing
-**110 x 102 mm**. All four copper layers exclude tracks and copper fill
+**110 x 102 mm**. Both copper layers exclude tracks and copper fill
 within 3.5 mm of each hole center. A 3.0 mm drill is a tight fit for M3,
 not the usual 3.2 mm clearance hole; confirm screw tolerance.
 
@@ -14,9 +14,9 @@ mirrored)** so its USB connectors face the top edge. As a result its
 original left header J1 is on the right and its original right header
 J2 is on the left; pin 1 of each now sits at the **bottom**. Both rows
 were shifted 12 mm upward relative to the first rotated layout. Beneath
-their antenna end is a **21.5 x 17 mm four-layer no-copper/no-track/no-via
+their antenna end is a **21.5 x 17 mm two-layer no-copper/no-track/no-via
 area** at X=52–73.5, Y=67–84 mm (also outlined on `Dwgs.User`).
-The microphone was moved down 7 mm to avoid this area. The supplied
+The microphone was moved near the lower edge to avoid this area. The supplied
 [`ESP32 dimensions image`](../assets/esp32s3_devkit_01.jpg) shows a
 57.15 mm PCB body and 63.611 mm overall length including the antenna
 (~6.46 mm overhang); the antenna pattern is about 18 mm across based
@@ -29,24 +29,43 @@ manufacture. Do not put a metal enclosure, cable or another module
 over the antenna. The RTC and
 amplifier sit left of it, the display cable on the far right, the 5V
 input at the upper edge, and the joystick, microphone, keyboard and
-switch along the lower edge. J11 and J12 are
+switch along the lower area. The microphone's estimated 19.5 mm
+courtyard begins at Y=92.79 mm; all other connectors and components
+sit above that line, except for the four mounting holes. J11 and J12 are
 horizontal 1x5 sockets, numbered **left to right** on the component side.
 Every connector position, including electrically unused positions, has a
-silkscreen pin name. `TP1` is a small exposed **3V3 measurement pad**, not
-an extra power input. J3's circular courtyard and J4's module outline
+silkscreen pin name. Connected module signal pins also show their ESP32
+GPIO number, derived from the DevKit pin mapping; power and ground labels
+remain unchanged, and unused signals are marked NC. J3 L/R is labeled GND
+because it is strapped to ground, not a GPIO.
+J3's circular courtyard and J4's module outline
 reserve their estimated body footprints; the RTC stands vertically and
-the screen/joystick/keyboard connect by cable. **Only J7 and J8** use
+the screen/joystick/keyboard connect by cable. The J4 body reservation
+is X=7–34 mm; against the image-derived DevKit left edge near X=48.13 mm
+this leaves approximately 14 mm of horizontal separation, pending
+physical measurement. **Only J7 and J8** use
 5.08 mm screw terminals for the switch and external 5V wires; all
 module headers remain 2.54 mm female sockets.
 
 The routed traces use 0.35 mm signals, 0.65 mm 3V3, and 0.8 mm 5V.
-`F.Cu` and `B.Cu` carry signals and power with filled GND zones;
-`In1.Cu` is a GND reference plane and `In2.Cu` carries additional signals.
-Through-hole pads and 27 standard through-vias connect the layers.
-The two-layer trial with the 5.08 mm terminals left a disconnected
-GND zone; this four-layer version passes DRC. No blind or buried
-vias are required, but reducing to two layers would need a redesigned
-ground return and a new DRC/signal-integrity check.
+`F.Cu` and `B.Cu` carry signals and power with filled GND zones.
+Ground connections are routed first to keep the pours connected.
+Through-hole pads and 51 standard through-vias connect the layers;
+there are no blind or buried vias. To reduce sharp bends, the routing
+step chamfers 105 eligible orthogonal corners into 45-degree segments.
+Each diagonal is extended as far as half the shorter adjoining leg allows,
+then reduced if needed to clear other nets, pads, vias and keepouts.
+Against the previous short-chamfer routing, total routed copper length
+decreased from 3260.7 to 3114.8 mm (4.47%); LCD SCK decreased from
+91.4 to 87.5 mm. About 426.7 mm of routing is now diagonal, with the
+same 51 vias. This is a clearance-checked local optimization, not a
+globally shortest routing solution.
+Tiny connector fanout stubs and endpoints at pads/vias are left intact;
+silk/edge geometry is unchanged.
+The two-layer design has no uninterrupted inner GND reference plane:
+the PCB-only LCD SCK route is about 87.5 mm. Verify screen SPI reliability
+at the configured clock and with the actual cable, and lower the clock
+if required.
 **KiCad DRC has no violations or unconnected pads**, but DRC cannot
 verify signal integrity at the screen's configured SPI speed, or real
 module dimensions, polarity or regulator current.
@@ -68,19 +87,34 @@ numeric capability table. Against the separate
 this KiCad project explicitly checks 0.30 mm minimum copper clearance,
 0.45 mm drill-to-drill clearance, and at least 1.0 mm-high/0.15 mm-stroke
 silkscreen with 0.15 mm clearance. The saved copper uses 0.35 mm signal,
-0.65 mm 3V3 and 0.8 mm 5V traces; all three ground zones use 0.35 mm
+0.65 mm 3V3 and 0.8 mm 5V traces; both ground zones use 0.35 mm
 local clearance. Board setup requires 0.5 mm copper-to-edge clearance;
-ground fill starts 1 mm in from the routed outline. The 27 vias are
+ground fill starts 1 mm in from the routed outline. The 51 vias are
 ordinary **0.8 mm pad / 0.4 mm drill through-vias** (0.2 mm annular
 ring). All 87 socket holes are 1.0 mm plated drills with 1.7 mm pads
-(0.35 mm annular ring); J7/J8 have five 1.3 mm plated terminal holes.
+(0.35 mm annular ring); J7/J8 have five 1.3 mm plated terminal holes
+with 2.6 mm pads (0.65 mm annular ring).
 The four M3 holes are 3.0 mm NPTH, with 3.5 mm
 radius copper keepouts. Solder-mask openings expand 0.05 mm per side
 from exposed pads (0.1 mm overall), with a 0.1 mm minimum mask web.
 The nominal board thickness is 1.6 mm. Visible front-side text measures
-at least 1.0 mm high with 0.15 mm strokes; the smallest text-to-exposed-pad
-clearance measured from text/pad bounding boxes (including mask expansion)
-is about 0.60 mm.
+at least 1.0 mm high with 0.15 mm strokes. All silk (including footprint
+graphics) is outside a 3.5 mm radius from each of the four mounting-hole
+centers, verified conservatively against each object's bounding box.
+
+All ten connector footprints are on the front side, with plated through-hole
+pads, copper lands and solder-mask openings on both sides. Insert female
+headers and terminal pins from the front and solder from the back; do not
+flip the footprints. The socket holes are suitable for typical 0.64 mm
+square leads (about 0.91 mm diagonal), but confirm the chosen leads and
+finished-hole tolerances. Check the terminals' approximately 0.9 mm leads
+against their actual shape too. Both GND zones use thermal relief with
+0.30 mm gaps and 0.35 mm spokes. J1 pad 22 uses its explicit routed GND
+connection without a zone connection: the local bottom pour would otherwise
+form an isolated thermal island. Existing routed ground traces remain
+connected, so thermal relief improves solderability but does not completely
+isolate pads thermally from the ground network. Backside pin order appears
+mirrored relative to the front-view labels.
 
 The tightened project rules report **zero KiCad DRC violations and zero
 unconnected pads** after regenerating and filling the board. This checks
@@ -89,7 +123,7 @@ spacing/pin order, ESP32 row separation, screen module identity, keyboard
 cable orientation, switch pin order and 3.3V regulator load before ordering.
 The 3.0 mm M3 drill is nominally tight, not a clearance fit. The
 [`fabrication/minibox-carrier-jlcpcb.zip`](fabrication/minibox-carrier-jlcpcb.zip)
-archive contains nine Gerber layers (four copper, two mask, two silk,
+archive contains seven Gerber layers (two copper, two mask, two silk,
 one outline), a Gerber job file, and separate Excellon plated/non-plated
 drills in millimetres. It is a **preview candidate, not fabrication
 approval**: check the physical module fit and power path above, then
@@ -100,14 +134,47 @@ To regenerate the upload archive from the saved board after a design change:
 
 ```powershell
 $cli = "C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
+$out = Join-Path $env:TEMP ("minibox-gerber-" + [guid]::NewGuid())
+New-Item -ItemType Directory -Path $out | Out-Null
 & $cli pcb drc --refill-zones --severity-all --exit-code-violations .\minibox-carrier.kicad_pcb
-& $cli pcb export gerbers --output .\fabrication\export --layers "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Mask,B.Mask,F.SilkS,B.SilkS,Edge.Cuts" --subtract-soldermask --precision 6 --check-zones .\minibox-carrier.kicad_pcb
-& $cli pcb export drill --output .\fabrication\export --format excellon --excellon-units mm --excellon-separate-th .\minibox-carrier.kicad_pcb
-Compress-Archive -Path .\fabrication\export\* -DestinationPath .\fabrication\minibox-carrier-jlcpcb.zip -Force
+if ($LASTEXITCODE -ne 0) { throw "PCB DRC failed" }
+& $cli pcb export gerbers --output $out --layers "F.Cu,B.Cu,F.Mask,B.Mask,F.SilkS,B.SilkS,Edge.Cuts" --subtract-soldermask --precision 6 --check-zones .\minibox-carrier.kicad_pcb
+if ($LASTEXITCODE -ne 0) { throw "Gerber export failed" }
+& $cli pcb export drill --output $out --format excellon --excellon-units mm --excellon-separate-th .\minibox-carrier.kicad_pcb
+if ($LASTEXITCODE -ne 0) { throw "Drill export failed" }
+Compress-Archive -Path (Join-Path $out "*") -DestinationPath .\fabrication\minibox-carrier-jlcpcb.zip -Force
 ```
 
-The temporary `fabrication/export` directory is not tracked; only the
+Using a fresh temporary directory avoids accidentally including stale
+four-layer Gerbers when regenerating the two-layer archive. Only the
 archive is the delivered manufacturing preview.
+
+## PNG previews
+
+The latest front and back views, with Chinese color/material legends beside
+the board, are [front](renders/minibox-carrier-front-legend.png) and
+[back](renders/minibox-carrier-back-legend.png). Unannotated versions are
+[front](renders/minibox-carrier-front.png) and
+[back](renders/minibox-carrier-back.png). The legends are image annotations,
+not PCB silkscreen, and are absent from the Gerbers. The colors distinguish
+covered copper, no-copper areas, exposed metal and materials, not copper-layer
+count. KiCad models show sockets/terminals rather than complete installed
+modules; the custom microphone socket currently has no 3D connector model.
+
+Regenerate these after changing the saved board (from this directory):
+
+```powershell
+$cli = "C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
+& $cli pcb render --side top --width 2200 --height 2200 --quality high --background opaque --output .\renders\minibox-carrier-front.png .\minibox-carrier.kicad_pcb
+if ($LASTEXITCODE -ne 0) { throw "Front render failed" }
+& $cli pcb render --side bottom --width 2200 --height 2200 --quality high --background opaque --output .\renders\minibox-carrier-back.png .\minibox-carrier.kicad_pcb
+if ($LASTEXITCODE -ne 0) { throw "Back render failed" }
+python .\add_render_legends.py
+if ($LASTEXITCODE -ne 0) { throw "Legend generation failed" }
+```
+
+The legend helper uses Pillow and the Windows Microsoft YaHei font;
+`--font` accepts another Chinese font file if needed.
 
 | Connector | Module/interface | Pin 1 to last pin (J8 left to right; J1/J2 bottom to top; other rows top to bottom; J11/J12 left to right) |
 |---|---|---|
@@ -121,7 +188,6 @@ archive is the delivered manufacturing preview.
 | J8 | 2-position 5.08 mm external-power screw terminal | 5V, GND |
 | J11 | Three-key keyboard cable | KeyA (GPIO40), KeyB (GPIO41), KeyC (GPIO42), Vcc (3V3), Gnd |
 | J12 | Joystick cable | G, V (3V3), X (GPIO4), Y (GPIO5), K (GPIO6) |
-| TP1 | 3.3 V probe pad | 3V3 |
 
 J1/J2 follow the repository's `assets/esp32s3_devkit.jpg` pinout (pictured USB
 at bottom), then both rows are rotated 180 degrees on the carrier so USB
@@ -180,7 +246,7 @@ GND; J7 switched load -> ESP32 J1 5V and amplifier J4 VIN. The development
 board's onboard regulator (not the ESP32-S3 chip) produces 3V3, which
 powers the microphone, RTC, screen, keyboard and joystick. No screen pin
 is connected to 5V. The amplifier alone uses switched 5V among the
-peripheral modules. GPIO/SPI are 3.3V logic. LCD SCK is roughly 39 mm
+peripheral modules. GPIO/SPI are 3.3V logic. LCD SCK is roughly 87.5 mm
 on this PCB before accounting for the cable; test the real screen at a
 reduced SPI clock if 40 MHz proves unreliable, rather than assuming DRC
 guarantees signal integrity.

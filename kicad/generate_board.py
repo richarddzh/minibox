@@ -1,7 +1,8 @@
 """Generate the provisional Minibox carrier in KiCad 10 using its bundled Python."""
 
+import json
 from pathlib import Path
-from math import cos, pi, sin, sqrt
+from math import cos, hypot, pi, sin, sqrt
 
 import pcbnew as pcb
 
@@ -10,9 +11,13 @@ HERE = Path(__file__).resolve().parent
 SOCKETS = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints\Connector_PinSocket_2.54mm.pretty")
 CUSTOM = HERE / "Minibox.pretty"
 MOUNTING = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints\MountingHole.pretty")
-TESTPOINTS = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints\TestPoint.pretty")
 TERMINALS = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints\TerminalBlock_Phoenix.pretty")
 BOARD_FILE = HERE / "minibox-carrier.kicad_pcb"
+PROJECT_FILE = BOARD_FILE.with_suffix(".kicad_pro")
+existing_sheets = None
+if PROJECT_FILE.exists():
+    existing_sheets = json.loads(PROJECT_FILE.read_text(encoding="utf-8")).get(
+        "schematic", {}).get("top_level_sheets")
 
 
 def point(x, y):
@@ -20,7 +25,7 @@ def point(x, y):
 
 
 board = pcb.BOARD()
-board.SetCopperLayerCount(4)
+board.SetCopperLayerCount(2)
 board.GetDesignSettings().m_SolderMaskExpansion = pcb.FromMM(0.05)
 board.GetDesignSettings().m_SolderMaskMinWidth = pcb.FromMM(0.1)
 nets = {}
@@ -104,7 +109,7 @@ def mounting_hole(reference, x, y):
     footprint.Reference().SetVisible(False)
     footprint.Value().SetVisible(False)
     board.Add(footprint)
-    for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.In2_Cu, pcb.B_Cu):
+    for layer in (pcb.F_Cu, pcb.B_Cu):
         keepout = pcb.ZONE(board)
         keepout.SetLayer(layer)
         keepout.SetIsRuleArea(True)
@@ -122,7 +127,7 @@ def mounting_hole(reference, x, y):
 
 
 def antenna_keepout(x1, y1, x2, y2):
-    for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.In2_Cu, pcb.B_Cu):
+    for layer in (pcb.F_Cu, pcb.B_Cu):
         keepout = pcb.ZONE(board)
         keepout.SetLayer(layer)
         keepout.SetIsRuleArea(True)
@@ -137,28 +142,14 @@ def antenna_keepout(x1, y1, x2, y2):
     envelope(x1, y1, x2, y2)
 
 
-def test_point(reference, x, y):
-    name = "TestPoint_Pad_D1.0mm"
-    footprint = pcb.FootprintLoad(str(TESTPOINTS), name)
-    if footprint is None:
-        raise RuntimeError(f"Missing KiCad footprint: {name}")
-    footprint.SetFPIDAsString(f"TestPoint:{name}")
-    footprint.SetReference(reference)
-    footprint.SetValue("3V3")
-    footprint.SetPosition(point(x, y))
-    footprint.Reference().SetVisible(False)
-    footprint.Value().SetVisible(False)
-    next(iter(footprint.Pads())).SetNet(net("3V3"))
-    board.Add(footprint)
-
-
-def text(value, x, y, size=1):
+def text(value, x, y, size=1, angle=0):
     item = pcb.PCB_TEXT(board)
     item.SetText(value)
     item.SetPosition(point(x, y))
     item.SetTextSize(point(size, size))
     item.SetTextThickness(pcb.FromMM(0.16))
     item.SetLayer(pcb.F_SilkS)
+    item.SetTextAngle(pcb.EDA_ANGLE(angle, pcb.DEGREES_T))
     board.Add(item)
 
 
@@ -208,29 +199,28 @@ socket("J2", 22, 49.4, 66, [
 
 # Standard two-row, three-pin socket. KiCad numbers alternate by column:
 # 1 2 / 3 4 / 5 6. Verify the actual microphone's pin order before insertion.
-double_socket("J3", 50, 97,
+double_socket("J3", 50, 100,
               ["3V3", "GND", "I2S_BCLK", "I2S_WS", "MIC_SD", "GND"],
               "INMP441 2x3 VDD GND / SCK WS / SD LR")
-socket("J4", 7, 16, 38,
+socket("J4", 7, 12, 38,
        ["I2S_WS", "I2S_BCLK", "AUDIO_DIN", "AMP_GAIN",
         "AMP_SD", "GND", "5V_SW"],
        "MAX98357A LRC BCLK DIN GAIN SD GND VIN")
-envelope(11, 34, 38, 58)  # Body and on-module speaker screw terminal.
+envelope(7, 34, 34, 58)  # Body and on-module speaker screw terminal.
 socket("J5", 6, 16, 12,
        [None, None, "RTC_SDA", "RTC_SCL", "3V3", "GND"],
        "PCF8563T CLK INT SDA SCL VCC GND")
 
 # The owner confirmed the screen's 14-pin header follows assets/tft_spi.jpg.
 # Touch and readback pins are unused by the current firmware.
-socket("J6", 14, 110, 10,
+socket("J6", 14, 110, 18,
        ["3V3", "GND", "LCD_CS", "LCD_RST", "LCD_DC",
         "LCD_MOSI", "LCD_SCK", "LCD_BL", None, None, None,
         None, None, None],
        "ST7796 14-PIN DISPLAY HEADER")
-terminal("J7", 3, 105, 88, ["5V_IN", "5V_SW", "GND"], orientation=-90)
+terminal("J7", 3, 105, 72, ["5V_IN", "5V_SW", "GND"], orientation=-90)
 terminal("J8", 2, 97, 12, ["5V_IN", "GND"])
-test_point("TP1", 65, 104)
-socket("J11", 5, 72, 90,
+socket("J11", 5, 82, 88,
        ["BUTTON1", "RECORD", "BUTTON3", "3V3", "GND"],
        "THREE-KEY CABLE KeyA KeyB KeyC Vcc Gnd", orientation=90)
 socket("J12", 5, 12, 90,
@@ -246,12 +236,12 @@ antenna_keepout(52, 67, 73.5, 84)
 # The amplifier module exposes speaker outputs on its own screw terminal.
 for label, x, y, size in [
     ("ESP32-S3", 62, 16, 1), ("USB ^", 62, 20, 1),
-    ("MIC 2x3", 61, 89, 1), ("AMP", 16, 33, 1),
-    ("RTC", 16, 9, 1), ("LCD", 110, 53, 1),
-    ("SW", 116, 83, 1), ("5V IN", 90, 8, 1),
-    ("3V3", 65, 101, 1), ("KEYS", 77, 81, 1),
-    ("JOY", 17, 81, 1), ("SPK: USE AMP TERMINAL", 19, 63, 1),
-    ("PROTOTYPE - VERIFY PIN PITCH AND ORDER", 63, 112, 1),
+    ("MIC 2x3", 61, 88, 1), ("AMP", 12, 33, 1),
+    ("RTC", 16, 9, 1), ("LCD", 110, 61, 1),
+    ("SW", 116, 67, 1), ("5V IN", 90, 8, 1),
+    ("KEYS", 87, 73.5, 1),
+    ("JOY", 17, 77, 1), ("SPK: USE AMP TERMINAL", 19, 63, 1),
+    ("PROTOTYPE - VERIFY PIN PITCH AND ORDER", 92, 112, 1),
 ]:
     text(label, x, y, size)
 
@@ -268,7 +258,7 @@ pin_names = {
         "GPIO36 NC", "GPIO35 NC", "GPIO0", "GPIO45", "GPIO48",
         "GPIO47", "GPIO21", "GPIO20 NC", "GPIO19 NC", "GND", "GND",
     ],
-    "J3": ["VDD", "GND", "SCK", "WS", "SD", "L/R"],
+    "J3": ["VDD", "GND", "SCK", "WS", "SD", "L/R GND"],
     "J4": ["LRC", "BCLK", "DIN", "GAIN", "SD", "GND", "VIN 5V"],
     "J5": ["CLK NC", "INT NC", "SDA", "SCL", "VCC 3V3", "GND"],
     "J6": [
@@ -282,6 +272,17 @@ pin_names = {
     "J12": ["G", "V", "X", "Y", "K"],
 }
 
+net_gpio = {}
+for footprint in board.GetFootprints():
+    if footprint.GetReference() not in ("J1", "J2"):
+        continue
+    for pad in footprint.Pads():
+        name = pin_names[footprint.GetReference()][int(pad.GetNumber()) - 1]
+        if name.startswith("GPIO") and pad.GetNetname():
+            if pad.GetNetname() in net_gpio and net_gpio[pad.GetNetname()] != name:
+                raise RuntimeError(f"Ambiguous GPIO mapping for {pad.GetNetname()}")
+            net_gpio[pad.GetNetname()] = name
+
 for footprint in board.GetFootprints():
     reference = footprint.GetReference()
     if reference not in pin_names:
@@ -292,22 +293,29 @@ for footprint in board.GetFootprints():
         number = int(pad.GetNumber())
         position = pad.GetPosition()
         x, y = pcb.ToMM(position.x), pcb.ToMM(position.y)
+        angle = 0
         if reference == "J8":
             label_x, label_y = x, y + 7
         elif reference == "J11":
-            label_x, label_y = x, y - (4.5 if number % 2 else 6.5)
+            label_x, label_y, angle = x, 81, 90
         elif reference == "J12":
-            label_x, label_y = x, y - 4.5
+            label_x, label_y, angle = x, 83, 90
         elif reference == "J3":
-            label_x, label_y = (59 if number % 2 else 33), y
+            label_x, label_y = (64 if number % 2 else 30), y
         else:
             label_x = {
-                "J1": 83, "J2": 39, "J4": 31, "J5": 31,
-                "J6": 116,
+                "J1": 83, "J2": 39, "J4": 25, "J5": 27,
+                "J6": 98 if 3 <= number <= 8 else 116,
                 "J7": 114,
             }[reference]
             label_y = y
-        text(pin_names[reference][number - 1], label_x, label_y, 1)
+        label = pin_names[reference][number - 1]
+        if reference not in ("J1", "J2"):
+            if pad.GetNetname() in net_gpio:
+                label += " " + net_gpio[pad.GetNetname()]
+            elif not pad.GetNetname() and "NC" not in label:
+                label += " NC"
+        text(label, label_x, label_y, 1, angle)
 
 for start, end in [
     ((8, 3), (118, 3)),
@@ -322,5 +330,32 @@ arc((123, 110), (118 + offset, 110 + offset), (118, 115))
 arc((8, 115), (8 - offset, 110 + offset), (3, 110))
 arc((3, 8), (8 - offset, 8 - offset), (8, 3))
 
+microphone_top = 100 + 2.54 - 9.75
+for footprint in board.GetFootprints():
+    if footprint.GetReference() in ("J3", "H1", "H2", "H3", "H4"):
+        continue
+    if pcb.ToMM(footprint.GetBoundingBox(False, False).GetBottom()) >= microphone_top:
+        raise RuntimeError(f"{footprint.GetReference()} intrudes below the microphone top")
+
+silk = [item for item in board.GetDrawings()
+        if item.GetLayer() in (pcb.F_SilkS, pcb.B_SilkS)]
+for footprint in board.GetFootprints():
+    silk.extend(item for item in footprint.GraphicalItems()
+                if item.GetLayer() in (pcb.F_SilkS, pcb.B_SilkS))
+    silk.extend(item for item in (footprint.Reference(), footprint.Value())
+                if item.GetLayer() in (pcb.F_SilkS, pcb.B_SilkS) and item.IsVisible())
+for x, y in ((8, 8), (118, 8), (8, 110), (118, 110)):
+    for item in silk:
+        box = item.GetBoundingBox()
+        left, top, right, bottom = map(
+            pcb.ToMM, (box.GetLeft(), box.GetTop(), box.GetRight(), box.GetBottom()))
+        distance = hypot(max(left - x, 0, x - right), max(top - y, 0, y - bottom))
+        if distance < 3.5:
+            raise RuntimeError(f"Silkscreen intrudes into M3 screw area at ({x}, {y})")
+
 pcb.SaveBoard(str(BOARD_FILE), board)
+if existing_sheets is not None:
+    project = json.loads(PROJECT_FILE.read_text(encoding="utf-8"))
+    project["schematic"]["top_level_sheets"] = existing_sheets
+    PROJECT_FILE.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
 print(BOARD_FILE)
