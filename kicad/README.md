@@ -88,7 +88,15 @@ this KiCad project explicitly checks 0.30 mm minimum copper clearance,
 0.45 mm drill-to-drill clearance, and at least 1.0 mm-high/0.15 mm-stroke
 silkscreen with 0.15 mm clearance. The saved copper uses 0.35 mm signal,
 0.65 mm 3V3 and 0.8 mm 5V traces; both ground zones use 0.35 mm
-local clearance. Board setup requires 0.5 mm copper-to-edge clearance;
+local clearance.
+J7 pads 1/2 and J8 pad 1 have a **0.50 mm local copper clearance**
+override for the external/switched 5V terminal lands. This applies on
+both sides against GND fill and other networks; their own 5V traces
+remain connected. The filled pad-to-GND gaps measure at least 0.50 mm.
+Other pads and routing keep the existing rules, including 0.35 mm
+ground-zone clearance. These overrides do not increase the GND pads'
+thermal gaps or expand clearance along every 5V trace.
+Board setup requires 0.5 mm copper-to-edge clearance;
 ground fill starts 1 mm in from the routed outline. The 51 vias are
 ordinary **0.8 mm pad / 0.4 mm drill through-vias** (0.2 mm annular
 ring). All 87 socket holes are 1.0 mm plated drills with 1.7 mm pads

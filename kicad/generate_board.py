@@ -94,6 +94,8 @@ def terminal(reference, count, x, y, labels, orientation=0):
     footprint.Value().SetVisible(False)
     for pad in footprint.Pads():
         pad.SetNet(net(labels[int(pad.GetNumber()) - 1]))
+        if pad.GetNetname() in ("5V_IN", "5V_SW"):
+            pad.SetLocalClearance(pcb.FromMM(0.5))
     board.Add(footprint)
     return footprint
 

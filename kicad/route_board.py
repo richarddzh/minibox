@@ -74,10 +74,11 @@ blocked = [defaultdict(set) for _ in ROUTE_LAYERS]
 via_pad_blocks = defaultdict(set)
 for pad in all_pads:
     px, py = cell(pad.GetPosition())
+    pad_clearance = max(CLEARANCE, mm(pad.GetLocalClearance() or 0))
     radius = max(mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2
     if pad.GetParentFootprint().GetReference().startswith("H"):
         radius = 3.5
-    radius += WIDTH / 2 + CLEARANCE + STEP / 2
+    radius += WIDTH / 2 + pad_clearance + STEP / 2
     for layer in range(len(ROUTE_LAYERS)):
         if not pad.IsOnLayer(ROUTE_LAYERS[layer]):
             continue
@@ -86,7 +87,7 @@ for pad in all_pads:
     via_radius = 3.5 if pad.GetParentFootprint().GetReference().startswith("H") else (
         max(mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2)
     for coordinate in disk(px, py, via_radius +
-                           VIA_DIAMETER / 2 + CLEARANCE + STEP / 2):
+                           VIA_DIAMETER / 2 + pad_clearance + STEP / 2):
         via_pad_blocks[coordinate].add("PAD")
 
 # Match the board's two-sided antenna rule area, including trace radius.
@@ -349,7 +350,8 @@ def diagonal_clear(start, end, original):
         elif pad.GetNetCode() != original.GetNetCode() and pad.IsOnLayer(original.GetLayer()):
             box = pad.GetBoundingBox()
             if rectangle_distance(start, end, mm(box.GetLeft()), mm(box.GetTop()),
-                                  mm(box.GetRight()), mm(box.GetBottom())) <= clearance:
+                                  mm(box.GetRight()), mm(box.GetBottom())) <= (
+                    radius + max(CLEARANCE, mm(pad.GetLocalClearance() or 0)) + 0.02):
                 return False
     for item in board.GetTracks():
         if item.GetNetCode() == original.GetNetCode():
