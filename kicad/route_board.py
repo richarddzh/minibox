@@ -7,7 +7,7 @@ measuring the actual mating modules.
 import json
 from collections import defaultdict
 from heapq import heappop, heappush
-from math import ceil, hypot
+from math import ceil, floor, hypot
 from pathlib import Path
 
 import pcbnew as pcb
@@ -16,12 +16,22 @@ import pcbnew as pcb
 FILE = Path(__file__).with_name("minibox-carrier.kicad_pcb")
 board = pcb.LoadBoard(str(FILE))
 STEP = 0.5
-X0, Y0 = 5.0, 5.0
-NX, NY = 233, 217
+edge_points = [
+    position for item in board.GetDrawings() if item.GetLayer() == pcb.Edge_Cuts
+    for position in (item.GetStart(), item.GetEnd())
+]
+LEFT = min(pcb.ToMM(position.x) for position in edge_points)
+TOP = min(pcb.ToMM(position.y) for position in edge_points)
+RIGHT = max(pcb.ToMM(position.x) for position in edge_points)
+BOTTOM = max(pcb.ToMM(position.y) for position in edge_points)
+X0, Y0 = LEFT + 2, TOP + 2
+NX = floor((RIGHT - 2 - X0) / STEP + 1e-6) + 1
+NY = floor((BOTTOM - 2 - Y0) / STEP + 1e-6) + 1
 WIDTH = 0.35
 CLEARANCE = 0.3
 VIA_DIAMETER = 0.8
 VIA_DRILL = 0.4
+VIA_COST = 75
 ROUTE_LAYERS = (pcb.F_Cu, pcb.B_Cu)
 POWER_WIDTHS = {"3V3": 0.65, "5V_IN": 0.8, "5V_SW": 0.8}
 
@@ -163,10 +173,11 @@ def search(start, targets, name, start_layers=range(len(ROUTE_LAYERS))):
                 if next_layer == layer:
                     continue
                 other = (next_layer, x, y)
-                if cost + 50 < costs.get(other, 10**12):
-                    costs[other] = cost + 50
+                if cost + VIA_COST < costs.get(other, 10**12):
+                    costs[other] = cost + VIA_COST
                     previous[other] = state
-                    heappush(queue, (cost + 50 + 10 * heuristic(x, y), cost + 50, other))
+                    heappush(queue, (cost + VIA_COST + 10 * heuristic(x, y),
+                                     cost + VIA_COST, other))
     raise RuntimeError(
         f"No path for {name} starting at {start}; explored {len(costs)} cells; "
         f"goals {len(goals)}")
@@ -235,12 +246,13 @@ def apply(route, source, name, from_position=None):
 priority = [
     "GND",
     "LCD_BL", "LCD_CS", "LCD_RST", "LCD_DC", "LCD_MOSI", "LCD_SCK",
+    "5V_IN",
     "GPIO1", "GPIO2", "GPIO42",
     "RTC_SDA", "RTC_SCL",
-    "I2S_WS", "I2S_BCLK", "AUDIO_DIN", "MIC_SD",
-    "BUTTON1", "RECORD", "BUTTON3",
-    "AMP_SD", "AMP_GAIN",
-    "5V_IN", "5V_SW",
+    "I2S_WS", "I2S_BCLK", "AUDIO_DIN",
+    "AMP_GAIN", "AMP_SD",
+    "MIC_SD", "BUTTON1", "RECORD", "BUTTON3",
+    "5V_SW",
     "3V3",
 ]
 assert set(priority) == {
@@ -459,7 +471,7 @@ def chamfer_corners():
                 add_segment(start, end, original)
             changed += 1
             continue
-        cut = shortest // 2
+        cut = shortest * 3 // 4
         # Tree branches and vias can join a leg between its endpoints.
         for ox, oy in fixed | anchors[(layer, net_code)]:
             dx, dy = ox - x, oy - y
@@ -474,7 +486,7 @@ def chamfer_corners():
                               y + (cut if by > 0 else -cut if by < 0 else 0))
             if diagonal_clear(p1, p2, a):
                 break
-            cut //= 2
+            cut -= min(pcb.FromMM(0.25), max(1, cut // 2))
         else:
             continue
         if a.GetStart().x == x and a.GetStart().y == y:
@@ -490,7 +502,13 @@ def chamfer_corners():
     return changed
 
 
-print("45-degree corners:", chamfer_corners(), flush=True)
+changed_corners = 0
+for _ in range(8):
+    changed = chamfer_corners()
+    changed_corners += changed
+    if not changed:
+        break
+print("45-degree corners:", changed_corners, flush=True)
 
 remaining_junctions = defaultdict(list)
 for item in board.GetTracks():
@@ -510,6 +528,13 @@ for (_, _, x, y), pair in remaining_junctions.items():
             vectors[0][0] * vectors[1][0] + vectors[0][1] * vectors[1][1] == 0):
         raise RuntimeError(f"Unresolved right-angle bend at ({mm(x)}, {mm(y)})")
 
+tracks = list(board.GetTracks())
+if sum(isinstance(item, pcb.PCB_VIA) for item in tracks) > 23:
+    raise RuntimeError("Stacked layout exceeds its 23-via routing budget")
+if sum(mm(item.GetLength()) for item in tracks
+       if not isinstance(item, pcb.PCB_VIA)) > 1975.819:
+    raise RuntimeError("Stacked layout exceeds the preceding compact board's routed length")
+
 for layer in (pcb.F_Cu, pcb.B_Cu):
     zone = pcb.ZONE(board)
     zone.SetLayer(layer)
@@ -521,14 +546,16 @@ for layer in (pcb.F_Cu, pcb.B_Cu):
     zone.SetMinThickness(pcb.FromMM(0.25))
     zone.SetIslandRemovalMode(pcb.ISLAND_REMOVAL_MODE_ALWAYS)
     zone.Outline().NewOutline()
-    for x, y in ((4, 4), (122, 4), (122, 114), (4, 114)):
+    for x, y in ((LEFT + 1, TOP + 1), (RIGHT - 1, TOP + 1),
+                 (RIGHT - 1, BOTTOM - 1), (LEFT + 1, BOTTOM - 1)):
         zone.Outline().Append(pcb.FromMM(x), pcb.FromMM(y))
     board.Add(zone)
 
-# This pad's bottom-side pour is an isolated sliver; use its routed GND
-# connection rather than retaining a starved thermal island.
+# These pads' bottom-side pours form isolated slivers; retain their
+# explicit routed GND connections instead of starved thermal islands.
 for pad in all_pads:
-    if pad.GetParentFootprint().GetReference() == "J1" and pad.GetNumber() == "22":
+    if (pad.GetParentFootprint().GetReference(), pad.GetNumber()) in {
+            ("J1", "22"), ("J5", "6")}:
         pad.SetLocalZoneConnection(pcb.ZONE_CONNECTION_NONE)
 
 if not pcb.ZONE_FILLER(board).Fill(board.Zones()):

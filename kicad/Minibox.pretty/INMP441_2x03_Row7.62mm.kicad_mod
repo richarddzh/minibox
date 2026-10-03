@@ -2,7 +2,7 @@
 	(version 20260206)
 	(generator "pcbnew")
 	(layer "F.Cu")
-	(descr "Provisional 2x3 round INMP441 carrier socket; 2.54mm along rows, 7.62mm row spacing; measure module before fabrication")
+	(descr "Two separate 1x3 INMP441 female strips; 2.54mm along rows, provisional 7.62mm row spacing; measure module before fabrication")
 	(property "Reference" "REF**" (at -3.81 -9 0) (layer "F.SilkS") (effects (font (size 1 1) (thickness 0.15))))
 	(property "Value" "INMP441_2x03_Row7.62mm" (at -3.81 13 0) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
 	(attr through_hole)
@@ -15,4 +15,14 @@
 	(pad "4" thru_hole circle (at -7.62 2.54) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask"))
 	(pad "5" thru_hole circle (at 0 5.08) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask"))
 	(pad "6" thru_hole circle (at -7.62 5.08) (size 1.7 1.7) (drill 1) (layers "*.Cu" "*.Mask"))
+	(model "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x03_P2.54mm_Vertical.step"
+		(offset (xyz 0 0 0))
+		(scale (xyz 1 1 1))
+		(rotate (xyz 0 0 0))
+	)
+	(model "${KICAD10_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x03_P2.54mm_Vertical.step"
+		(offset (xyz -7.62 0 0))
+		(scale (xyz 1 1 1))
+		(rotate (xyz 0 0 0))
+	)
 )

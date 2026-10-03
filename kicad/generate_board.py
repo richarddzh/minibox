@@ -1,5 +1,6 @@
 """Generate the provisional Minibox carrier in KiCad 10 using its bundled Python."""
 
+from collections import Counter
 import json
 from pathlib import Path
 from math import cos, hypot, pi, sin, sqrt
@@ -14,6 +15,15 @@ MOUNTING = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints\MountingHol
 TERMINALS = Path(r"C:\Program Files\KiCad\10.0\share\kicad\footprints\TerminalBlock_Phoenix.pretty")
 BOARD_FILE = HERE / "minibox-carrier.kicad_pcb"
 PROJECT_FILE = BOARD_FILE.with_suffix(".kicad_pro")
+LEFT, TOP, RIGHT, BOTTOM = 5, 3, 105, 115
+CORNER_RADIUS = 5
+BOARD_NAME = "PangMiaoMiao MiniBox"
+BOARD_VERSION = "v1.0"
+BOARD_DATE = "2026-10-03"
+MOUNTING_POINTS = (
+    ("H1", LEFT + 5, 8), ("H2", RIGHT - 5, 8),
+    ("H3", LEFT + 5, 110), ("H4", RIGHT - 5, 110),
+)
 existing_sheets = None
 if PROJECT_FILE.exists():
     existing_sheets = json.loads(PROJECT_FILE.read_text(encoding="utf-8")).get(
@@ -29,6 +39,7 @@ board.SetCopperLayerCount(2)
 board.GetDesignSettings().m_SolderMaskExpansion = pcb.FromMM(0.05)
 board.GetDesignSettings().m_SolderMaskMinWidth = pcb.FromMM(0.1)
 nets = {}
+socket_counts = Counter()
 
 
 def net(name):
@@ -58,6 +69,7 @@ def socket(reference, count, x, y, labels, value, orientation=0):
         if label:
             pad.SetNet(net(label))
     board.Add(footprint)
+    socket_counts[count] += 1
     return footprint
 
 
@@ -76,6 +88,7 @@ def double_socket(reference, x, y, labels, value):
     for pad in footprint.Pads():
         pad.SetNet(net(labels[int(pad.GetNumber()) - 1]))
     board.Add(footprint)
+    socket_counts[3] += 2
     return footprint
 
 
@@ -199,7 +212,7 @@ socket("J2", 22, 49.4, 66, [
     "RTC_SCL", None, None, "GND", "GND",
 ], "ESP32-S3 RIGHT - USB AT TOP", orientation=180)
 
-# Standard two-row, three-pin socket. KiCad numbers alternate by column:
+# Two separate 1x3 female strips. KiCad numbers alternate by column:
 # 1 2 / 3 4 / 5 6. Verify the actual microphone's pin order before insertion.
 double_socket("J3", 50, 100,
               ["3V3", "GND", "I2S_BCLK", "I2S_WS", "MIC_SD", "GND"],
@@ -215,23 +228,20 @@ socket("J5", 6, 16, 12,
 
 # The owner confirmed the screen's 14-pin header follows assets/tft_spi.jpg.
 # Touch and readback pins are unused by the current firmware.
-socket("J6", 14, 110, 18,
+socket("J6", 14, 96, 14,
        ["3V3", "GND", "LCD_CS", "LCD_RST", "LCD_DC",
         "LCD_MOSI", "LCD_SCK", "LCD_BL", None, None, None,
         None, None, None],
        "ST7796 14-PIN DISPLAY HEADER")
-terminal("J7", 3, 115, 61.57, ["5V_IN", "5V_SW", "GND"], orientation=-90)
-terminal("J8", 2, 97, 12, ["5V_IN", "GND"])
-socket("J11", 5, 90, 73,
+terminal("J7", 3, 96, 55.5, ["5V_IN", "5V_SW", "GND"], orientation=-90)
+terminal("J8", 2, 28, 11, ["5V_IN", "GND"])
+socket("J11", 5, 82, 73,
        ["BUTTON1", "RECORD", "BUTTON3", "3V3", "GND"],
        "THREE-KEY CABLE KeyA KeyB KeyC Vcc Gnd", orientation=90)
 socket("J12", 5, 12, 73,
        ["GND", "3V3", "GPIO1", "GPIO2", "GPIO42"],
        "JOYSTICK CABLE G V X Y K", orientation=90)
-for reference, x, y in (
-    ("H1", 8, 8), ("H2", 118, 8),
-    ("H3", 8, 110), ("H4", 118, 110),
-):
+for reference, x, y in MOUNTING_POINTS:
     mounting_hole(reference, x, y)
 antenna_keepout(52, 67, 73.5, 84)
 
@@ -239,13 +249,31 @@ antenna_keepout(52, 67, 73.5, 84)
 for label, x, y, size in [
     ("ESP32-S3", 62, 16, 1), ("USB ^", 62, 20, 1),
     ("MIC 2x3", 61, 88, 1), ("AMP", 12, 33, 1),
-    ("RTC", 16, 9, 1), ("LCD", 110, 55.5, 1),
-    ("SW", 115, 56.57, 1), ("5V IN", 90, 8, 1),
-    ("KEYS", 95, 79, 1),
+    ("RTC", 16, 9, 1), ("LCD", 87.5, 11, 1),
+    ("SW", 96, 50.5, 1),
+    ("KEYS", 87, 91, 1),
     ("JOY", 17, 79, 1), ("SPK: USE AMP TERMINAL", 19, 60, 1),
-    ("PROTOTYPE - VERIFY PIN PITCH AND ORDER", 92, 112, 1),
 ]:
     text(label, x, y, size)
+
+text(BOARD_NAME, 30, 85.5, 1.2)
+text(f"{BOARD_VERSION}  {BOARD_DATE}", 30, 89)
+text("SOCKETS P2.54", 17, 92)
+for index, (count, quantity) in enumerate(sorted(socket_counts.items(), reverse=True)):
+    text(f"1x{count:02d}  x{quantity}", 17, 94.5 + index * 2)
+text("MECHANICAL / mm", 88.5, 93)
+for y in (94, 98, 102, 106):
+    line(74, y, 103, y, pcb.F_SilkS, 0.15)
+for x in (74, 84, 103):
+    line(x, 94, x, 106, pcb.F_SilkS, 0.15)
+hole_dx = MOUNTING_POINTS[1][1] - MOUNTING_POINTS[0][1]
+hole_dy = MOUNTING_POINTS[2][2] - MOUNTING_POINTS[0][2]
+for y, label, value in (
+        (96, "BOARD", f"{RIGHT - LEFT}x{BOTTOM - TOP}"),
+        (100, "PITCH", f"{hole_dx}x{hole_dy}"),
+        (104, "HOLES", "4xD3.0")):
+    text(label, 79, y)
+    text(value, 93.5, y)
 
 pin_names = {
     "J1": [
@@ -268,7 +296,7 @@ pin_names = {
         "SCK", "LED", "SDO NC", "T_CLK NC", "T_CS NC",
         "T_DIN NC", "T_DO NC", "T_IRQ NC",
     ],
-    "J7": ["5V_IN", "5V_LOAD", "GND"],
+    "J7": ["5V_IN", "5V_SW", "GND"],
     "J8": ["5V_IN", "GND"],
     "J11": ["KeyA", "KeyB", "KeyC", "Vcc", "Gnd"],
     "J12": ["G", "V", "X", "Y", "K"],
@@ -297,21 +325,26 @@ for footprint in board.GetFootprints():
         x, y = pcb.ToMM(position.x), pcb.ToMM(position.y)
         angle = 0
         if reference == "J8":
-            label_x, label_y = x, y + 7
+            label_x, label_y = x, y - 7
         elif reference == "J11":
-            label_x, label_y, angle = x, y - 7, 90
+            label_x, label_y, angle = x, y + 10, 90
         elif reference == "J12":
             label_x, label_y, angle = x, y - 7, 90
         elif reference == "J3":
             label_x, label_y = (64 if number % 2 else 30), y
         else:
             label_x = {
-                "J1": 83, "J2": 39, "J4": 25, "J5": 27,
-                "J6": 98 if 3 <= number <= 8 else 116,
-                "J7": 105,
+                "J1": 79.5 if number <= 2 else 80, "J2": 39, "J4": 25,
+                "J5": 21.5 if number <= 2 else 26,
+                "J6": 88.3,
+                "J7": 86.8,
             }[reference]
             label_y = y
         label = pin_names[reference][number - 1]
+        if reference == "J5" and number == 3:
+            label_y += 0.15
+        if reference == "J6" and number == 6:
+            label = "MOSI"
         if reference not in ("J1", "J2"):
             if pad.GetNetname() in net_gpio:
                 label += " " + net_gpio[pad.GetNetname()]
@@ -319,35 +352,52 @@ for footprint in board.GetFootprints():
                 label += " NC"
         text(label, label_x, label_y, 1, angle)
 
+r = CORNER_RADIUS
 for start, end in [
-    ((8, 3), (118, 3)),
-    ((123, 8), (123, 110)),
-    ((118, 115), (8, 115)),
-    ((3, 110), (3, 8)),
+    ((LEFT + r, TOP), (RIGHT - r, TOP)),
+    ((RIGHT, TOP + r), (RIGHT, BOTTOM - r)),
+    ((RIGHT - r, BOTTOM), (LEFT + r, BOTTOM)),
+    ((LEFT, BOTTOM - r), (LEFT, TOP + r)),
 ]:
     line(*start, *end, pcb.Edge_Cuts, 0.05)
-offset = 5 / sqrt(2)
-arc((118, 3), (118 + offset, 8 - offset), (123, 8))
-arc((123, 110), (118 + offset, 110 + offset), (118, 115))
-arc((8, 115), (8 - offset, 110 + offset), (3, 110))
-arc((3, 8), (8 - offset, 8 - offset), (8, 3))
+offset = r / sqrt(2)
+arc((RIGHT - r, TOP), (RIGHT - r + offset, TOP + r - offset), (RIGHT, TOP + r))
+arc((RIGHT, BOTTOM - r), (RIGHT - r + offset, BOTTOM - r + offset), (RIGHT - r, BOTTOM))
+arc((LEFT + r, BOTTOM), (LEFT + r - offset, BOTTOM - r + offset), (LEFT, BOTTOM - r))
+arc((LEFT, TOP + r), (LEFT + r - offset, TOP + r - offset), (LEFT + r, TOP))
 
 microphone_top = 100 + 2.54 - 9.75
-interface_bottoms = []
+body_bounds = {}
 for footprint in board.GetFootprints():
-    if footprint.GetReference() in ("J7", "J11", "J12"):
-        # Align the physical body outlines, not the differently padded courtyards.
-        interface_bottoms.append(max(
-            pcb.ToMM(position.y)
+    if footprint.GetReference() in ("J6", "J7", "J11", "J12"):
+        positions = [
+            position
             for item in footprint.GraphicalItems()
             if isinstance(item, pcb.PCB_SHAPE) and item.GetLayer() == pcb.F_Fab
-            for position in (item.GetStart(), item.GetEnd())))
+            for position in (item.GetStart(), item.GetEnd())]
+        body_bounds[footprint.GetReference()] = (
+            min(pcb.ToMM(p.x) for p in positions), min(pcb.ToMM(p.y) for p in positions),
+            max(pcb.ToMM(p.x) for p in positions), max(pcb.ToMM(p.y) for p in positions))
     if footprint.GetReference() in ("J3", "H1", "H2", "H3", "H4"):
         continue
     if pcb.ToMM(footprint.GetBoundingBox(False, False).GetBottom()) >= microphone_top:
         raise RuntimeError(f"{footprint.GetReference()} intrudes below the microphone top")
-if max(interface_bottoms) - min(interface_bottoms) > 0.001:
-    raise RuntimeError("Switch, keyboard and joystick body lower edges are not aligned")
+if abs(body_bounds["J11"][3] - body_bounds["J12"][3]) > 0.001:
+    raise RuntimeError("Keyboard and joystick body lower edges are not aligned")
+if max(body_bounds[ref][3] for ref in ("J7", "J11", "J12")) > 74.271:
+    raise RuntimeError("Interface body lower edges moved downward")
+if body_bounds["J7"][1] - body_bounds["J6"][3] < 2 or (
+        body_bounds["J11"][1] - body_bounds["J7"][3] < 2):
+    raise RuntimeError("Stacked LCD, switch and keyboard bodies need at least 2 mm gaps")
+if body_bounds["J7"][2] > RIGHT - 3:
+    raise RuntimeError("Switch wire-entry side needs at least 3 mm to the board edge")
+if LEFT > 7 - 2:
+    raise RuntimeError("Amplifier module envelope needs at least 2 mm to the board edge")
+for reference, expected in (("J1", (74.8, 66)), ("J2", (49.4, 66)),
+                            ("J3", (50, 100)), ("J4", (12, 38))):
+    footprint = next(f for f in board.GetFootprints() if f.GetReference() == reference)
+    if footprint.GetPosition() != point(*expected):
+        raise RuntimeError(f"{reference} moved from its fixed position")
 
 silk = [item for item in board.GetDrawings()
         if item.GetLayer() in (pcb.F_SilkS, pcb.B_SilkS)]
@@ -356,7 +406,7 @@ for footprint in board.GetFootprints():
                 if item.GetLayer() in (pcb.F_SilkS, pcb.B_SilkS))
     silk.extend(item for item in (footprint.Reference(), footprint.Value())
                 if item.GetLayer() in (pcb.F_SilkS, pcb.B_SilkS) and item.IsVisible())
-for x, y in ((8, 8), (118, 8), (8, 110), (118, 110)):
+for _, x, y in MOUNTING_POINTS:
     for item in silk:
         box = item.GetBoundingBox()
         left, top, right, bottom = map(

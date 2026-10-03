@@ -1,11 +1,11 @@
 # Minibox KiCad carrier (provisional)
 
 Open `minibox-carrier.kicad_pro` in KiCad 10. This PCB-only project (no
-schematic) has a **120 x 112 mm, R5 rounded** outline, 2 copper layers,
+schematic) has a **100 x 112 mm, R5 rounded** outline, 2 copper layers,
 routed female sockets and two wire terminals. The four **3.0 mm
-non-plated** M3 holes are at (8,8),
-(118,8), (8,110) and (118,110) mm in KiCad board coordinates: spacing
-**110 x 102 mm**. Both copper layers exclude tracks and copper fill
+non-plated** M3 holes are at (10,8),
+(100,8), (10,110) and (100,110) mm in KiCad board coordinates: spacing
+**90 x 102 mm**, measured center to center. Both copper layers exclude tracks and copper fill
 within 3.5 mm of each hole center. A 3.0 mm drill is a tight fit for M3,
 not the usual 3.2 mm clearance hole; confirm screw tolerance.
 
@@ -28,16 +28,35 @@ the physical antenna location and required RF clearance before
 manufacture. Do not put a metal enclosure, cable or another module
 over the antenna. The RTC and
 amplifier sit left of it, the display cable on the far right, the 5V
-input at the upper edge. J12 joystick and J11 keyboard pad rows are
+input beside the RTC at the upper left. J12 joystick and J11 keyboard pad rows are
 aligned at **Y=73 mm**, just above the estimated antenna tip near Y=74.4:
-J12 stays at X=12 mm, while J11 moved right to X=90 mm.
-J7 moved right to X=115 mm and up to **Y=61.57 mm** (pin 1), a 10.43 mm
-lift from Y=72. The switch, joystick and keyboard **F.Fab body lower
-edges all align at Y=74.27 mm**; this compares physical body outlines,
-not their slightly different courtyard padding. Its stock footprint
-extent ends at X=120.735, leaving about 2.265 mm to the X=123 board edge.
+J12 stays at X=12 mm, while J11 is at X=82 mm.
+J6 LCD is at **(96,14) mm** and J7 switch is at **(96,55.5) mm**
+(pin 1). The right-side interfaces now stack LCD, switch and horizontal
+keyboard from top to bottom. The switch's F.Fab body has **4.67 mm**
+clearance below the LCD socket and **3.53 mm** above the keyboard socket.
+The joystick and keyboard **F.Fab body lower edges remain at Y=74.27 mm**;
+the switch lower edge is raised to **Y=68.2 mm**, not moved downward.
+These compare physical body outlines, not courtyard padding.
+The switch's stock footprint extent ends at X=101.735, leaving about
+3.265 mm to the X=105 board edge. Its wire-entry side faces right:
+verify cable bend and screwdriver access with the actual terminal.
 The antenna keepout itself is unchanged, and both socket rows sit outside
 its X=52–73.5 span. The microphone remains at **(50,100) mm**.
+This compact revision reduces width from 120 to 100 mm (16.7%) without
+increasing the 112 mm height. J1/J2, J3 and J4 retain their exact pad
+positions and orientations, preserving microphone/ESP32 and
+amplifier/ESP32 spacing. Relative to the preceding 108 mm-wide version,
+the left edge moves from X=3 to X=5 and the right edge from X=111 to X=105.
+The amplifier module's reserved left extent at X=7 retains **2 mm**
+to the left edge; its exact body must still be measured.
+J6 moves 4 mm left and 2 mm up; J7 moves 6 mm left and 6.07 mm up.
+J11 remains at (82,73), still horizontal.
+J8 moved from (97,12) to **(28,11) mm** beside J5 (16,12).
+Connector orientations, net assignments and firmware GPIOs are unchanged.
+The left mounting holes move 2 mm right and the right holes 6 mm left
+relative to the 108 mm-wide version. Update enclosures or mounting plates
+made for either the preceding 98 mm or original 110 mm horizontal spacing.
 The microphone's estimated 19.5 mm
 courtyard begins at Y=92.79 mm; all other connectors and components
 sit above that line, except for the four mounting holes. J11 and J12 are
@@ -59,19 +78,37 @@ module headers remain 2.54 mm female sockets.
 The routed traces use 0.35 mm signals, 0.65 mm 3V3, and 0.8 mm 5V.
 `F.Cu` and `B.Cu` carry signals and power with filled GND zones.
 Ground connections are routed first to keep the pours connected.
-Through-hole pads and 33 standard through-vias connect the layers;
+Through-hole pads and 23 standard through-vias connect the layers;
 there are no blind or buried vias. To reduce sharp bends, the routing
-step eases 131 right-angle corners into 45-degree transitions.
-Each diagonal is extended as far as half the shorter adjoining leg allows,
-then reduced if needed to clear other nets, pads, vias and keepouts.
+step eases 122 right-angle corners into 45-degree transitions.
+Each ordinary corner starts with a cut up to three quarters of the shorter
+adjoining leg, retaining a connecting leg rather than consuming it entirely.
+Cuts are reduced in at most 0.25 mm steps to clear other nets, pads,
+vias and keepouts; very short cuts are reduced proportionally.
+Repeated passes handle corners exposed by adjoining changes.
 Cuts also preserve connections to vias and tree branches inside the
 original legs, not only at their endpoints.
 With the layout-aware GPIO allocation, total routed copper length
-decreased from the pre-remap 3114.8 mm to 2059.7 mm (33.9%);
-LCD SCK decreased from 87.5 to 39.6 mm. About 258.8 mm of routing is
-diagonal, with 33 vias instead of 51. Joystick X/Y traces measure
-45.9/46.1 mm before the external cable. Local SPI and analog joystick
-routes are prioritized before I2S, controls and power.
+decreased from the pre-remap 3114.8 mm to **1860.4 mm** (40.3%).
+This is 5.8% shorter than the preceding 108 mm-wide board's 1975.8 mm,
+and 9.7% shorter than the last 120 mm-wide board's 2059.7 mm.
+LCD SCK decreases from the preceding 27.4 to **21.9 mm**
+(120 mm-wide board: 39.6 mm; original pre-remap: 87.5 mm).
+About **332.3 mm** of routing is diagonal, versus 238.6 mm with the
+same stacked placement and the previous shorter chamfers: a 39.2% increase.
+The compact revision uses **23 vias**, down from 33 (initial layout: 51).
+Joystick X/Y traces measure
+45.7/45.5 mm before the external cable. Local SPI is routed first after GND, then the relocated external 5V
+input, analog joystick, RTC, I2S and amplifier controls.
+The via cost is increased from 50 to 75 to discourage unnecessary
+layer changes. The router rejects layouts exceeding the preceding
+23-via / 1975.819 mm routing budget.
+Shared I2S WS/BCLK lengths are 105.9/109.0 mm, versus the 120 mm-wide board's
+109.6/110.5 mm. MIC_SD is 75.4 mm versus 77.9 mm; the physical
+microphone position and distance are unchanged. Relocating J8 increases
+5V_IN routing from the 120 mm-wide board's 65.1 to 109.8 mm,
+while 5V_SW drops from 205.1 to 153.3 mm.
+Both retain 0.8 mm width and the power topology is unchanged.
 This is a clearance-checked routing optimization, not a
 globally shortest routing solution.
 Short connector-to-grid elbows are included, rather than leaving small
@@ -81,7 +118,7 @@ The router rejects remaining two-track 90-degree elbows before saving.
 Electrical multiway junctions and rectangular pads are not trace elbows.
 The routing step leaves silkscreen and board outline unchanged.
 The two-layer design has no uninterrupted inner GND reference plane:
-the PCB-only LCD SCK route is about 39.6 mm. Verify screen SPI reliability
+the PCB-only LCD SCK route is about 21.9 mm. Verify screen SPI reliability
 at the configured clock and with the actual cable, and lower the clock
 if required.
 **KiCad DRC has no violations or unconnected pads**, but DRC cannot
@@ -115,7 +152,7 @@ Other pads and routing keep the existing rules, including 0.35 mm
 ground-zone clearance. These overrides do not increase the GND pads'
 thermal gaps or expand clearance along every 5V trace.
 Board setup requires 0.5 mm copper-to-edge clearance;
-ground fill starts 1 mm in from the routed outline. The 33 vias are
+ground fill starts 1 mm in from the routed outline. The 23 vias are
 ordinary **0.8 mm pad / 0.4 mm drill through-vias** (0.2 mm annular
 ring). All 87 socket holes are 1.0 mm plated drills with 1.7 mm pads
 (0.35 mm annular ring); J7/J8 have five 1.3 mm plated terminal holes
@@ -135,9 +172,10 @@ flip the footprints. The socket holes are suitable for typical 0.64 mm
 square leads (about 0.91 mm diagonal), but confirm the chosen leads and
 finished-hole tolerances. Check the terminals' approximately 0.9 mm leads
 against their actual shape too. Both GND zones use thermal relief with
-0.30 mm gaps and 0.35 mm spokes. J1 pad 22 uses its explicit routed GND
-connection without a zone connection: the local bottom pour would otherwise
-form an isolated thermal island. Existing routed ground traces remain
+0.30 mm gaps and 0.35 mm spokes. J1 pad 22 and J5 pad 6 use their
+explicit routed GND connections without zone connections: their local
+bottom pours would otherwise form isolated thermal islands.
+Existing routed ground traces remain
 connected, so thermal relief improves solderability but does not completely
 isolate pads thermally from the ground network. Backside pin order appears
 mirrored relative to the front-view labels.
@@ -177,15 +215,40 @@ archive is the delivered manufacturing preview.
 
 ## PNG previews
 
-The latest front and back views, with Chinese color/material legends beside
+The latest front and back views, with Chinese color/material legends and dimensions beside
 the board, are [front](renders/minibox-carrier-front-legend.png) and
 [back](renders/minibox-carrier-back-legend.png). Unannotated versions are
 [front](renders/minibox-carrier-front.png) and
-[back](renders/minibox-carrier-back.png). The legends are image annotations,
-not PCB silkscreen, and are absent from the Gerbers. The colors distinguish
+[back](renders/minibox-carrier-back.png). Blue dimension leaders label the
+100 x 112 mm outline, all four 3.0 mm mounting holes and their
+90 x 102 mm center spacing, read directly from the saved board.
+Their pixel placement is illustrative, not a manufacturing drawing.
+The legends and blue leaders are image annotations, not PCB silkscreen,
+and are absent from the Gerbers. The colors distinguish
 covered copper, no-copper areas, exposed metal and materials, not copper-layer
 count. KiCad models show sockets/terminals rather than complete installed
-modules; the custom microphone socket currently has no 3D connector model.
+modules. J3 now includes two standard 1x3 female-socket models,
+one on each three-pad strip, at the provisional 7.62 mm separation.
+
+The actual front silkscreen, included in the Gerbers, carries
+**PangMiaoMiao MiniBox**, **v1.0**, **2026-10-03** and a compact mechanical
+table: `BOARD 100x112`, `PITCH 90x102` (hole centers), `HOLES 4xD3.0`,
+all in millimetres. A separate `SOCKETS P2.54` list is generated from
+the actual socket placements, counting J3 as two separate strips:
+
+| Female socket, 2.54 mm pitch | Quantity per board |
+|---|---|
+| 1x22 | 2 |
+| 1x14 | 1 |
+| 1x7 | 1 |
+| 1x6 | 1 |
+| 1x5 | 2 |
+| 1x3 | 2 |
+
+These are nine female strips / 87 solder pins. J7/J8 are separate
+three-/two-position 5.08 mm screw terminals, not female sockets;
+all connectors together have 92 solder pins. Socket height and exact
+part numbers still need confirmation.
 
 Regenerate these after changing the saved board (from this directory):
 
@@ -205,8 +268,9 @@ python .\add_render_legends.py
 if ($LASTEXITCODE -ne 0) { throw "Legend generation failed" }
 ```
 
-The legend helper uses Pillow and the Windows Microsoft YaHei font;
-`--font` accepts another Chinese font file if needed.
+The legend helper uses Pillow, KiCad's bundled Python for board geometry,
+and the Windows Microsoft YaHei font. `--font` accepts another Chinese
+font file; `--kicad-python` accepts another KiCad Python executable.
 Rendering to fresh files and replacing the images atomically avoids
 Windows refusing to truncate a PNG that an open viewer has memory-mapped.
 Check that the new output exists: KiCad may report success even after
@@ -295,7 +359,7 @@ GND; J7 switched load -> ESP32 J1 5V and amplifier J4 VIN. The development
 board's onboard regulator (not the ESP32-S3 chip) produces 3V3, which
 powers the microphone, RTC, screen, keyboard and joystick. No screen pin
 is connected to 5V. The amplifier alone uses switched 5V among the
-peripheral modules. GPIO/SPI are 3.3V logic. LCD SCK is roughly 39.6 mm
+peripheral modules. GPIO/SPI are 3.3V logic. LCD SCK is roughly 21.9 mm
 on this PCB before accounting for the cable; test the real screen at a
 reduced SPI clock if 40 MHz proves unreliable, rather than assuming DRC
 guarantees signal integrity.
@@ -308,7 +372,7 @@ combined display, microphone and RTC current. `docs/hardware-connections.md`
 remains the source for firmware
 GPIO mappings, I2S sharing and backlight caveats.
 
-This 120 x 112 mm board **does not fit** the enclosure's current 58 x 68 mm
+This 100 x 112 mm board **does not fit** the enclosure's current 58 x 68 mm
 ESP32 expansion-board space; its mounting/height and any cable access require
 a new enclosure layout. This is not a replacement for the existing expansion
 board. Measure all modules and revise the footprints, keepouts, edge clearance
