@@ -32,8 +32,19 @@ CLEARANCE = 0.3
 VIA_DIAMETER = 0.8
 VIA_DRILL = 0.4
 VIA_COST = 75
-ROUTE_LAYERS = (pcb.F_Cu, pcb.B_Cu)
+ROUTE_LAYERS = (pcb.F_Cu, pcb.B_Cu, pcb.In2_Cu)
 POWER_WIDTHS = {"3V3": 0.65, "5V_IN": 0.8, "5V_SW": 0.8}
+I2S_NETS = {"I2S_WS", "I2S_BCLK", "AUDIO_DIN", "MIC_SD"}
+if board.GetCopperLayerCount() != 4 or list(board.GetTracks()):
+    raise RuntimeError("Run generate_board.py before routing the four-layer board")
+
+
+def layers_for(name):
+    if name in POWER_WIDTHS:
+        return (2,)
+    if name in I2S_NETS:
+        return (0,)
+    return (0, 1)
 
 
 def width_for(name):
@@ -100,7 +111,7 @@ for pad in all_pads:
                            VIA_DIAMETER / 2 + pad_clearance + STEP / 2):
         via_pad_blocks[coordinate].add("PAD")
 
-# Match the board's two-sided antenna rule area, including trace radius.
+# Match the board's all-layer antenna rule area, including trace radius.
 for x in range(NX):
     for y in range(NY):
         px, py = xy(x, y)
@@ -127,7 +138,7 @@ def via_free(x, y, name):
     return True
 
 
-def search(start, targets, name, start_layers=range(len(ROUTE_LAYERS))):
+def search(start, targets, name, start_layers=None):
     sx, sy = start
     goals = set(targets)
     positions = {(x, y) for _, x, y in goals}
@@ -141,7 +152,8 @@ def search(start, targets, name, start_layers=range(len(ROUTE_LAYERS))):
     queue = []
     previous = {}
     costs = {}
-    for layer in start_layers:
+    allowed_layers = layers_for(name)
+    for layer in allowed_layers if start_layers is None else start_layers:
         state = (layer, sx, sy)
         costs[state] = 0
         heappush(queue, (heuristic(sx, sy), 0, state))
@@ -169,7 +181,7 @@ def search(start, targets, name, start_layers=range(len(ROUTE_LAYERS))):
                 previous[nxt] = state
                 heappush(queue, (new_cost + 10 * heuristic(nx, ny), new_cost, nxt))
         if via_free(x, y, name):
-            for next_layer in range(len(ROUTE_LAYERS)):
+            for next_layer in allowed_layers:
                 if next_layer == layer:
                     continue
                 other = (next_layer, x, y)
@@ -244,23 +256,24 @@ def apply(route, source, name, from_position=None):
 
 
 priority = [
-    "GND",
+    "AUDIO_DIN", "I2S_BCLK", "I2S_WS", "MIC_SD",
     "LCD_BL", "LCD_CS", "LCD_RST", "LCD_DC", "LCD_MOSI", "LCD_SCK",
     "5V_IN",
     "GPIO1", "GPIO2", "GPIO42",
     "RTC_SDA", "RTC_SCL",
-    "I2S_WS", "I2S_BCLK", "AUDIO_DIN",
     "AMP_GAIN", "AMP_SD",
-    "MIC_SD", "BUTTON1", "RECORD", "BUTTON3",
+    "BUTTON1", "RECORD", "BUTTON3",
     "5V_SW",
     "3V3",
 ]
 assert set(priority) == {
-    name for name, group in pads.items() if len(group) > 1}
+    name for name, group in pads.items() if len(group) > 1 and name != "GND"}
 escapes = {}
 for pad in all_pads:
     reference = pad.GetParentFootprint().GetReference()
     number = int(pad.GetNumber()) if pad.GetNumber().isdigit() else 0
+    if pad.GetNetname() in POWER_WIDTHS or pad.GetNetname() == "GND":
+        continue
     if reference == "J4" and pad.GetNetname() != "GND":
         dx, dy = (5.5 if number == 7 else 5), 0
     elif reference == "J12" and number >= 3:
@@ -299,7 +312,7 @@ for name in priority:
     first_escape = escapes.get(id(first))
     px, py = cell(first_escape or first.GetPosition())
     tree = {(layer, px, py) for layer in (
-        (0,) if first_escape else range(len(ROUTE_LAYERS)))}
+        (0,) if first_escape else layers_for(name))}
     while group:
         source = min(group, key=lambda p: min(
             abs(cell(escapes.get(id(p), p.GetPosition()))[0] - x) +
@@ -307,7 +320,7 @@ for name in priority:
             for _, x, y in tree))
         group.remove(source)
         escape = escapes.get(id(source))
-        layers = (0,) if escape or source.GetAttribute() == pcb.PAD_ATTRIB_SMD else range(len(ROUTE_LAYERS))
+        layers = (0,) if escape or source.GetAttribute() == pcb.PAD_ATTRIB_SMD else layers_for(name)
         route = search(cell(escape or source.GetPosition()), tree, name,
                        start_layers=layers)
         tip = apply(route, source, name, from_position=escape)
@@ -529,37 +542,160 @@ for (_, _, x, y), pair in remaining_junctions.items():
         raise RuntimeError(f"Unresolved right-angle bend at ({mm(x)}, {mm(y)})")
 
 tracks = list(board.GetTracks())
-if sum(isinstance(item, pcb.PCB_VIA) for item in tracks) > 23:
-    raise RuntimeError("Stacked layout exceeds its 23-via routing budget")
+if sum(isinstance(item, pcb.PCB_VIA) for item in tracks) > 32:
+    raise RuntimeError("Four-layer layout exceeds its 32-signal-via routing budget")
 if sum(mm(item.GetLength()) for item in tracks
        if not isinstance(item, pcb.PCB_VIA)) > 1975.819:
     raise RuntimeError("Stacked layout exceeds the preceding compact board's routed length")
 
-for layer in (pcb.F_Cu, pcb.B_Cu):
+
+def add_zone(layer, name, outline=None, priority=0):
     zone = pcb.ZONE(board)
     zone.SetLayer(layer)
-    zone.SetNet(board.FindNet("GND"))
+    zone.SetNet(board.FindNet(name))
+    zone.SetAssignedPriority(priority)
     zone.SetPadConnection(pcb.ZONE_CONNECTION_THERMAL)
     zone.SetThermalReliefGap(pcb.FromMM(0.3))
     zone.SetThermalReliefSpokeWidth(pcb.FromMM(0.35))
     zone.SetLocalClearance(pcb.FromMM(0.35))
     zone.SetMinThickness(pcb.FromMM(0.25))
     zone.SetIslandRemovalMode(pcb.ISLAND_REMOVAL_MODE_ALWAYS)
-    zone.Outline().NewOutline()
-    for x, y in ((LEFT + 1, TOP + 1), (RIGHT - 1, TOP + 1),
-                 (RIGHT - 1, BOTTOM - 1), (LEFT + 1, BOTTOM - 1)):
-        zone.Outline().Append(pcb.FromMM(x), pcb.FromMM(y))
+    if outline is None:
+        zone.Outline().NewOutline()
+        for x, y in ((LEFT + 1, TOP + 1), (RIGHT - 1, TOP + 1),
+                     (RIGHT - 1, BOTTOM - 1), (LEFT + 1, BOTTOM - 1)):
+            zone.Outline().Append(pcb.FromMM(x), pcb.FromMM(y))
+    else:
+        zone.SetOutline(outline)
+        # SetOutline transfers ownership to the KiCad zone.
+        outline.thisown = False
     board.Add(zone)
 
-# These pads' bottom-side pours form isolated slivers; retain their
-# explicit routed GND connections instead of starved thermal islands.
-for pad in all_pads:
-    if (pad.GetParentFootprint().GetReference(), pad.GetNumber()) in {
-            ("J1", "22"), ("J5", "6")}:
-        pad.SetLocalZoneConnection(pcb.ZONE_CONNECTION_NONE)
+
+for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.B_Cu):
+    add_zone(layer, "GND")
+add_zone(pcb.In2_Cu, "3V3")
+for name in ("5V_IN", "5V_SW"):
+    outline = pcb.SHAPE_POLY_SET()
+    for item in tracks:
+        if item.GetNetname() != name:
+            continue
+        shape = pcb.SHAPE_POLY_SET()
+        item.TransformShapeToPolygon(
+            shape, pcb.In2_Cu, pcb.FromMM(0.7), pcb.FromMM(0.01),
+            pcb.ERROR_INSIDE)
+        outline.BooleanAdd(shape)
+    add_zone(pcb.In2_Cu, name, outline, priority=1)
+
+
+def ground_site_clear(x, y):
+    if not (LEFT + 2 <= x <= RIGHT - 2 and TOP + 2 <= y <= BOTTOM - 2):
+        return False
+    radius = VIA_DIAMETER / 2
+    if rectangle_distance((x, y), (x, y), 52, 67, 73.5, 84) <= radius + CLEARANCE:
+        return False
+    for pad in all_pads:
+        if pad.GetParentFootprint().GetReference().startswith("H"):
+            if hypot(x - mm(pad.GetPosition().x), y - mm(pad.GetPosition().y)) <= 3.5 + radius:
+                return False
+        else:
+            box = pad.GetBoundingBox()
+            if rectangle_distance(
+                    (x, y), (x, y), mm(box.GetLeft()), mm(box.GetTop()),
+                    mm(box.GetRight()), mm(box.GetBottom())) <= radius + max(
+                        CLEARANCE, mm(pad.GetLocalClearance() or 0)) + 0.02:
+                return False
+    for item in board.GetTracks():
+        if isinstance(item, pcb.PCB_VIA):
+            if hypot(x - mm(item.GetPosition().x), y - mm(item.GetPosition().y)) <= (
+                    radius + mm(item.GetWidth(pcb.F_Cu)) / 2 + CLEARANCE + 0.02):
+                return False
+        elif item.GetNetname() != "GND" and segment_distance(
+                (x, y), (x, y),
+                (mm(item.GetStart().x), mm(item.GetStart().y)),
+                (mm(item.GetEnd().x), mm(item.GetEnd().y))) <= (
+                    radius + mm(item.GetWidth()) / 2 + CLEARANCE + 0.02):
+            return False
+    return True
+
+
+def stitch_near(position, max_distance=3):
+    if any(isinstance(t, pcb.PCB_VIA) and t.GetNetname() == "GND" and
+           hypot(mm(t.GetPosition().x - position.x),
+                 mm(t.GetPosition().y - position.y)) <= max_distance
+           for t in board.GetTracks()):
+        return
+    x, y = cell(position)
+    candidates = sorted(disk(x, y, max_distance),
+                        key=lambda c: hypot(c[0] - x, c[1] - y))
+    for a, b in candidates:
+        px, py = xy(a, b)
+        if hypot(px - mm(position.x), py - mm(position.y)) > max_distance:
+            continue
+        if not ground_site_clear(px, py):
+            continue
+        via(a, b, "GND")
+        return
+    raise RuntimeError(f"No ground stitching site near {xy(x, y)}")
+
+
+for item in tracks:
+    if isinstance(item, pcb.PCB_VIA):
+        stitch_near(item.GetPosition())
+    elif item.GetNetname() in I2S_NETS:
+        length = mm(item.GetLength())
+        for index in range(1, ceil(length / 10)):
+            ratio = index / ceil(length / 10)
+            start, end = item.GetStart(), item.GetEnd()
+            stitch_near(point(
+                mm(start.x) + ratio * mm(end.x - start.x),
+                mm(start.y) + ratio * mm(end.y - start.y)))
 
 if not pcb.ZONE_FILLER(board).Fill(board.Zones()):
     raise RuntimeError("KiCad failed to fill the ground zones")
+
+ground_plane = next(
+    zone.GetFilledPolysList(pcb.In1_Cu) for zone in board.Zones()
+    if zone.GetLayer() == pcb.In1_Cu and zone.GetNetname() == "GND")
+if ground_plane.OutlineCount() != 1:
+    raise RuntimeError("The inner GND plane must remain a single connected region")
+endpoint_boxes = {
+    name: [pad.GetBoundingBox() for pad in pads[name]] for name in I2S_NETS
+}
+for item in board.GetTracks():
+    if isinstance(item, pcb.PCB_VIA):
+        if item.GetNetname() in I2S_NETS:
+            raise RuntimeError("I2S must not change layers")
+        continue
+    if item.GetNetname() in POWER_WIDTHS:
+        if item.GetLayer() != pcb.In2_Cu:
+            raise RuntimeError("Power routing must stay on In2.Cu")
+    elif item.GetLayer() not in (pcb.F_Cu, pcb.B_Cu):
+        raise RuntimeError("Signal routing must stay on the outer layers")
+    if item.GetNetname() not in I2S_NETS:
+        continue
+    if item.GetLayer() != pcb.F_Cu:
+        raise RuntimeError("I2S must reference In1.Cu from F.Cu")
+    start, end = item.GetStart(), item.GetEnd()
+    samples = max(1, ceil(mm(item.GetLength()) / 0.1))
+    for index in range(samples):
+        ratio = (index + 0.5) / samples
+        position = pcb.VECTOR2I(
+            round(start.x + ratio * (end.x - start.x)),
+            round(start.y + ratio * (end.y - start.y)))
+        if ground_plane.Contains(position):
+            continue
+        # A plated signal pad necessarily has an antipad in the GND plane.
+        margin = pcb.FromMM(0.4)
+        if any(
+                box.GetLeft() - margin <= position.x <= box.GetRight() + margin and
+                box.GetTop() - margin <= position.y <= box.GetBottom() + margin
+                for box in endpoint_boxes[item.GetNetname()]):
+            continue
+        raise RuntimeError(
+            f"{item.GetNetname()} loses its GND reference at "
+            f"({mm(position.x):.3f}, {mm(position.y):.3f})")
+print("I2S reference: continuous In1.Cu outside connector antipads", flush=True)
 pcb.SaveBoard(str(FILE), board)
 
 project_file = FILE.with_suffix(".kicad_pro")

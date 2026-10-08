@@ -1,0 +1,9 @@
+﻿Comment,Designator,Footprint,Quantity per PCB,LCSC Part #,Manufacturer Part Number,Selection Status
+Female socket 1x22 P2.54mm vertical THT,"J1,J2",PinSocket_1x22_P2.54mm_Vertical,2,,,NOT_SELECTED - QUOTATION ONLY
+Female socket 1x03 P2.54mm vertical THT,"J3A,J3B",PinSocket_1x03_P2.54mm_Vertical,2,,,NOT_SELECTED - QUOTATION ONLY
+Female socket 1x07 P2.54mm vertical THT,J4,PinSocket_1x07_P2.54mm_Vertical,1,,,NOT_SELECTED - QUOTATION ONLY
+Female socket 1x06 P2.54mm vertical THT,J5,PinSocket_1x06_P2.54mm_Vertical,1,,,NOT_SELECTED - QUOTATION ONLY
+Female socket 1x14 P2.54mm vertical THT,J6,PinSocket_1x14_P2.54mm_Vertical,1,,,NOT_SELECTED - QUOTATION ONLY
+Screw terminal 3P P5.08mm horizontal wire entry THT,J7,"TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal",1,,,NOT_SELECTED - QUOTATION ONLY
+Screw terminal 2P P5.08mm horizontal wire entry THT,J8,"TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",1,,,NOT_SELECTED - QUOTATION ONLY
+Female socket 1x05 P2.54mm vertical THT,"J11,J12",PinSocket_1x05_P2.54mm_Vertical,2,,,NOT_SELECTED - QUOTATION ONLY

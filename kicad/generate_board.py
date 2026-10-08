@@ -35,7 +35,10 @@ def point(x, y):
 
 
 board = pcb.BOARD()
-board.SetCopperLayerCount(2)
+board.SetCopperLayerCount(4)
+board.SetLayerType(pcb.In1_Cu, pcb.LT_POWER)
+board.SetLayerType(pcb.In2_Cu, pcb.LT_POWER)
+COPPER_LAYERS = (pcb.F_Cu, pcb.In1_Cu, pcb.In2_Cu, pcb.B_Cu)
 board.GetDesignSettings().m_SolderMaskExpansion = pcb.FromMM(0.05)
 board.GetDesignSettings().m_SolderMaskMinWidth = pcb.FromMM(0.1)
 nets = {}
@@ -124,7 +127,7 @@ def mounting_hole(reference, x, y):
     footprint.Reference().SetVisible(False)
     footprint.Value().SetVisible(False)
     board.Add(footprint)
-    for layer in (pcb.F_Cu, pcb.B_Cu):
+    for layer in COPPER_LAYERS:
         keepout = pcb.ZONE(board)
         keepout.SetLayer(layer)
         keepout.SetIsRuleArea(True)
@@ -142,7 +145,7 @@ def mounting_hole(reference, x, y):
 
 
 def antenna_keepout(x1, y1, x2, y2):
-    for layer in (pcb.F_Cu, pcb.B_Cu):
+    for layer in COPPER_LAYERS:
         keepout = pcb.ZONE(board)
         keepout.SetLayer(layer)
         keepout.SetIsRuleArea(True)
@@ -416,6 +419,32 @@ for _, x, y in MOUNTING_POINTS:
             raise RuntimeError(f"Silkscreen intrudes into M3 screw area at ({x}, {y})")
 
 pcb.SaveBoard(str(BOARD_FILE), board)
+# KiCad's bundled SWIG API does not expose stackup item setters.
+stackup = """(stackup
+        (layer "F.SilkS" (type "Top Silk Screen"))
+        (layer "F.Paste" (type "Top Solder Paste"))
+        (layer "F.Mask" (type "Top Solder Mask") (thickness 0.01))
+        (layer "F.Cu" (type "copper") (thickness 0.035))
+        (layer "dielectric 1" (type "prepreg") (thickness 0.18)
+            (material "FR4") (epsilon_r 4.5) (loss_tangent 0.02))
+        (layer "In1.Cu" (type "copper") (thickness 0.035))
+        (layer "dielectric 2" (type "core") (thickness 1.08)
+            (material "FR4") (epsilon_r 4.5) (loss_tangent 0.02))
+        (layer "In2.Cu" (type "copper") (thickness 0.035))
+        (layer "dielectric 3" (type "prepreg") (thickness 0.18)
+            (material "FR4") (epsilon_r 4.5) (loss_tangent 0.02))
+        (layer "B.Cu" (type "copper") (thickness 0.035))
+        (layer "B.Mask" (type "Bottom Solder Mask") (thickness 0.01))
+        (layer "B.Paste" (type "Bottom Solder Paste"))
+        (layer "B.SilkS" (type "Bottom Silk Screen"))
+        (copper_finish "HAL lead-free")
+        (dielectric_constraints no)
+    )
+    """
+before, setup, after = BOARD_FILE.read_text(encoding="utf-8").partition("(setup\n")
+if not setup:
+    raise RuntimeError("Generated board has no setup section for the stackup")
+BOARD_FILE.write_text(before + setup + "\t\t" + stackup + after, encoding="utf-8")
 if existing_sheets is not None:
     project = json.loads(PROJECT_FILE.read_text(encoding="utf-8"))
     project["schematic"]["top_level_sheets"] = existing_sheets

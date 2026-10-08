@@ -1,0 +1,1012 @@
+{
+  "left": 5.0,
+  "right": 105.0,
+  "top": 3.0,
+  "bottom": 115.0,
+  "layers": 4,
+  "units": [
+    {
+      "reference": "J1",
+      "pcb_reference": "J1",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "1",
+          "x": 74.8,
+          "y": 66.0,
+          "net": "3V3",
+          "drill": 1.0
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "2",
+          "x": 74.8,
+          "y": 63.46,
+          "net": "3V3",
+          "drill": 1.0
+        },
+        {
+          "pin": 3,
+          "pcb_pad": "3",
+          "x": 74.8,
+          "y": 60.92,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 4,
+          "pcb_pad": "4",
+          "x": 74.8,
+          "y": 58.38,
+          "net": "BUTTON1",
+          "drill": 1.0
+        },
+        {
+          "pin": 5,
+          "pcb_pad": "5",
+          "x": 74.8,
+          "y": 55.84,
+          "net": "RECORD",
+          "drill": 1.0
+        },
+        {
+          "pin": 6,
+          "pcb_pad": "6",
+          "x": 74.8,
+          "y": 53.3,
+          "net": "BUTTON3",
+          "drill": 1.0
+        },
+        {
+          "pin": 7,
+          "pcb_pad": "7",
+          "x": 74.8,
+          "y": 50.76,
+          "net": "AMP_SD",
+          "drill": 1.0
+        },
+        {
+          "pin": 8,
+          "pcb_pad": "8",
+          "x": 74.8,
+          "y": 48.22,
+          "net": "MIC_SD",
+          "drill": 1.0
+        },
+        {
+          "pin": 9,
+          "pcb_pad": "9",
+          "x": 74.8,
+          "y": 45.68,
+          "net": "GPIO16",
+          "drill": 1.0
+        },
+        {
+          "pin": 10,
+          "pcb_pad": "10",
+          "x": 74.8,
+          "y": 43.14,
+          "net": "GPIO17",
+          "drill": 1.0
+        },
+        {
+          "pin": 11,
+          "pcb_pad": "11",
+          "x": 74.8,
+          "y": 40.6,
+          "net": "GPIO18",
+          "drill": 1.0
+        },
+        {
+          "pin": 12,
+          "pcb_pad": "12",
+          "x": 74.8,
+          "y": 38.06,
+          "net": "AMP_GAIN",
+          "drill": 1.0
+        },
+        {
+          "pin": 13,
+          "pcb_pad": "13",
+          "x": 74.8,
+          "y": 35.52,
+          "net": "GPIO3",
+          "drill": 1.0
+        },
+        {
+          "pin": 14,
+          "pcb_pad": "14",
+          "x": 74.8,
+          "y": 32.98,
+          "net": "GPIO46",
+          "drill": 1.0
+        },
+        {
+          "pin": 15,
+          "pcb_pad": "15",
+          "x": 74.8,
+          "y": 30.44,
+          "net": "LCD_BL",
+          "drill": 1.0
+        },
+        {
+          "pin": 16,
+          "pcb_pad": "16",
+          "x": 74.8,
+          "y": 27.9,
+          "net": "LCD_SCK",
+          "drill": 1.0
+        },
+        {
+          "pin": 17,
+          "pcb_pad": "17",
+          "x": 74.8,
+          "y": 25.36,
+          "net": "LCD_MOSI",
+          "drill": 1.0
+        },
+        {
+          "pin": 18,
+          "pcb_pad": "18",
+          "x": 74.8,
+          "y": 22.82,
+          "net": "LCD_DC",
+          "drill": 1.0
+        },
+        {
+          "pin": 19,
+          "pcb_pad": "19",
+          "x": 74.8,
+          "y": 20.28,
+          "net": "LCD_RST",
+          "drill": 1.0
+        },
+        {
+          "pin": 20,
+          "pcb_pad": "20",
+          "x": 74.8,
+          "y": 17.74,
+          "net": "LCD_CS",
+          "drill": 1.0
+        },
+        {
+          "pin": 21,
+          "pcb_pad": "21",
+          "x": 74.8,
+          "y": 15.2,
+          "net": "5V_SW",
+          "drill": 1.0
+        },
+        {
+          "pin": 22,
+          "pcb_pad": "22",
+          "x": 74.8,
+          "y": 12.66,
+          "net": "GND",
+          "drill": 1.0
+        }
+      ],
+      "type": "female_socket",
+      "count": 22,
+      "pitch": 2.54,
+      "footprint": "PinSocket_1x22_P2.54mm_Vertical",
+      "rotation": 180.0,
+      "cx": 74.79999999999997,
+      "cy": 39.33000000000001,
+      "bounds": [
+        73.53,
+        11.39,
+        76.07,
+        67.27
+      ]
+    },
+    {
+      "reference": "J2",
+      "pcb_reference": "J2",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "1",
+          "x": 49.4,
+          "y": 66.0,
+          "net": "GND",
+          "drill": 1.0
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "2",
+          "x": 49.4,
+          "y": 63.46,
+          "net": "GPIO43",
+          "drill": 1.0
+        },
+        {
+          "pin": 3,
+          "pcb_pad": "3",
+          "x": 49.4,
+          "y": 60.92,
+          "net": "GPIO44",
+          "drill": 1.0
+        },
+        {
+          "pin": 4,
+          "pcb_pad": "4",
+          "x": 49.4,
+          "y": 58.38,
+          "net": "GPIO1",
+          "drill": 1.0
+        },
+        {
+          "pin": 5,
+          "pcb_pad": "5",
+          "x": 49.4,
+          "y": 55.84,
+          "net": "GPIO2",
+          "drill": 1.0
+        },
+        {
+          "pin": 6,
+          "pcb_pad": "6",
+          "x": 49.4,
+          "y": 53.3,
+          "net": "GPIO42",
+          "drill": 1.0
+        },
+        {
+          "pin": 7,
+          "pcb_pad": "7",
+          "x": 49.4,
+          "y": 50.76,
+          "net": "AUDIO_DIN",
+          "drill": 1.0
+        },
+        {
+          "pin": 8,
+          "pcb_pad": "8",
+          "x": 49.4,
+          "y": 48.22,
+          "net": "I2S_BCLK",
+          "drill": 1.0
+        },
+        {
+          "pin": 9,
+          "pcb_pad": "9",
+          "x": 49.4,
+          "y": 45.68,
+          "net": "I2S_WS",
+          "drill": 1.0
+        },
+        {
+          "pin": 10,
+          "pcb_pad": "10",
+          "x": 49.4,
+          "y": 43.14,
+          "net": "GPIO38",
+          "drill": 1.0
+        },
+        {
+          "pin": 11,
+          "pcb_pad": "11",
+          "x": 49.4,
+          "y": 40.6,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 12,
+          "pcb_pad": "12",
+          "x": 49.4,
+          "y": 38.06,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 13,
+          "pcb_pad": "13",
+          "x": 49.4,
+          "y": 35.52,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 14,
+          "pcb_pad": "14",
+          "x": 49.4,
+          "y": 32.98,
+          "net": "GPIO0",
+          "drill": 1.0
+        },
+        {
+          "pin": 15,
+          "pcb_pad": "15",
+          "x": 49.4,
+          "y": 30.44,
+          "net": "GPIO45",
+          "drill": 1.0
+        },
+        {
+          "pin": 16,
+          "pcb_pad": "16",
+          "x": 49.4,
+          "y": 27.9,
+          "net": "GPIO48",
+          "drill": 1.0
+        },
+        {
+          "pin": 17,
+          "pcb_pad": "17",
+          "x": 49.4,
+          "y": 25.36,
+          "net": "RTC_SDA",
+          "drill": 1.0
+        },
+        {
+          "pin": 18,
+          "pcb_pad": "18",
+          "x": 49.4,
+          "y": 22.82,
+          "net": "RTC_SCL",
+          "drill": 1.0
+        },
+        {
+          "pin": 19,
+          "pcb_pad": "19",
+          "x": 49.4,
+          "y": 20.28,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 20,
+          "pcb_pad": "20",
+          "x": 49.4,
+          "y": 17.74,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 21,
+          "pcb_pad": "21",
+          "x": 49.4,
+          "y": 15.2,
+          "net": "GND",
+          "drill": 1.0
+        },
+        {
+          "pin": 22,
+          "pcb_pad": "22",
+          "x": 49.4,
+          "y": 12.66,
+          "net": "GND",
+          "drill": 1.0
+        }
+      ],
+      "type": "female_socket",
+      "count": 22,
+      "pitch": 2.54,
+      "footprint": "PinSocket_1x22_P2.54mm_Vertical",
+      "rotation": 180.0,
+      "cx": 49.399999999999984,
+      "cy": 39.33000000000001,
+      "bounds": [
+        48.13,
+        11.39,
+        50.67,
+        67.27
+      ]
+    },
+    {
+      "reference": "J3A",
+      "pcb_reference": "J3",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "1",
+          "x": 50.0,
+          "y": 100.0,
+          "net": "3V3",
+          "drill": 1.0
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "3",
+          "x": 50.0,
+          "y": 102.54,
+          "net": "I2S_BCLK",
+          "drill": 1.0
+        },
+        {
+          "pin": 3,
+          "pcb_pad": "5",
+          "x": 50.0,
+          "y": 105.08,
+          "net": "MIC_SD",
+          "drill": 1.0
+        }
+      ],
+      "type": "female_socket",
+      "count": 3,
+      "pitch": 2.54,
+      "footprint": "PinSocket_1x03_P2.54mm_Vertical",
+      "rotation": 0.0,
+      "cx": 50.0,
+      "cy": 102.54,
+      "bounds": [
+        48.73,
+        98.73,
+        51.27,
+        106.35
+      ]
+    },
+    {
+      "reference": "J3B",
+      "pcb_reference": "J3",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "2",
+          "x": 42.38,
+          "y": 100.0,
+          "net": "GND",
+          "drill": 1.0
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "4",
+          "x": 42.38,
+          "y": 102.54,
+          "net": "I2S_WS",
+          "drill": 1.0
+        },
+        {
+          "pin": 3,
+          "pcb_pad": "6",
+          "x": 42.38,
+          "y": 105.08,
+          "net": "GND",
+          "drill": 1.0
+        }
+      ],
+      "type": "female_socket",
+      "count": 3,
+      "pitch": 2.54,
+      "footprint": "PinSocket_1x03_P2.54mm_Vertical",
+      "rotation": 0.0,
+      "cx": 42.38,
+      "cy": 102.54,
+      "bounds": [
+        41.11,
+        98.73,
+        43.650000000000006,
+        106.35
+      ]
+    },
+    {
+      "reference": "J4",
+      "pcb_reference": "J4",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "1",
+          "x": 12.0,
+          "y": 38.0,
+          "net": "I2S_WS",
+          "drill": 1.0
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "2",
+          "x": 12.0,
+          "y": 40.54,
+          "net": "I2S_BCLK",
+          "drill": 1.0
+        },
+        {
+          "pin": 3,
+          "pcb_pad": "3",
+          "x": 12.0,
+          "y": 43.08,
+          "net": "AUDIO_DIN",
+          "drill": 1.0
+        },
+        {
+          "pin": 4,
+          "pcb_pad": "4",
+          "x": 12.0,
+          "y": 45.62,
+          "net": "AMP_GAIN",
+          "drill": 1.0
+        },
+        {
+          "pin": 5,
+          "pcb_pad": "5",
+          "x": 12.0,
+          "y": 48.16,
+          "net": "AMP_SD",
+          "drill": 1.0
+        },
+        {
+          "pin": 6,
+          "pcb_pad": "6",
+          "x": 12.0,
+          "y": 50.7,
+          "net": "GND",
+          "drill": 1.0
+        },
+        {
+          "pin": 7,
+          "pcb_pad": "7",
+          "x": 12.0,
+          "y": 53.24,
+          "net": "5V_SW",
+          "drill": 1.0
+        }
+      ],
+      "type": "female_socket",
+      "count": 7,
+      "pitch": 2.54,
+      "footprint": "PinSocket_1x07_P2.54mm_Vertical",
+      "rotation": 0.0,
+      "cx": 12.0,
+      "cy": 45.62,
+      "bounds": [
+        10.73,
+        36.73,
+        13.27,
+        54.51
+      ]
+    },
+    {
+      "reference": "J5",
+      "pcb_reference": "J5",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "1",
+          "x": 16.0,
+          "y": 12.0,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "2",
+          "x": 16.0,
+          "y": 14.54,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 3,
+          "pcb_pad": "3",
+          "x": 16.0,
+          "y": 17.08,
+          "net": "RTC_SDA",
+          "drill": 1.0
+        },
+        {
+          "pin": 4,
+          "pcb_pad": "4",
+          "x": 16.0,
+          "y": 19.62,
+          "net": "RTC_SCL",
+          "drill": 1.0
+        },
+        {
+          "pin": 5,
+          "pcb_pad": "5",
+          "x": 16.0,
+          "y": 22.16,
+          "net": "3V3",
+          "drill": 1.0
+        },
+        {
+          "pin": 6,
+          "pcb_pad": "6",
+          "x": 16.0,
+          "y": 24.7,
+          "net": "GND",
+          "drill": 1.0
+        }
+      ],
+      "type": "female_socket",
+      "count": 6,
+      "pitch": 2.54,
+      "footprint": "PinSocket_1x06_P2.54mm_Vertical",
+      "rotation": 0.0,
+      "cx": 16.0,
+      "cy": 18.349999999999998,
+      "bounds": [
+        14.73,
+        10.73,
+        17.27,
+        25.97
+      ]
+    },
+    {
+      "reference": "J6",
+      "pcb_reference": "J6",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "1",
+          "x": 96.0,
+          "y": 14.0,
+          "net": "3V3",
+          "drill": 1.0
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "2",
+          "x": 96.0,
+          "y": 16.54,
+          "net": "GND",
+          "drill": 1.0
+        },
+        {
+          "pin": 3,
+          "pcb_pad": "3",
+          "x": 96.0,
+          "y": 19.08,
+          "net": "LCD_CS",
+          "drill": 1.0
+        },
+        {
+          "pin": 4,
+          "pcb_pad": "4",
+          "x": 96.0,
+          "y": 21.62,
+          "net": "LCD_RST",
+          "drill": 1.0
+        },
+        {
+          "pin": 5,
+          "pcb_pad": "5",
+          "x": 96.0,
+          "y": 24.16,
+          "net": "LCD_DC",
+          "drill": 1.0
+        },
+        {
+          "pin": 6,
+          "pcb_pad": "6",
+          "x": 96.0,
+          "y": 26.7,
+          "net": "LCD_MOSI",
+          "drill": 1.0
+        },
+        {
+          "pin": 7,
+          "pcb_pad": "7",
+          "x": 96.0,
+          "y": 29.24,
+          "net": "LCD_SCK",
+          "drill": 1.0
+        },
+        {
+          "pin": 8,
+          "pcb_pad": "8",
+          "x": 96.0,
+          "y": 31.78,
+          "net": "LCD_BL",
+          "drill": 1.0
+        },
+        {
+          "pin": 9,
+          "pcb_pad": "9",
+          "x": 96.0,
+          "y": 34.32,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 10,
+          "pcb_pad": "10",
+          "x": 96.0,
+          "y": 36.86,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 11,
+          "pcb_pad": "11",
+          "x": 96.0,
+          "y": 39.4,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 12,
+          "pcb_pad": "12",
+          "x": 96.0,
+          "y": 41.94,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 13,
+          "pcb_pad": "13",
+          "x": 96.0,
+          "y": 44.48,
+          "net": "NC",
+          "drill": 1.0
+        },
+        {
+          "pin": 14,
+          "pcb_pad": "14",
+          "x": 96.0,
+          "y": 47.02,
+          "net": "NC",
+          "drill": 1.0
+        }
+      ],
+      "type": "female_socket",
+      "count": 14,
+      "pitch": 2.54,
+      "footprint": "PinSocket_1x14_P2.54mm_Vertical",
+      "rotation": 0.0,
+      "cx": 96.0,
+      "cy": 30.509999999999998,
+      "bounds": [
+        94.73,
+        12.73,
+        97.27,
+        48.29
+      ]
+    },
+    {
+      "reference": "J7",
+      "pcb_reference": "J7",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "1",
+          "x": 96.0,
+          "y": 55.5,
+          "net": "5V_IN",
+          "drill": 1.3
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "2",
+          "x": 96.0,
+          "y": 60.58,
+          "net": "5V_SW",
+          "drill": 1.3
+        },
+        {
+          "pin": 3,
+          "pcb_pad": "3",
+          "x": 96.0,
+          "y": 65.66,
+          "net": "GND",
+          "drill": 1.3
+        }
+      ],
+      "type": "terminal",
+      "count": 3,
+      "pitch": 5.08,
+      "footprint": "TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal",
+      "rotation": 270.0,
+      "cx": 96.0,
+      "cy": 60.580000000000005,
+      "bounds": [
+        91.4,
+        52.96,
+        101.2,
+        68.2
+      ]
+    },
+    {
+      "reference": "J8",
+      "pcb_reference": "J8",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "1",
+          "x": 28.0,
+          "y": 11.0,
+          "net": "5V_IN",
+          "drill": 1.3
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "2",
+          "x": 33.08,
+          "y": 11.0,
+          "net": "GND",
+          "drill": 1.3
+        }
+      ],
+      "type": "terminal",
+      "count": 2,
+      "pitch": 5.08,
+      "footprint": "TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal",
+      "rotation": 0.0,
+      "cx": 30.54,
+      "cy": 11.0,
+      "bounds": [
+        25.46,
+        5.8,
+        35.62,
+        15.6
+      ]
+    },
+    {
+      "reference": "J11",
+      "pcb_reference": "J11",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "1",
+          "x": 82.0,
+          "y": 73.0,
+          "net": "BUTTON1",
+          "drill": 1.0
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "2",
+          "x": 84.54,
+          "y": 73.0,
+          "net": "RECORD",
+          "drill": 1.0
+        },
+        {
+          "pin": 3,
+          "pcb_pad": "3",
+          "x": 87.08,
+          "y": 73.0,
+          "net": "BUTTON3",
+          "drill": 1.0
+        },
+        {
+          "pin": 4,
+          "pcb_pad": "4",
+          "x": 89.62,
+          "y": 73.0,
+          "net": "3V3",
+          "drill": 1.0
+        },
+        {
+          "pin": 5,
+          "pcb_pad": "5",
+          "x": 92.16,
+          "y": 73.0,
+          "net": "GND",
+          "drill": 1.0
+        }
+      ],
+      "type": "female_socket",
+      "count": 5,
+      "pitch": 2.54,
+      "footprint": "PinSocket_1x05_P2.54mm_Vertical",
+      "rotation": 90.0,
+      "cx": 87.08,
+      "cy": 73.0,
+      "bounds": [
+        80.73,
+        71.73,
+        93.43,
+        74.27
+      ]
+    },
+    {
+      "reference": "J12",
+      "pcb_reference": "J12",
+      "pins": [
+        {
+          "pin": 1,
+          "pcb_pad": "1",
+          "x": 12.0,
+          "y": 73.0,
+          "net": "GND",
+          "drill": 1.0
+        },
+        {
+          "pin": 2,
+          "pcb_pad": "2",
+          "x": 14.54,
+          "y": 73.0,
+          "net": "3V3",
+          "drill": 1.0
+        },
+        {
+          "pin": 3,
+          "pcb_pad": "3",
+          "x": 17.08,
+          "y": 73.0,
+          "net": "GPIO1",
+          "drill": 1.0
+        },
+        {
+          "pin": 4,
+          "pcb_pad": "4",
+          "x": 19.62,
+          "y": 73.0,
+          "net": "GPIO2",
+          "drill": 1.0
+        },
+        {
+          "pin": 5,
+          "pcb_pad": "5",
+          "x": 22.16,
+          "y": 73.0,
+          "net": "GPIO42",
+          "drill": 1.0
+        }
+      ],
+      "type": "female_socket",
+      "count": 5,
+      "pitch": 2.54,
+      "footprint": "PinSocket_1x05_P2.54mm_Vertical",
+      "rotation": 90.0,
+      "cx": 17.08,
+      "cy": 73.0,
+      "bounds": [
+        10.73,
+        71.73,
+        23.43,
+        74.27
+      ]
+    }
+  ],
+  "holes": [
+    {
+      "reference": "H1",
+      "x": 10.0,
+      "y": 8.0,
+      "drill": 3.0
+    },
+    {
+      "reference": "H2",
+      "x": 100.0,
+      "y": 8.0,
+      "drill": 3.0
+    },
+    {
+      "reference": "H3",
+      "x": 10.0,
+      "y": 110.0,
+      "drill": 3.0
+    },
+    {
+      "reference": "H4",
+      "x": 100.0,
+      "y": 110.0,
+      "drill": 3.0
+    }
+  ],
+  "status": "QUOTATION_ONLY_NOT_APPROVED_FOR_PRODUCTION",
+  "requested_max_pcbs": 5,
+  "requested_quantity": "minimum accepted batch, not more than five boards",
+  "date": "2026-10-03",
+  "board_version": "v1.0",
+  "git_head": "2aaeddc3d3f7e6dbf074fe36666461171946e8a9",
+  "pcb_sha256": "146f5bf1f978ed1ced275b5bf4dac4155c2979514cf74e1bd449c5952f088a00",
+  "gerber_sha256": "0481e031dd0a6716dd1e0dd0f4bbc63e0f60ecb802caa55d884c053708a7cc24",
+  "coordinate_origin_board_mm": [
+    5,
+    115
+  ],
+  "coordinate_units": "mm",
+  "coordinate_axes": "X right, Y up, front view",
+  "position_reference": "centroid of each physical unit's plated pin centers",
+  "rotation": "KiCad footprint rotation, counterclockwise positive, modulo 360; factory zero unverified",
+  "unresolved_part_types": 8,
+  "release_blockers": [
+    "pure-DIP batch acceptance and price",
+    "all exact SKUs and heights",
+    "real module row spacing and terminal fit",
+    "factory coordinate/rotation review",
+    "factory-confirmed four-layer stackup and revised quotation"
+  ],
+  "pcb_revision_date": "2026-10-08",
+  "pcb_working_tree_modified": true,
+  "stackup": [
+    "F.Cu: signals and GND fill",
+    "In1.Cu: GND reference plane",
+    "In2.Cu: separate 3V3, 5V_IN and 5V_SW power zones",
+    "B.Cu: signals and GND fill"
+  ]
+}

@@ -1,11 +1,11 @@
 # Minibox KiCad carrier (provisional)
 
 Open `minibox-carrier.kicad_pro` in KiCad 10. This PCB-only project (no
-schematic) has a **100 x 112 mm, R5 rounded** outline, 2 copper layers,
+schematic) has a **100 x 112 mm, R5 rounded** outline, 4 copper layers,
 routed female sockets and two wire terminals. The four **3.0 mm
 non-plated** M3 holes are at (10,8),
 (100,8), (10,110) and (100,110) mm in KiCad board coordinates: spacing
-**90 x 102 mm**, measured center to center. Both copper layers exclude tracks and copper fill
+**90 x 102 mm**, measured center to center. All four copper layers exclude tracks and copper fill
 within 3.5 mm of each hole center. A 3.0 mm drill is a tight fit for M3,
 not the usual 3.2 mm clearance hole; confirm screw tolerance.
 
@@ -14,7 +14,7 @@ mirrored)** so its USB connectors face the top edge. As a result its
 original left header J1 is on the right and its original right header
 J2 is on the left; pin 1 of each now sits at the **bottom**. Both rows
 were shifted 12 mm upward relative to the first rotated layout. Beneath
-their antenna end is a **21.5 x 17 mm two-layer no-copper/no-track/no-via
+their antenna end is a **21.5 x 17 mm all-four-layer no-copper/no-track/no-via
 area** at X=52–73.5, Y=67–84 mm (also outlined on `Dwgs.User`).
 The microphone was moved near the lower edge to avoid this area. The supplied
 [`ESP32 dimensions image`](../assets/esp32s3_devkit_01.jpg) shows a
@@ -75,12 +75,52 @@ physical measurement. **Only J7 and J8** use
 5.08 mm screw terminals for the switch and external 5V wires; all
 module headers remain 2.54 mm female sockets.
 
-The routed traces use 0.35 mm signals, 0.65 mm 3V3, and 0.8 mm 5V.
-`F.Cu` and `B.Cu` carry signals and power with filled GND zones.
-Ground connections are routed first to keep the pours connected.
-Through-hole pads and 23 standard through-vias connect the layers;
-there are no blind or buried vias. To reduce sharp bends, the routing
-step eases 122 right-angle corners into 45-degree transitions.
+## Four-layer stackup and I2S
+
+The nominal 1.6 mm stackup is:
+
+| Layer | Function |
+|---|---|
+| L1 / F.Cu | Signals, all four I2S networks, and GND fill |
+| L2 / In1.Cu | Single connected GND reference plane; no tracks |
+| L3 / In2.Cu | Power: 3V3 plane with separate 5V_IN and 5V_SW corridor zones and feeders |
+| L4 / B.Cu | Other signals and GND fill; no power tracks |
+
+The saved stackup specifies 0.035 mm copper on each layer, 0.18 mm
+outer-to-inner prepregs, a 1.08 mm inner core and 0.01 mm masks on each
+side, totaling 1.6 mm. These are **nominal design values, not a
+factory-confirmed stackup**; have the manufacturer confirm the finished
+thickness, dielectric properties and copper thickness before ordering.
+This is not an impedance-controlled release.
+
+The routed traces use 0.35 mm signals, 0.65 mm 3V3 feeders and 0.8 mm
+5V feeders. Power tracks are confined to In2.Cu; the 5V corridor zone
+outlines extend 0.7 mm beyond the routed copper before filling and
+clearance trimming. Different power nets are not joined.
+All GND connector pads connect to the internal plane with thermal relief.
+The antenna and screw-area keepouts apply to **all four copper layers**.
+The reference plane is continuous under I2S outside the necessary
+connector antipads; it is intentionally absent from the antenna keepout.
+
+`AUDIO_DIN`, `I2S_BCLK`, `I2S_WS` and `MIC_SD` are routed first,
+entirely on F.Cu with **zero I2S vias**, eliminating the old long
+top/bottom BCLK/WS overlap. Their routed network lengths are
+42.4, 105.0, 129.8 and 78.0 mm respectively; shared-clock lengths include
+both module branches, not a single source-to-load distance.
+WS is longer than the previous two-layer route to keep it on the same
+reference layer without crossings. The router checks the actual filled
+In1.Cu plane at intervals no greater than 0.1 mm along each I2S centerline,
+excluding only the same-net connector antipad envelopes, and rejects gaps.
+Plane continuity and DRC do not replace an electrical signal-integrity test.
+
+There are **11 signal vias and 28 GND stitching vias**, all ordinary
+through-vias, with no blind or buried vias. Each signal via has a GND
+stitch within 3 mm; additional stitches are placed alongside long I2S legs.
+The bottom layer's adjacent layer is split power, not a uniform GND
+plane, so future fast signals should also prefer F.Cu/In1.Cu.
+Total routed track length is **1507.9 mm**, excluding zone copper.
+To reduce sharp bends, the routing step eases 105 right-angle corners
+into 45-degree transitions.
 Each ordinary corner starts with a cut up to three quarters of the shorter
 adjoining leg, retaining a connecting leg rather than consuming it entirely.
 Cuts are reduced in at most 0.25 mm steps to clear other nets, pads,
@@ -88,37 +128,19 @@ vias and keepouts; very short cuts are reduced proportionally.
 Repeated passes handle corners exposed by adjoining changes.
 Cuts also preserve connections to vias and tree branches inside the
 original legs, not only at their endpoints.
-With the layout-aware GPIO allocation, total routed copper length
-decreased from the pre-remap 3114.8 mm to **1860.4 mm** (40.3%).
-This is 5.8% shorter than the preceding 108 mm-wide board's 1975.8 mm,
-and 9.7% shorter than the last 120 mm-wide board's 2059.7 mm.
-LCD SCK decreases from the preceding 27.4 to **21.9 mm**
-(120 mm-wide board: 39.6 mm; original pre-remap: 87.5 mm).
-About **332.3 mm** of routing is diagonal, versus 238.6 mm with the
-same stacked placement and the previous shorter chamfers: a 39.2% increase.
-The compact revision uses **23 vias**, down from 33 (initial layout: 51).
-Joystick X/Y traces measure
-45.7/45.5 mm before the external cable. Local SPI is routed first after GND, then the relocated external 5V
-input, analog joystick, RTC, I2S and amplifier controls.
-The via cost is increased from 50 to 75 to discourage unnecessary
-layer changes. The router rejects layouts exceeding the preceding
-23-via / 1975.819 mm routing budget.
-Shared I2S WS/BCLK lengths are 105.9/109.0 mm, versus the 120 mm-wide board's
-109.6/110.5 mm. MIC_SD is 75.4 mm versus 77.9 mm; the physical
-microphone position and distance are unchanged. Relocating J8 increases
-5V_IN routing from the 120 mm-wide board's 65.1 to 109.8 mm,
-while 5V_SW drops from 205.1 to 153.3 mm.
-Both retain 0.8 mm width and the power topology is unchanged.
-This is a clearance-checked routing optimization, not a
-globally shortest routing solution.
+After I2S, the router prioritizes local SPI, external 5V input,
+joystick, RTC, amplifier controls, buttons and the remaining power nets.
+The via cost is 75 to discourage unnecessary layer changes.
+The router rejects more than 32 signal vias or more than 1975.819 mm
+of routed track length; GND stitching is added separately.
+This is a clearance-checked layout, not a globally shortest solution.
 Short connector-to-grid elbows are included, rather than leaving small
 right angles. Pad/via anchors remain fixed; a short 45-degree dogleg eases
 the outgoing leg where moving a corner would disconnect an anchor.
 The router rejects remaining two-track 90-degree elbows before saving.
 Electrical multiway junctions and rectangular pads are not trace elbows.
 The routing step leaves silkscreen and board outline unchanged.
-The two-layer design has no uninterrupted inner GND reference plane:
-the PCB-only LCD SCK route is about 21.9 mm. Verify screen SPI reliability
+Verify screen SPI reliability
 at the configured clock and with the actual cable, and lower the clock
 if required.
 **KiCad DRC has no violations or unconnected pads**, but DRC cannot
@@ -142,17 +164,17 @@ numeric capability table. Against the separate
 this KiCad project explicitly checks 0.30 mm minimum copper clearance,
 0.45 mm drill-to-drill clearance, and at least 1.0 mm-high/0.15 mm-stroke
 silkscreen with 0.15 mm clearance. The saved copper uses 0.35 mm signal,
-0.65 mm 3V3 and 0.8 mm 5V traces; both ground zones use 0.35 mm
+0.65 mm 3V3 and 0.8 mm 5V traces; all copper zones use 0.35 mm
 local clearance.
 J7 pads 1/2 and J8 pad 1 have a **0.50 mm local copper clearance**
 override for the external/switched 5V terminal lands. This applies on
-both sides against GND fill and other networks; their own 5V traces
+all copper layers against GND fill and other networks; their own 5V traces
 remain connected. The filled pad-to-GND gaps measure at least 0.50 mm.
 Other pads and routing keep the existing rules, including 0.35 mm
-ground-zone clearance. These overrides do not increase the GND pads'
+zone clearance. These overrides do not increase the GND pads'
 thermal gaps or expand clearance along every 5V trace.
 Board setup requires 0.5 mm copper-to-edge clearance;
-ground fill starts 1 mm in from the routed outline. The 23 vias are
+plane and ground fill outlines start 1 mm in from the routed outline. The 39 vias are
 ordinary **0.8 mm pad / 0.4 mm drill through-vias** (0.2 mm annular
 ring). All 87 socket holes are 1.0 mm plated drills with 1.7 mm pads
 (0.35 mm annular ring); J7/J8 have five 1.3 mm plated terminal holes
@@ -171,13 +193,10 @@ headers and terminal pins from the front and solder from the back; do not
 flip the footprints. The socket holes are suitable for typical 0.64 mm
 square leads (about 0.91 mm diagonal), but confirm the chosen leads and
 finished-hole tolerances. Check the terminals' approximately 0.9 mm leads
-against their actual shape too. Both GND zones use thermal relief with
-0.30 mm gaps and 0.35 mm spokes. J1 pad 22 and J5 pad 6 use their
-explicit routed GND connections without zone connections: their local
-bottom pours would otherwise form isolated thermal islands.
-Existing routed ground traces remain
-connected, so thermal relief improves solderability but does not completely
-isolate pads thermally from the ground network. Backside pin order appears
+against their actual shape too. All three GND zones use thermal relief with
+0.30 mm gaps and 0.35 mm spokes. J1 pad 22 and J5 pad 6 now connect
+to the internal GND plane rather than relying on explicit ground tracks;
+all GND pads retain thermal relief. Backside pin order appears
 mirrored relative to the front-view labels.
 
 The tightened project rules report **zero KiCad DRC violations and zero
@@ -187,7 +206,7 @@ spacing/pin order, ESP32 row separation, screen module identity, keyboard
 cable orientation, switch pin order and 3.3V regulator load before ordering.
 The 3.0 mm M3 drill is nominally tight, not a clearance fit. The
 [`fabrication/minibox-carrier-jlcpcb.zip`](fabrication/minibox-carrier-jlcpcb.zip)
-archive contains seven Gerber layers (two copper, two mask, two silk,
+archive contains nine Gerber layers (four copper, two mask, two silk,
 one outline), a Gerber job file, and separate Excellon plated/non-plated
 drills in millimetres. It is a **preview candidate, not fabrication
 approval**: check the physical module fit and power path above, then
@@ -202,7 +221,7 @@ $out = Join-Path $env:TEMP ("minibox-gerber-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $out | Out-Null
 & $cli pcb drc --refill-zones --severity-all --exit-code-violations .\minibox-carrier.kicad_pcb
 if ($LASTEXITCODE -ne 0) { throw "PCB DRC failed" }
-& $cli pcb export gerbers --output $out --layers "F.Cu,B.Cu,F.Mask,B.Mask,F.SilkS,B.SilkS,Edge.Cuts" --subtract-soldermask --precision 6 --check-zones .\minibox-carrier.kicad_pcb
+& $cli pcb export gerbers --output $out --layers "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Mask,B.Mask,F.SilkS,B.SilkS,Edge.Cuts" --subtract-soldermask --precision 6 --check-zones .\minibox-carrier.kicad_pcb
 if ($LASTEXITCODE -ne 0) { throw "Gerber export failed" }
 & $cli pcb export drill --output $out --format excellon --excellon-units mm --excellon-separate-th .\minibox-carrier.kicad_pcb
 if ($LASTEXITCODE -ne 0) { throw "Drill export failed" }
@@ -210,7 +229,7 @@ Compress-Archive -Path (Join-Path $out "*") -DestinationPath .\fabrication\minib
 ```
 
 Using a fresh temporary directory avoids accidentally including stale
-four-layer Gerbers when regenerating the two-layer archive. Only the
+Gerbers from an earlier layer count or revision. Only the
 archive is the delivered manufacturing preview.
 
 ## PNG previews
@@ -275,6 +294,17 @@ Rendering to fresh files and replacing the images atomically avoids
 Windows refusing to truncate a PNG that an open viewer has memory-mapped.
 Check that the new output exists: KiCad may report success even after
 an image-writing error. The legend helper also saves via atomic replacement.
+
+## Connector assembly quotation
+
+[assembly/README.md](assembly/README.md) contains a supplier-facing inquiry
+for the minimum accepted batch, **no more than five PCBs**, including both
+5.08 mm screw terminals. The folder includes a draft BOM, placement
+coordinates, a 92-pin mapping and a front assembly diagram. J3 is split
+into physical J3A/J3B strips in those files, not changed on the PCB.
+These are **quotation-only, not production-approved**: all eight exact
+part selections, factory coordinate/rotation conventions, physical fit,
+pure-DIP batch acceptance and pricing remain to be confirmed.
 
 | Connector | Module/interface | Pin 1 to last pin (J8 left to right; J1/J2 bottom to top; other rows top to bottom; J11/J12 left to right) |
 |---|---|---|
