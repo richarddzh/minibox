@@ -15,7 +15,7 @@
 - `esp32_idf_s3n16r8/`：独立 ESP-IDF 固件项目。
 - `models/`：3D 模型、STL、3MF、机械尺寸说明及模型检查脚本。
 - `docs/`：模块参数、接线及其他项目文档。
-- `.github/skills/`：构建和开发日志技能。
+- `.github/skills/`：构建、开发日志及 PCB 设计布线技能。
 - 不依赖 `C:\gitroot\talking-alarm` 运行或构建；该仓库只作参考。
 
 ## 固件与硬件
@@ -42,6 +42,15 @@
 - 逻辑电平及摇杆供电为 3.3 V，所有模块共地；屏幕 VCC 和背光驱动须遵守模块规格。
 - GPIO19/20 保留给原生 USB，避免使用被 Octal PSRAM 占用的 GPIO35/36/37。
 - 接线和参数的权威文档为 `docs/hardware-connections.md`，硬件变化时同步更新。
+
+## PCB 设计与布线
+
+- PCB 设计、布局、布线、包地审查和生产资料准备使用
+  [design-route-minibox-pcb](skills/design-route-minibox-pcb/SKILL.md)。
+- 嘉立创工艺能力与项目推荐值见
+  [PCB 设计规范](../docs/jlc-pcb-design-spec.md)；生产前核对最新官方参数。
+- 工艺文档不代表现有 PCB 已达标；不得把未完成布线或未确认 BOM 的工程
+  标记为可生产。`kicad` 原载板与 `kicad_ex` 集成工程分别维护。
 
 ## 构建、烧录与验证
 
