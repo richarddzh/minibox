@@ -1,0 +1,5508 @@
+TLV431x Low-Voltage Adjustable Precision Shunt Regulator
+1 Features
+•
+Low-voltage operation, VREF = 1.24V
+•
+Adjustable output voltage, VO = VREF to 6V
+•
+Reference voltage tolerances at 25°C
+–
+0.5% for TLV431B
+–
+1% for TLV431A
+–
+1.5% for TLV431
+•
+Typical temperature drift
+–
+4mV (0°C to 70°C)
+–
+6mV (–40°C to 85°C)
+–
+11mV (–40°C to 125°C)
+•
+Low operational cathode current, 80µA typical
+•
+0.25Ω typical output impedance
+•
+Ultra-small SC-70 package offers 40% smaller 
+footprint than SOT-23-3
+•
+See TLVH431 and TLVH432 for:
+–
+Wider VKA (1.24V to 18 V) and IK (80mA)
+–
+Additional SOT-89 package
+–
+Multiple pinouts for SOT-23-3 and SOT-89 
+packages
+•
+On products compliant to MIL-PRF-38535, all 
+parameters are tested unless otherwise noted. on 
+all other products, production processing does not 
+necessarily include testing of all parameters.
+2 Applications
+•
+Adjustable voltage and current referencing
+•
+Secondary side regulation in flyback SMPSs
+•
+Zener replacement
+•
+Voltage monitoring
+•
+Comparator with integrated reference
+Simplified Schematic
+3 Description
+The TLV431 device is a low-voltage 3-terminal 
+adjustable voltage reference with specified thermal 
+stability over applicable industrial and commercial 
+temperature ranges. Output voltage can be set to 
+any value between VREF (1.24V) and 6V with two 
+external resistors (see the Parameter Measurement 
+Information section). These devices operate from a 
+lower voltage (1.24V) than the widely used TL431 and 
+TL1431 shunt-regulator references.
+When used with an optocoupler, the TLV431 device is 
+an ideal voltage reference in isolated feedback circuits 
+for 3V to 3.3V switching-mode power supplies. These 
+devices have a typical output impedance of 0.25Ω. 
+Active output circuitry provides a very sharp turnon 
+characteristic, making them excellent replacements 
+for low-voltage Zener diodes in many applications, 
+including on-board regulation and adjustable power 
+supplies.
+Package Information 
+PART NUMBER
+PACKAGE(1)
+PACKAGE SIZE(2)
+TLV431
+DBZ (SOT-23, 3)
+2.92mm × 2.37mm
+DBV (SOT-23, 5)
+2.90mm × 2.8mm
+LP (TO-92, 3)
+5.2mm × 3.68mm
+PK (SOT-89, 3)
+4.5mm × 4.095mm
+TLV431A
+DBV (SOT-23, 5)
+2.90mm × 2.8mm
+DBZ (SOT-23, 3)
+2.92mm × 2.37mm
+PK (SOT-89, 3)
+4.5mm × 4.095mm
+LP (TO-92, 3)
+5.2mm × 3.68mm
+D (SOIC, 8)
+4.9mm × 6mm
+TLV431B
+DBV (SOT-23, 5)
+2.90mm × 2.8mm
+DBZ (SOT-23, 3)
+2.92mm × 2.37mm
+PK (SOT-89, 3)
+4.5mm × 4.095mm
+LP (TO-92, 3)
+5.2mm × 3.68mm
+DCK (SOT-SC70, 6) 2mm × 1.5mm
+(1)
+For all available packages, see the orderable addendum at 
+the end of the data sheet.
+(2)
+The package size (length × width) is a nominal value and 
+includes pins, where applicable
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+An IMPORTANT NOTICE at the end of this data sheet addresses availability, warranty, changes, use in safety-critical applications, 
+intellectual property matters and other important disclaimers. PRODUCTION DATA.
+
+Table of Contents
+1 Features............................................................................1
+2 Applications.....................................................................1
+3 Description.......................................................................1
+4 Pin Configuration and Functions...................................3
+5 Specifications.................................................................. 4
+5.1 Absolute Maximum Ratings........................................ 4
+5.2 ESD Ratings............................................................... 4
+5.3 Recommended Operating Conditions.........................4
+5.4 Thermal Information....................................................4
+5.5 Electrical Characteristics for TLV431.......................... 5
+5.6 Electrical Characteristics for TLV431A........................6
+5.7 Electrical Characteristics for TLV431B........................7
+5.8 Typical Characteristics................................................8
+6 Parameter Measurement Information..........................17
+7 Detailed Description......................................................18
+7.1 Overview...................................................................18
+7.2 Functional Block Diagram.........................................18
+7.3 Feature Description...................................................18
+7.4 Device Functional Modes..........................................19
+8 Applications and Implementation................................20
+8.1 Application Information............................................. 20
+8.2 Typical Applications.................................................. 21
+8.3 Power Supply Recommendations.............................24
+8.4 Layout....................................................................... 24
+9 Device and Documentation Support............................25
+9.1 Documentation Support............................................ 25
+9.2 Receiving Notification of Documentation Updates....25
+9.3 Support Resources................................................... 25
+9.4 Trademarks...............................................................25
+9.5 Electrostatic Discharge Caution................................25
+9.6 Glossary....................................................................25
+10 Revision History.......................................................... 25
+11 Mechanical, Packaging, and Orderable 
+Information.................................................................... 26
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+2
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+4 Pin Configuration and Functions
+Figure 4-1. D (SOIC) Package
+(Top View)
+NC − No internal connection
+* Pin 2 is attached to Substrate and must be 
+connected to ANODE or left open.
+Figure 4-2. DBV (SOT-23-5) Package
+(Top View)
+Figure 4-3. DBZ (SOT-23-3) Package
+(Top View)
+Figure 4-4. PK (SOT-89) Package
+(Top View)
+*
+*- Must be connected to ANODE or left open
+Figure 4-5. DCK (SC-70) Package
+(Top View)
+Figure 4-6. LP (TO-92/TO-226) Package
+(Top View)
+Table 4-1. Pin Functions
+PIN
+TYPE
+DESCRIPTION
+NAME
+DBZ
+DBV
+PK
+D
+LP
+DCK
+CATHODE
+2
+3
+3
+1
+1
+1
+I/O
+Shunt Current/Voltage input
+REF
+1
+4
+1
+8
+3
+3
+I
+Threshold relative to common 
+anode
+ANODE
+3
+5
+2
+2, 3, 6, 7
+2
+6
+O
+Common pin, normally connected 
+to ground
+NC
+—
+1
+—
+4, 5
+—
+4, 5
+I
+No Internal Connection
+*
+—
+2
+—
+—
+—
+2
+I
+Substrate Connection. Must be 
+connected to ANODE or left 
+open.
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+3
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5 Specifications
+5.1 Absolute Maximum Ratings
+over operating free-air temperature range (unless otherwise noted)
+(1)
+MIN
+MAX
+UNIT
+VKA
+Cathode voltage
+(2)
+7
+V
+IK
+Continuous cathode current
+–20
+20
+mA
+Iref
+Reference current
+–0.05
+3
+mA
+Operating virtual junction temperature
+150
+°C
+Tstg
+Storage temperature
+–65
+150
+°C
+(1)
+Stresses beyond those listed under Absolute Maximum Ratings may cause permanent damage to the device. These are stress ratings 
+only, and functional operation of the device at these or any other conditions beyond those indicated under Recommended Operating 
+Conditions is not implied. Exposure to absolute-maximum-rated conditions for extended periods may affect device reliability.
+(2)
+Voltage values are with respect to the anode terminal, unless otherwise noted.
+5.2 ESD Ratings
+PARAMETER
+DEFINITION
+VALUE
+UNIT
+V(ESD)
+Electrostatic 
+discharge
+Human body model (HBM), per ANSI/ESDA/JEDEC JS-001, all pins
+(1)
+±2000
+V
+Charged device model (CDM), per JEDEC specification JESD22-C101, all pins
+(2)
+±1000
+(1)
+JEDEC document JEP155 states that 500V HBM allows safe manufacturing with a standard ESD control process.
+(2)
+JEDEC document JEP157 states that 250V CDM allows safe manufacturing with a standard ESD control process.
+5.3 Recommended Operating Conditions
+over operating free-air temperature range (unless otherwise noted)
+MIN
+MAX
+UNIT
+VKA
+Cathode voltage
+VREF
+6
+V
+IK
+Cathode current
+0.1
+15
+mA
+TA
+Operating free-air temperature
+TLV431_C
+0
+70
+°C
+TLV431_I
+–40
+85
+TLV431_Q
+–40
+125
+5.4 Thermal Information
+THERMAL METRIC
+(1)
+TLV431x
+UNIT
+DCK
+D
+PK
+DBV
+DBZ
+LP
+6 PINS
+8 PINS
+3 PINS
+5 PINS
+3 PINS
+3 PINS
+RθJA
+Junction-to-ambient thermal 
+resistance
+87
+97
+52
+206
+206
+140
+°C/W
+RθJC(top)
+Junction-to-case (top) thermal 
+resistance
+259
+39
+9
+131
+76
+55
+°C/W
+(1)
+For more information about traditional and new thermal metrics, see the Semiconductor and IC Package Thermal Metrics application 
+report (SPRA953).
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+4
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.5 Electrical Characteristics for TLV431
+at 25°C free-air temperature (unless otherwise noted)
+PARAMETER
+TEST CONDITIONS
+TLV431
+UNIT
+MIN
+TYP
+MAX
+VREF
+Reference voltage
+VKA = VREF, 
+IK=10mA
+TA = 25°C
+1.222
+1.24
+1.258
+V
+TA = full range
+(1) 
+(see Figure 6-1)
+TLV431C
+1.21
+1.27
+TLV431I
+1.202
+1.278
+TLV431Q
+1.194
+1.286
+VREF(dev)
+VREF deviation over full 
+temperature range(2)
+VKA = VREF, IK = 10mA
+(1) (see 
+Figure 6-1)
+TLV431C
+4
+12
+mV
+TLV431I
+6
+20
+TLV431Q
+11
+31
+Ratio of VREF change in cathode 
+voltage change
+VKA = VREF to 6V, IK = 10mA (see Figure 6-2)
+-1.5
+-2.7
+mV/V
+Iref
+Reference terminal current
+IK = 10mA, R1 = 10kΩ, R2 = open (see Figure 6-2)
+0.15
+0.5
+µA
+Iref(dev)
+Iref deviation over full 
+temperature range(2)
+IK = 10mA, R1 =10kΩ, R2 = 
+open
+(1) (see Figure 6-2)
+TLV431C
+0.05
+0.3
+µA
+TLV431I
+0.1
+0.4
+TLV431Q
+0.15
+0.5
+IK(min)
+Minimum cathode current for 
+regulation
+VKA = VREF (see Figure 6-1)
+TLV431C/I
+55
+80
+µA
+TLV431Q
+55
+100
+IK(off)
+Off-state cathode current
+VREF = 0, VKA = 6V (see Figure 6-3)
+0.001
+0.1
+µA
+|zKA|
+Dynamic impedance(3)
+VKA = VREF, f ≤ 1kHz, IK = 0.1mA to 15mA (see 
+Figure 6-1)
+0.25
+0.4
+Ω
+(1)
+Full temperature ranges are –40°C to 125°C for TLV431Q, –40°C to 85°C for TLV431I, and 0°C to 70°C for TLV431C.
+(2)
+The deviation parameters VREF(dev) and Iref(dev) are defined as the differences between the maximum and minimum values obtained 
+over the rated temperature range. The average full-range temperature coefficient of the reference input voltage, αVREF, is defined as:
+where ΔTA is the rated operating free-air temperature range of the device. αVREF can be positive or negative, depending on whether 
+minimum VREF or maximum VREF, respectively, occurs at the lower temperature.
+(3)
+The dynamic impedance is defined as 
+. When the device is operating with two external resistors (see Figure 6-2), the 
+total dynamic impedance of the circuit is defined as: 
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+5
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.6 Electrical Characteristics for TLV431A
+at 25°C free-air temperature (unless otherwise noted)
+PARAMETER
+TEST CONDITIONS
+TLV431A
+UNIT
+MIN
+TYP
+MAX
+VREF
+Reference voltage
+VKA = VREF, 
+IK = 10mA
+TA = 25°C
+1.228
+1.24
+1.252
+V
+TA = full range
+(1) 
+(see Figure 6-1)
+TLV431AC
+1.221
+1.259
+TLV431AI
+1.215
+1.265
+TLV431AQ
+1.209
+1.271
+VREF(dev)
+VREF deviation over full 
+temperature range
+(2)
+VKA = VREF, IK = 10mA
+(1) (see 
+Figure 6-1)
+TLV431AC
+4
+12
+mV
+TLV431AI
+6
+20
+TLV431AQ
+11
+31
+Ratio of VREF change in 
+cathode voltage change
+VKA = VREF to 6V, IK = 10mA (see Figure 6-2)
+-1.5
+-2.7
+mV/V
+Iref
+Reference terminal current
+IK = 10mA, R1 = 10kΩ, R2 = open (see Figure 6-2)
+0.15
+0.5
+µA
+Iref(dev)
+Iref deviation over full 
+temperature range
+(2)
+IK = 10mA, R1 = 10kΩ, R2 = 
+open(1) (see Figure 6-2)
+TLV431AC
+0.05
+0.3
+µA
+TLV431AI
+0.1
+0.4
+TLV431AQ
+0.15
+0.5
+IK(min)
+Minimum cathode current for 
+regulation
+VKA = VREF (see Figure 6-1)
+TLV431AC/AI
+55
+80
+µA
+TLV431AQ
+55
+100
+IK(off)
+Off-state cathode current
+VREF = 0, VKA = 6V (see Figure 6-3)
+0.001
+0.1
+µA
+|zKA|
+Dynamic impedance (3)
+VKA = VREF, f ≤ 1kHz, IK = 0.1mA to 15mA (see 
+Figure 6-1)
+0.25
+0.4
+Ω
+(1)
+Full temperature ranges are –40°C to 125°C for TLV431Q, –40°C to 85°C for TLV431I, and 0°C to 70°C for TLV431C.
+(2)
+The deviation parameters VREF(dev) and Iref(dev) are defined as the differences between the maximum and minimum values obtained 
+over the rated temperature range. The average full-range temperature coefficient of the reference input voltage, αVREF, is defined as:
+where ΔTA is the rated operating free-air temperature range of the device. αVREF can be positive or negative, depending on whether 
+minimum VREF or maximum VREF, respectively, occurs at the lower temperature.
+(3)
+The dynamic impedance is defined as 
+. When the device is operating with two external resistors (see Figure 6-2), the 
+total dynamic impedance of the circuit is defined as: 
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+6
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.7 Electrical Characteristics for TLV431B
+at 25°C free-air temperature (unless otherwise noted)
+PARAMETER
+TEST CONDITIONS
+TLV431B
+UNIT
+MIN
+TYP
+MAX
+VREF
+Reference voltage
+VKA = VREF, 
+IK=10mA
+TA = 25°C
+1.234
+1.24
+1.246
+V
+TA = full range
+(1) 
+(see Figure 6-1)
+TLV431BC
+1.227
+1.253
+TLV431BI
+1.224
+1.259
+TLV431BQ
+1.221
+1.265
+VREF(dev)
+VREF deviation over full 
+temperature range
+(2)
+VKA = VREF , IK = 10mA
+(1) (see 
+Figure 6-1)
+TLV431BC
+4
+12
+mV
+TLV431BI
+6
+20
+TLV431BQ
+11
+31
+Ratio of VREF change in cathode 
+voltage change
+VKA = VREF to 6V, IK = 10mA (see Figure 6-2)
+-1.5
+-2.7
+mV/V
+Iref
+Reference terminal current
+IK = 10mA, R1 = 10kΩ, R2 = open (see Figure 6-2)
+0.1
+0.5
+µA
+Iref(dev)
+Iref deviation over full 
+temperature range
+(2)
+IK = 10mA, R1 =10kΩ, R2 = 
+open
+(3) (see Figure 6-2)
+TLV431BC
+0.05
+0.3
+µA
+TLV431BI
+0.1
+0.4
+TLV431BQ
+0.15
+0.5
+IK(min)
+Minimum cathode current for 
+regulation
+VKA = VREF (see Figure 6-1)
+55
+100
+µA
+IK(off)
+Off-state cathode current
+VREF = 0, VKA = 6V (see Figure 6-3)
+0.001
+0.1
+µA
+|zKA|
+Dynamic impedance
+(4)
+VKA = VREF, f ≤ 1kHz, IK = 0.1mA to 15mA (see 
+Figure 6-1)
+0.25
+0.4
+Ω
+(1)
+Full temperature ranges are –40°C to 125°C for TLV431Q, –40°C to 85°C for TLV431I, and 0°C to 70°C for TLV431C.
+(2)
+The deviation parameters VREF(dev) and Iref(dev) are defined as the differences between the maximum and minimum values 
+obtained over the rated temperature range. The average full-range temperature coefficient of the reference input voltage, αVREF, is 
+defined as:
+where ΔTA is the rated operating free-air temperature range of the device. αVREF can be positive or negative, depending on whether 
+minimum VREF or maximum VREF, respectively, occurs at the lower temperature.
+(3)
+Full temperature ranges are –40°C to 125°C for TLV431Q, –40°C to 85°C for TLV431I, and 0°C to 70°C for TLV431C.
+(4)
+dynamic impedance is defined as 
+. When the device is operating with two external resistors (see Figure 6-2), the total 
+dynamic impedance of the circuit is defined as: 
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+7
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.8 Typical Characteristics
+Operation of the device at these or any other conditions beyond those indicated in the Recommended Operating Conditions 
+table are not implied.
+Figure 5-1. Reference Voltage vs Junction Temperature
+Figure 5-2. Reference Input Current vs Junction Temperature 
+(for TLV431 and TLV431A)
+Figure 5-3. Reference Input Current vs Junction Temperature 
+(for TLV431B)
+Figure 5-4. Cathode Current vs Cathode Voltage
+Figure 5-5. Minimum Cathode Current vs Temperature
+Figure 5-6. Cathode Current vs Cathode Voltage
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+8
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.8 Typical Characteristics (continued)
+Operation of the device at these or any other conditions beyond those indicated in the Recommended Operating Conditions 
+table are not implied.
+Figure 5-7. Off-State Cathode Current vs Junction Temperature 
+(for TLV431 and TLV431A)
+Figure 5-8. Off-State Cathode Current vs Junction Temperature 
+(for TLV431B)
+Figure 5-9. Ratio of Delta Reference Voltage to Delta Cathode 
+Voltage vs Junction Temperature (for TLV431 and TLV431A)
+Figure 5-10. Ratio of Delta Reference Voltage to Delta Cathode 
+Voltage vs Junction Temperature (for TLV431B)
+Figure 5-11. Percentage Change in vREF vs Operating Life at 55°C
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+9
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.8 Typical Characteristics (continued)
+Operation of the device at these or any other conditions beyond those indicated in the Recommended Operating Conditions 
+table are not implied.
+Figure 5-12. Equivalent Input Noise Voltage
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+10
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.8 Typical Characteristics (continued)
+Operation of the device at these or any other conditions beyond those indicated in the Recommended Operating Conditions 
+table are not implied.
+Figure 5-13. Equivalent Noise Voltage over a 10S Period
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+11
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.8 Typical Characteristics (continued)
+Operation of the device at these or any other conditions beyond those indicated in the Recommended Operating Conditions 
+table are not implied.
+Figure 5-14. Voltage Gain and Phase Margin
+Figure 5-15. Reference Impedance vs Frequency
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+12
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.8 Typical Characteristics (continued)
+Operation of the device at these or any other conditions beyond those indicated in the Recommended Operating Conditions 
+table are not implied.
+Figure 5-16. Pulse Response 1
+Figure 5-17. Pulse Response 2
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+13
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.8 Typical Characteristics (continued)
+Operation of the device at these or any other conditions beyond those indicated in the Recommended Operating Conditions 
+table are not implied.
+‡The areas under the curves represent conditions that can cause the device to oscillate. For VKA = 2V and 3V curves, R2 and Vbat 
+were adjusted to establish the initial VKA and IK conditions with CL = 0. Vbat and CL then were adjusted to determine the ranges of 
+stability.
+Figure 5-18. Stability Boundary Conditions
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+14
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.8 Typical Characteristics (continued)
+Operation of the device at these or any other conditions beyond those indicated in the Recommended Operating Conditions 
+table are not implied.
+Figure 5-19. Phase Margin vs Capacitive Load vKA = VREF (1.25V), TA= 25°C
+Figure 5-20. Phase Margin vs Capacitive Load vKA = 2.50V, TA= 25°C
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+15
+Product Folder Links: TLV431 TLV431A TLV431B
+
+5.8 Typical Characteristics (continued)
+Operation of the device at these or any other conditions beyond those indicated in the Recommended Operating Conditions 
+table are not implied.
+Figure 5-21. Phase Margin vs Capacitive Load vKA = 5.00V, TA= 25°C
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+16
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+6 Parameter Measurement Information
+Figure 6-1. Test Circuit for vKA = VREF, VO = VKA = VREF 
+Figure 6-2. Test Circuit for vKA > VREF, VO = VKA = VREF × (1 + R1/R2) + Iref × R1
+Figure 6-3. Test Circuit for IK(off) 
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+17
+Product Folder Links: TLV431 TLV431A TLV431B
+
+7 Detailed Description
+7.1 Overview
+TLV431 is a low power counterpart to TL431, having lower reference voltage (1.24V vs 2.5 V) for lower voltage 
+adjustability and lower minimum cathode current (Ik(min)= 100µA vs 1mA). Like TL431, TLV431 is used in 
+conjunction with it's key components to behave as a single voltage reference, error amplifier, voltage clamp, or 
+comparator with integrated reference.
+TLV431 can be operated and adjusted to cathode voltages from 1.24V to 6V, making this part optimum for a 
+wide range of end equipments in industrial, auto, telecom, and computing. For this device to behave as a shunt 
+regulator or error amplifier, > 100µA (Imin(max)) must be supplied in to the cathode pin. Under this condition, 
+feedback can be applied from the Cathode and Ref pins to create a replica of the internal reference voltage.
+Various reference voltage options can be purchased with initial tolerances (at 25°C) of 0.5%, 1%, and 1.5%. 
+These reference options are denoted by B (0.5%), A (1.0%), and blank (1.5%) after the TLV431.
+The TLV431xC devices are characterized for operation from 0°C to 70°C, the TLV431xI devices are 
+characterized for operation from –40°C to 85°C, and the TLV431xQ devices are characterized for operation 
+from –40°C to 125°C.
+7.2 Functional Block Diagram
+7.3 Feature Description
+TLV431 consists of an internal reference and amplifier that outputs a sink current base on the difference 
+between the reference pin and the virtual internal pin. The sink current is produced by an internal darlington pair.
+When operated with enough voltage headroom (≥ 1.24V) and cathode current (Ika), TLV431 forces the reference 
+pin to 1.24V. However, the reference pin can not be left floating, as it requires Iref ≥ 0.5µA (see the Functional 
+Block Diagram). This is because the reference pin is driven into an NPN, which requires a base current to 
+operate properly.
+When feedback is applied from the Cathode and Reference pins, TLV431 behaves as a Zener diode, regulating 
+to a constant voltage dependent on current being supplied into the cathode. This is due to the internal amplifier 
+and reference entering the proper operating regions. The same amount of current required in the above 
+feedback situation must be applied to this device in open-loop, servo, or error-amplifying implementations for 
+it to be in the proper linear region giving TLV431 enough gain.
+Unlike many linear regulators, TLV431 is internally compensated to be stable without an output capacitor 
+between the cathode and anode. However, if it is desired to use an output capacitor Figure 5-19 can be used as 
+a guide to assist in choosing the correct capacitor to maintain stability.
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+18
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+7.4 Device Functional Modes
+7.4.1 Open Loop (Comparator)
+When the cathode/output voltage or current of TLV431 is not being fed back to the reference/input pin in any 
+form, this device is operating in open loop. With proper cathode current (Ika) applied to this device, TLV431 will 
+have the characteristics shown in Figure 5-6. With such high gain in this configuration, TLV431 is typically used 
+as a comparator. With the reference integrated makes TLV431 the preferred choice when users are trying to 
+monitor a certain level of a single signal.
+7.4.2 Closed Loop
+When the cathode/output voltage or current of TLV431 is being fed back to the reference/input pin in any form, 
+this device is operating in closed loop. The majority of applications involving TLV431 use it in this manner to 
+regulate a fixed voltage or current. The feedback enables this device to behave as an error amplifier, computing 
+a portion of the output voltage and adjusting it to maintain the desired regulation. This is done by relating the 
+output voltage back to the reference pin in a manner to make it equal to the internal reference voltage, which can 
+be accomplished through resistive or direct feedback.
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+19
+Product Folder Links: TLV431 TLV431A TLV431B
+
+8 Applications and Implementation
+Note
+Information in the following applications sections is not part of the TI component specification, 
+and TI does not warrant its accuracy or completeness. TI’s customers are responsible for 
+determining suitability of components for their purposes, as well as validating and testing their design 
+implementation to confirm system functionality.
+8.1 Application Information
+Figure 8-1 shows the TLV431, TLV431A, or TLV431B used in a 3.3V isolated flyback supply. Output voltage VO 
+can be as low as reference voltage VREF (1.24V ± 1%). The output of the regulator, plus the forward voltage drop 
+of the optocoupler LED (1.24 + 1.4 = 2.64V), determine the minimum voltage that can be regulated in an isolated 
+supply configuration. Regulated voltage as low as 2.7 Vdc is possible in the topology shown in Figure 8-1.
+The 431 family of devices are prevalent in these applications, being designers go to choice for secondary side 
+regulation. Due to this prevalence, this section will further go on to explain operation and design in both states of 
+TLV431 that this application will see, open loop (Comparator + Vref) and closed loop (Shunt Regulator).
+Further information about system stability and using a TLV431 device for compensation can be found in the 
+application note Compensation Design With TL431 for UCC28600 (SLUA671).
+Figure 8-1. Flyback with Isolation Using TLV431, TLV431A, or TLV431B as Voltage Reference and Error 
+Amplifier
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+20
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+8.2 Typical Applications
+8.2.1 Comparator with Integrated Reference (Open Loop)
+Figure 8-2. Comparator Application Schematic
+8.2.1.1 Design Requirements
+For this design example, use the parameters listed in Table 8-1 as the input parameters.
+Table 8-1. Design Parameters
+DESIGN PARAMETER
+EXAMPLE VALUE
+Input Voltage Range
+0V to 5V
+Input Resistance
+10kΩ
+Supply Voltage
+5V
+Cathode Current (Ik)
+500µA
+Output Voltage Level
+~1V - Vsup
+Logic Input Thresholds VIH/VIL
+VL
+8.2.1.2 Detailed Design Procedure
+When using TLV431 as a comparator with reference, determine the following:
+•
+Input voltage range
+•
+Reference voltage accuracy
+•
+Output logic input high and low level thresholds
+•
+Current source resistance
+8.2.1.2.1 Basic Operation
+In the configuration shown in Figure 8-2 TLV431 will behave as a comparator, comparing the Vref pin voltage 
+to the internal virtual reference voltage. When provided a proper cathode current (Ik), TLV431 will have enough 
+open-loop gain to provide a quick response. With the TLV431's maximum operating current (Imin(max)) being 
+100µA and up to 150µA over temperature, operation below that could result in low gain, leading to a slow 
+response.
+8.2.1.2.2 Overdrive
+Slow or inaccurate responses can also occur when the reference pin is not provided enough overdrive voltage. 
+This is the amount of voltage that is higher than the internal virtual reference. The internal virtual reference 
+voltage will be within the range of 1.24V ±(0.5%, 1.0%, or 1.5%) depending on which version is being used.
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+21
+Product Folder Links: TLV431 TLV431A TLV431B
+
+The more overdrive voltage provided, the faster the TLV431 will respond. This can be seen in Figure 8-3 and 
+Figure 8-4 where it displays the output responses to various input voltages.
+For applications where TLV431 is being used as a comparator, it is best to set the trip point to greater than the 
+positive expected error (that is, +1.0% for the A version). For fast response, setting the trip point to > 10% of the 
+internal Vref should suffice.
+For minimal voltage drop or difference from Vin to the ref pin, TI recommends using an input resistor < 10kΩ to 
+provide Iref.
+8.2.1.2.3 Output Voltage and Logic Input Level
+For the TLV431 to properly be used as a comparator, the logic output must be readable by the receiving logic 
+device. This is accomplished by knowing the input high and low level threshold voltage levels, typically denoted 
+by VIH and VIL.
+As seen in Figure 8-3, TLV431's output low level voltage in open-loop/comparator mode is approximately 1V, 
+which is sufficient for some 3.3V supplied logic. However, this does not work for 2.5V or 1.8V supplied logic. To 
+accommodate this a resistive divider can be tied to the output to attenuate the output voltage to a voltage legible 
+to the receiving low voltage logic device.
+TLV431's output high voltage is approximately Vsup due to TLV431 being open-collector. If Vsup is much higher 
+than the receiving logic's maximum input voltage tolerance, the output must be attenuated to accommodate the 
+outgoing logic's reliability.
+When using a resistive divider on the output, be sure to make the sum of the resistive divider (R1 and R2 in 
+Figure 8-2) is much greater than Rsup to not interfere with TLV431's ability to pull close to Vsup when turning off.
+8.2.1.2.3.1 Input Resistance
+TLV431 requires an input resistance in this application to source the reference current (Iref) needed from this 
+device to be in the proper operating regions while turning on. The actual voltage seen at the ref pin will be Vref = 
+Vin – Iref × Rin. Because the Iref can be as high as 0.5µA, TI recommends using a resistance small enough that 
+will mitigate the error that Iref creates from Vin.
+8.2.1.3 Application Curves
+Figure 8-3. Output Response with Small Overdrive 
+Voltages
+Figure 8-4. Output Response with Large Overdrive 
+Voltage
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+22
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+8.2.2 Shunt Regulator/Reference
+Figure 8-5. Shunt Regulator Schematic
+8.2.2.1 Design Requirements
+For this design example, use the parameters listed in Table 8-2 as the input parameters.
+Table 8-2. Design Parameters
+DESIGN PARAMETER
+EXAMPLE VALUE
+Reference Initial Accuracy
+1.0%
+Supply Voltage
+6V
+Cathode Current (Ik)
+1mA
+Output Voltage Level
+1.24V - 6V
+Load Capacitance
+100pF
+Feedback Resistor Values and Accuracy (R1 and R2)
+10kΩ
+8.2.2.2 Detailed Design Procedure
+When using TLV431 as a Shunt Regulator, determine the following:
+•
+Input voltage range
+•
+Temperature range
+•
+Total accuracy
+•
+Cathode current
+•
+Reference initial accuracy
+•
+Output capacitance
+8.2.2.2.1 Programming Output/Cathode Voltage
+To program the cathode voltage to a regulated voltage a resistive bridge must be shunted between the cathode 
+and anode pins with the mid point tied to the reference pin. This can be seen in Figure 8-5, with R1 and R2 being 
+the resistive bridge. The cathode/output voltage in the shunt regulator configuration can be approximated by the 
+equation shown in Figure 8-5. The cathode voltage can be more accurately determined by taking the cathode 
+current in to account
+VO = (1 + R1 / R2) × Vref – Iref × R1 (1)
+For Equation 1 to be valid, TLV431 must be fully biased so that it has enough open-loop gain to mitigate any 
+gain error. This can be done by meeting the Imin spec denoted in Recommended Operating Conditions table.
+8.2.2.2.2 Total Accuracy
+When programming the output above unity gain (Vka = Vref), TLV431 is susceptible to other errors that may 
+effect the overall accuracy beyond Vref. These errors include:
+•
+R1 and R2 accuracies
+•
+VI(dev) – Change in reference voltage over temperature
+•
+ΔVref / ΔVKA – Change in reference voltage to the change in cathode voltage
+•
+|zKA| – Dynamic impedance, causing a change in cathode voltage with cathode current
+Worst-case cathode voltage can be determined taking all of the variables in to account. Application note Setting 
+the Shunt Voltage on an Adjustable Shunt Regulator (SLVA445) assists designers in setting the shunt voltage to 
+achieve optimum accuracy for this device.
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+23
+Product Folder Links: TLV431 TLV431A TLV431B
+
+8.2.2.2.3 Stability
+Though TLV431 is stable with no capacitive load, the device that receives the shunt regulator's output voltage 
+could present a capacitive load that is within the TLV431 region of stability, shown in Figure 5-18. Also, 
+designers may use capacitive loads to improve the transient response or for power supply decoupling.
+8.2.2.3 Application Curve
+Figure 8-6. TLV431 Start-Up Response
+8.3 Power Supply Recommendations
+When using TLV431 as a Linear Regulator to supply a load, designers will typically use a bypass capacitor on 
+the output/cathode pin. When doing this, be sure that the capacitance is within the stability criteria shown in 
+Figure 5-18.
+To not exceed the maximum cathode current, be sure that the supply voltage is current limited. Also, be sure to 
+limit the current being driven into the Ref pin, as not to exceed the absolute maximum rating.
+For applications shunting high currents, pay attention to the cathode and anode trace lengths, adjusting the 
+width of the traces to have the proper current density.
+8.4 Layout
+8.4.1 Layout Guidelines
+Place decoupling capacitors as close to the device as possible. Use appropriate widths for traces when shunting 
+high currents to avoid excessive voltage drops.
+8.4.2 Layout Example
+Figure 8-7. DBZ Layout Example
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+24
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+9 Device and Documentation Support
+9.1 Documentation Support
+9.1.1 Related Documentation
+For related documentation, see the following:
+•
+Compensation Design With TL431 for UCC28600 (SLUA671)
+•
+Setting the Shunt Voltage on an Adjustable Shunt Regulator (SLVA445)
+9.2 Receiving Notification of Documentation Updates
+To receive notification of documentation updates, navigate to the device product folder on ti.com. Click on 
+Notifications to register and receive a weekly digest of any product information that has changed. For change 
+details, review the revision history included in any revised document.
+9.3 Support Resources
+TI E2E™ support forums are an engineer's go-to source for fast, verified answers and design help — straight 
+from the experts. Search existing answers or ask your own question to get the quick design help you need.
+Linked content is provided "AS IS" by the respective contributors. They do not constitute TI specifications and do 
+not necessarily reflect TI's views; see TI's Terms of Use.
+9.4 Trademarks
+E2E is a trademark of Texas Instruments.
+All other trademarks are the property of their respective owners.
+9.5 Electrostatic Discharge Caution
+This integrated circuit can be damaged by ESD. Texas Instruments recommends that all integrated circuits be handled 
+with appropriate precautions. Failure to observe proper handling and installation procedures can cause damage.
+ESD damage can range from subtle performance degradation to complete device failure. Precision integrated circuits may 
+be more susceptible to damage because very small parametric changes could cause the device not to meet its published 
+specifications.
+9.6 Glossary
+TI Glossary 
+This glossary lists and explains terms, acronyms, and definitions.
+10 Revision History
+NOTE: Page numbers for previous revisions may differ from page numbers in the current version.
+Changes from Revision Y (March 2024) to Revision Z (June 2024)
+Page
+•
+Updated pinout diagrams................................................................................................................................... 3
+Changes from Revision X (May 2018) to Revision Y (March 2024)
+Page
+•
+Updated the numbering format for tables, figures, and cross-references throughout the document................. 1
+•
+Moved Simplified Schematic from Description to Applications ..........................................................................1
+•
+Updated pinout diagrams................................................................................................................................... 3
+•
+Updated Typical Applications Design Requiements ........................................................................................ 23
+Changes from Revision W (March 2018) to Revision X (May 2018)
+Page
+•
+Changed Figure 5-18 .........................................................................................................................................8
+www.ti.com
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+Copyright © 2024 Texas Instruments Incorporated
+Submit Document Feedback
+25
+Product Folder Links: TLV431 TLV431A TLV431B
+
+11 Mechanical, Packaging, and Orderable Information
+The following pages include mechanical packaging and orderable information. This information is the most 
+current data available for the designated devices. This data is subject to change without notice and revision of 
+this document. For browser based versions of this data sheet, refer to the left hand navigation.
+TLV431, TLV431A, TLV431B
+SLVS139Z – JULY 1996 – REVISED JUNE 2024
+www.ti.com
+26
+Submit Document Feedback
+Copyright © 2024 Texas Instruments Incorporated
+Product Folder Links: TLV431 TLV431A TLV431B
+
+PACKAGE OPTION ADDENDUM
+www.ti.com
+18-Sep-2026
+PACKAGING INFORMATION
+Orderable part number
+Status
+(1)
+Material type
+(2)
+Package | Pins
+Package qty | Carrier
+RoHS
+(3)
+Lead finish/
+Ball material
+(4)
+MSL rating/
+Peak reflow
+(5)
+Op temp (°C)
+Part marking
+(6)
+TLV431ACDBVR
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+0 to 70
+(YAC6, YACC, YACI,
+     YACN)
+(YACG, YACL, YACS)
+    
+TLV431ACDBVR.A
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+SN
+Level-1-260C-UNLIM
+0 to 70
+(YAC6, YACC, YACI,
+     YACN)
+(YACG, YACL, YACS)
+    
+TLV431ACDBVR1G4
+NRND
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+0 to 70
+(YAC6, YACC, YACI)
+    
+(YACG, YACL, YACS)
+    
+TLV431ACDBVR1G4.A
+NRND
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+0 to 70
+(YAC6, YACC, YACI)
+    
+(YACG, YACL, YACS)
+    
+TLV431ACDBVRG4
+Obsolete
+Production
+SOT-23 (DBV) | 5
+-
+-
+Call TI
+Call TI
+0 to 70
+YACI
+TLV431ACDBVT
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+0 to 70
+(YAC6, YACC, YACI)
+    
+(YACG, YACL, YACS)
+    
+TLV431ACDBVT.A
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+SN
+Level-1-260C-UNLIM
+0 to 70
+(YAC6, YACC, YACI)
+    
+(YACG, YACL, YACS)
+    
+TLV431ACDBZR
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+| NIPDAUAG
+Level-1-260C-UNLIM
+0 to 70
+(YAC6, YAC8, YACB,
+     YACS)
+(YAC3, YACS, YACU)
+    
+TLV431ACDBZR.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+0 to 70
+(YAC6, YAC8, YACB,
+     YACS)
+(YAC3, YACS, YACU)
+    
+TLV431ACDBZRG4
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | NIPDAUAG
+Level-1-260C-UNLIM
+0 to 70
+YAC6
+YACS
+Addendum-Page 1
+
+PACKAGE OPTION ADDENDUM
+www.ti.com
+18-Sep-2026
+Orderable part number
+Status
+(1)
+Material type
+(2)
+Package | Pins
+Package qty | Carrier
+RoHS
+(3)
+Lead finish/
+Ball material
+(4)
+MSL rating/
+Peak reflow
+(5)
+Op temp (°C)
+Part marking
+(6)
+TLV431ACDBZRG4.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+0 to 70
+YAC6
+YACS
+TLV431ACLP
+NRND
+Production
+TO-92 (LP) | 3
+1000 | BULK
+Yes
+SN
+N/A for Pkg Type
+0 to 70
+V431AC
+TLV431ACLP.A
+NRND
+Production
+TO-92 (LP) | 3
+1000 | BULK
+Yes
+SN
+N/A for Pkg Type
+0 to 70
+V431AC
+TLV431ACLPR
+NRND
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+0 to 70
+V431AC
+TLV431ACLPR.A
+NRND
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+0 to 70
+V431AC
+TLV431AID
+Obsolete
+Production
+SOIC (D) | 8
+-
+-
+Call TI
+Call TI
+-40 to 85
+TY431A
+TLV431AIDBVR
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 85
+(YAI6, YAIC, YAII,
+     YAIN)
+(YAIG, YAIL, YAIS)
+    
+TLV431AIDBVR.A
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 85
+(YAI6, YAIC, YAII,
+     YAIN)
+(YAIG, YAIL, YAIS)
+    
+TLV431AIDBVR1G4
+NRND
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+(YAI6, YAIC)
+(YAIL, YAIS)
+TLV431AIDBVR1G4.A
+NRND
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+(YAI6, YAIC)
+(YAIL, YAIS)
+TLV431AIDBVRG4
+Obsolete
+Production
+SOT-23 (DBV) | 5
+-
+-
+Call TI
+Call TI
+-40 to 85
+YAII
+TLV431AIDBVT
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 85
+(YAI6, YAIC, YAII)
+    
+(YAIG, YAIL, YAIS)
+    
+TLV431AIDBVT.A
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 85
+(YAI6, YAIC, YAII)
+    
+(YAIG, YAIL, YAIS)
+    
+TLV431AIDBZR
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+| NIPDAUAG
+Level-1-260C-UNLIM
+-40 to 85
+(YAI6, YAI8, YAIB,
+     YAIS)
+(YAI3, YAIS, YAIU)
+    
+TLV431AIDBZR.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+(YAI6, YAI8, YAIB,
+     YAIS)
+(YAI3, YAIS, YAIU)
+    
+Addendum-Page 2
+
+PACKAGE OPTION ADDENDUM
+www.ti.com
+18-Sep-2026
+Orderable part number
+Status
+(1)
+Material type
+(2)
+Package | Pins
+Package qty | Carrier
+RoHS
+(3)
+Lead finish/
+Ball material
+(4)
+MSL rating/
+Peak reflow
+(5)
+Op temp (°C)
+Part marking
+(6)
+TLV431AIDBZRG4
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | NIPDAUAG
+Level-1-260C-UNLIM
+-40 to 85
+YAI6
+YAIS
+TLV431AIDBZRG4.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+YAI6
+YAIS
+TLV431AIDE4
+NRND
+Production
+SOIC (D) | 8
+75 | TUBE
+-
+Call TI
+Call TI
+-40 to 85
+TLV431AIDR
+NRND
+Production
+SOIC (D) | 8
+2500 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+TY431A
+TLV431AIDR.A
+NRND
+Production
+SOIC (D) | 8
+2500 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+TY431A
+TLV431AIDRE4
+NRND
+Production
+SOIC (D) | 8
+2500 | LARGE T&R
+-
+Call TI
+Call TI
+-40 to 85
+TLV431AILP
+Obsolete
+Production
+TO-92 (LP) | 3
+-
+-
+Call TI
+Call TI
+-40 to 85
+V431AI
+TLV431AILPM
+NRND
+Production
+TO-92 (LP) | 3
+2000 | AMMO
+Yes
+SN
+N/A for Pkg Type
+-40 to 85
+V431AI
+TLV431AILPM.A
+NRND
+Production
+TO-92 (LP) | 3
+2000 | AMMO
+Yes
+SN
+N/A for Pkg Type
+-40 to 85
+V431AI
+TLV431AILPR
+NRND
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+-40 to 85
+V431AI
+TLV431AILPR.A
+NRND
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+-40 to 85
+V431AI
+TLV431AQPK
+Active
+Production
+SOT-89 (PK) | 3
+1000 | LARGE T&R
+Yes
+SN
+Level-2-260C-1 YEAR
+-40 to 125
+VA
+TLV431AQPK.A
+Active
+Production
+SOT-89 (PK) | 3
+1000 | LARGE T&R
+Yes
+SN
+Level-2-260C-1 YEAR
+-40 to 125
+VA
+TLV431BCDBVR
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+0 to 70
+(Y3GG, Y3GJ, Y3GU)
+    
+TLV431BCDBVR.A
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+SN
+Level-1-260C-UNLIM
+0 to 70
+(Y3GG, Y3GJ, Y3GU)
+    
+TLV431BCDBVT
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+0 to 70
+(Y3GG, Y3GJ, Y3GU)
+    
+TLV431BCDBVT.A
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+SN
+Level-1-260C-UNLIM
+0 to 70
+(Y3GG, Y3GJ, Y3GU)
+    
+TLV431BCDBZR
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+| NIPDAUAG
+Level-1-260C-UNLIM
+0 to 70
+(Y3G3, Y3GS, Y3GU)
+    
+TLV431BCDBZR.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+0 to 70
+(Y3G3, Y3GS, Y3GU)
+    
+TLV431BCDBZT
+Active
+Production
+SOT-23 (DBZ) | 3
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+| NIPDAUAG
+Level-1-260C-UNLIM
+0 to 70
+(Y3GS, Y3GU)
+TLV431BCDBZT.A
+Active
+Production
+SOT-23 (DBZ) | 3
+250 | SMALL T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+0 to 70
+(Y3GS, Y3GU)
+TLV431BCDBZTG4
+Active
+Production
+SOT-23 (DBZ) | 3
+250 | SMALL T&R
+Yes
+NIPDAU | NIPDAUAG
+Level-1-260C-UNLIM
+0 to 70
+Y3GS
+TLV431BCDBZTG4.A
+Active
+Production
+SOT-23 (DBZ) | 3
+250 | SMALL T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+0 to 70
+Y3GS
+TLV431BCDCKR
+Active
+Production
+SC70 (DCK) | 6
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+0 to 70
+YEU
+Addendum-Page 3
+
+PACKAGE OPTION ADDENDUM
+www.ti.com
+18-Sep-2026
+Orderable part number
+Status
+(1)
+Material type
+(2)
+Package | Pins
+Package qty | Carrier
+RoHS
+(3)
+Lead finish/
+Ball material
+(4)
+MSL rating/
+Peak reflow
+(5)
+Op temp (°C)
+Part marking
+(6)
+TLV431BCDCKR.A
+Active
+Production
+SC70 (DCK) | 6
+3000 | LARGE T&R
+Yes
+SN
+Level-1-260C-UNLIM
+0 to 70
+YEU
+TLV431BCDCKT
+Active
+Production
+SC70 (DCK) | 6
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+0 to 70
+YEU
+TLV431BCDCKT.A
+Active
+Production
+SC70 (DCK) | 6
+250 | SMALL T&R
+Yes
+SN
+Level-1-260C-UNLIM
+0 to 70
+YEU
+TLV431BCLP
+Obsolete
+Production
+TO-92 (LP) | 3
+-
+-
+Call TI
+Call TI
+0 to 70
+TV431B
+TLV431BCLPR
+Active
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+0 to 70
+TV431B
+TLV431BCLPR.A
+Active
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+0 to 70
+TV431B
+TLV431BCPK
+Active
+Production
+SOT-89 (PK) | 3
+1000 | LARGE T&R
+Yes
+SN
+Level-2-260C-1 YEAR
+0 to 70
+VE
+TLV431BCPK.A
+Active
+Production
+SOT-89 (PK) | 3
+1000 | LARGE T&R
+Yes
+SN
+Level-2-260C-1 YEAR
+0 to 70
+VE
+TLV431BIDBVR
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 85
+(Y3FJ, Y3FU)
+TLV431BIDBVR.A
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 85
+(Y3FJ, Y3FU)
+TLV431BIDBVT
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 85
+(Y3FJ, Y3FU)
+TLV431BIDBVT.A
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 85
+(Y3FJ, Y3FU)
+TLV431BIDBZR
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+| NIPDAUAG
+Level-1-260C-UNLIM
+-40 to 85
+(Y3F3, Y3FS, Y3FU)
+    
+TLV431BIDBZR.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+(Y3F3, Y3FS, Y3FU)
+    
+TLV431BIDBZRG4
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | NIPDAUAG
+Level-1-260C-UNLIM
+-40 to 85
+(Y3F3, Y3FS)
+TLV431BIDBZRG4.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+(Y3F3, Y3FS)
+TLV431BIDBZT
+Active
+Production
+SOT-23 (DBZ) | 3
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+| NIPDAUAG
+Level-1-260C-UNLIM
+-40 to 85
+(Y3FS, Y3FU)
+TLV431BIDBZT.A
+Active
+Production
+SOT-23 (DBZ) | 3
+250 | SMALL T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+(Y3FS, Y3FU)
+TLV431BIDBZTG4.A
+Active
+Production
+SOT-23 (DBZ) | 3
+250 | SMALL T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+Y3FS
+TLV431BIDCKR
+Active
+Production
+SC70 (DCK) | 6
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 85
+YFU
+TLV431BIDCKR.A
+Active
+Production
+SC70 (DCK) | 6
+3000 | LARGE T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 85
+YFU
+TLV431BIDCKRG4
+Active
+Production
+SC70 (DCK) | 6
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+YFU
+TLV431BIDCKRG4.A
+Active
+Production
+SC70 (DCK) | 6
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+YFU
+TLV431BIDCKT
+Active
+Production
+SC70 (DCK) | 6
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 85
+YFU
+TLV431BIDCKT.A
+Active
+Production
+SC70 (DCK) | 6
+250 | SMALL T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 85
+YFU
+TLV431BILP
+Obsolete
+Production
+TO-92 (LP) | 3
+-
+-
+Call TI
+Call TI
+-40 to 85
+TY431B
+TLV431BILPR
+Active
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+-40 to 85
+TY431B
+TLV431BILPR.A
+Active
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+-40 to 85
+TY431B
+Addendum-Page 4
+
+PACKAGE OPTION ADDENDUM
+www.ti.com
+18-Sep-2026
+Orderable part number
+Status
+(1)
+Material type
+(2)
+Package | Pins
+Package qty | Carrier
+RoHS
+(3)
+Lead finish/
+Ball material
+(4)
+MSL rating/
+Peak reflow
+(5)
+Op temp (°C)
+Part marking
+(6)
+TLV431BIPK
+Active
+Production
+SOT-89 (PK) | 3
+1000 | LARGE T&R
+Yes
+SN
+Level-2-260C-1 YEAR
+-40 to 85
+VF
+TLV431BIPK.A
+Active
+Production
+SOT-89 (PK) | 3
+1000 | LARGE T&R
+Yes
+SN
+Level-2-260C-1 YEAR
+-40 to 85
+VF
+TLV431BQDBVR
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 125
+(Y3HJ, Y3HU)
+TLV431BQDBVR.A
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 125
+(Y3HJ, Y3HU)
+TLV431BQDBVRE4
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+-
+Call TI
+Call TI
+-40 to 125
+TLV431BQDBVRG4
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 125
+Y3HU
+TLV431BQDBVRG4.A
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 125
+Y3HU
+TLV431BQDBVT
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 125
+(Y3HJ, Y3HU)
+TLV431BQDBVT.A
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 125
+(Y3HJ, Y3HU)
+TLV431BQDBZR
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+| NIPDAUAG
+Level-1-260C-UNLIM
+-40 to 125
+(Y3H3, Y3HS, Y3HU)
+    
+TLV431BQDBZR.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 125
+(Y3H3, Y3HS, Y3HU)
+    
+TLV431BQDBZRG4
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | NIPDAUAG
+Level-1-260C-UNLIM
+-40 to 125
+Y3HS
+TLV431BQDBZRG4.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 125
+Y3HS
+TLV431BQDBZT
+Active
+Production
+SOT-23 (DBZ) | 3
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+| NIPDAUAG
+Level-1-260C-UNLIM
+-40 to 125
+(Y3HS, Y3HU)
+TLV431BQDBZT.A
+Active
+Production
+SOT-23 (DBZ) | 3
+250 | SMALL T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 125
+(Y3HS, Y3HU)
+TLV431BQDCKR
+Active
+Production
+SC70 (DCK) | 6
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 125
+YGU
+TLV431BQDCKR.A
+Active
+Production
+SC70 (DCK) | 6
+3000 | LARGE T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 125
+YGU
+TLV431BQDCKT
+Active
+Production
+SC70 (DCK) | 6
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 125
+YGU
+TLV431BQDCKT.A
+Active
+Production
+SC70 (DCK) | 6
+250 | SMALL T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 125
+YGU
+TLV431BQLP
+Obsolete
+Production
+TO-92 (LP) | 3
+-
+-
+Call TI
+Call TI
+-40 to 125
+TQ431B
+TLV431BQLPR
+Active
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+-40 to 125
+TQ431B
+TLV431BQLPR.A
+Active
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+-40 to 125
+TQ431B
+TLV431BQPK
+Active
+Production
+SOT-89 (PK) | 3
+1000 | LARGE T&R
+Yes
+SN
+Level-2-260C-1 YEAR
+-40 to 125
+V6
+TLV431BQPK.A
+Active
+Production
+SOT-89 (PK) | 3
+1000 | LARGE T&R
+Yes
+SN
+Level-2-260C-1 YEAR
+-40 to 125
+V6
+TLV431CDBVR
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+0 to 70
+(Y3C6, Y3CI)
+(Y3CG, Y3CS)
+TLV431CDBVR.A
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+SN
+Level-1-260C-UNLIM
+0 to 70
+(Y3C6, Y3CI)
+(Y3CG, Y3CS)
+TLV431CDBVRG4
+Obsolete
+Production
+SOT-23 (DBV) | 5
+-
+-
+Call TI
+Call TI
+0 to 70
+Y3CI
+Addendum-Page 5
+
+PACKAGE OPTION ADDENDUM
+www.ti.com
+18-Sep-2026
+Orderable part number
+Status
+(1)
+Material type
+(2)
+Package | Pins
+Package qty | Carrier
+RoHS
+(3)
+Lead finish/
+Ball material
+(4)
+MSL rating/
+Peak reflow
+(5)
+Op temp (°C)
+Part marking
+(6)
+TLV431CDBVT
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+0 to 70
+(Y3C6, Y3CI)
+(Y3CG, Y3CS)
+TLV431CDBVT.A
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+SN
+Level-1-260C-UNLIM
+0 to 70
+(Y3C6, Y3CI)
+(Y3CG, Y3CS)
+TLV431CDBZR
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+| NIPDAUAG
+Level-1-260C-UNLIM
+0 to 70
+(Y3C6, Y3C8, Y3CB,
+     Y3CS)
+(Y3C3, Y3CS, Y3CU)
+    
+TLV431CDBZR.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+0 to 70
+(Y3C6, Y3C8, Y3CB,
+     Y3CS)
+(Y3C3, Y3CS, Y3CU)
+    
+TLV431CLP
+Obsolete
+Production
+TO-92 (LP) | 3
+-
+-
+Call TI
+Call TI
+0 to 70
+V431C
+TLV431CLPR
+Active
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+0 to 70
+V431C
+TLV431CLPR.A
+Active
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+0 to 70
+V431C
+TLV431IDBVR
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 85
+(Y3I6, Y3II)
+(Y3IG, Y3IS)
+TLV431IDBVR.A
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 85
+(Y3I6, Y3II)
+(Y3IG, Y3IS)
+TLV431IDBVR1G4
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+Y3I6
+Y3IS
+TLV431IDBVR1G4.A
+Active
+Production
+SOT-23 (DBV) | 5
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+Y3I6
+Y3IS
+TLV431IDBVRG4
+Obsolete
+Production
+SOT-23 (DBV) | 5
+-
+-
+Call TI
+Call TI
+-40 to 85
+Y3II
+TLV431IDBVT
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+NIPDAU | SN
+Level-1-260C-UNLIM
+-40 to 85
+(Y3I6, Y3II)
+(Y3IG, Y3IS)
+TLV431IDBVT.A
+Active
+Production
+SOT-23 (DBV) | 5
+250 | SMALL T&R
+Yes
+SN
+Level-1-260C-UNLIM
+-40 to 85
+(Y3I6, Y3II)
+(Y3IG, Y3IS)
+TLV431IDBZR
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | SN
+| NIPDAUAG
+Level-1-260C-UNLIM
+-40 to 85
+(Y3I6, Y3IB, Y3IS)
+    
+(Y3IU, Y3IU)
+TLV431IDBZR.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+(Y3I6, Y3IB, Y3IS)
+    
+(Y3IU, Y3IU)
+TLV431IDBZRG4
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU | NIPDAUAG
+Level-1-260C-UNLIM
+-40 to 85
+Y3I6
+Y3IS
+Addendum-Page 6
+
+PACKAGE OPTION ADDENDUM
+www.ti.com
+18-Sep-2026
+Orderable part number
+Status
+(1)
+Material type
+(2)
+Package | Pins
+Package qty | Carrier
+RoHS
+(3)
+Lead finish/
+Ball material
+(4)
+MSL rating/
+Peak reflow
+(5)
+Op temp (°C)
+Part marking
+(6)
+TLV431IDBZRG4.A
+Active
+Production
+SOT-23 (DBZ) | 3
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+Y3I6
+Y3IS
+TLV431ILP
+Obsolete
+Production
+TO-92 (LP) | 3
+-
+-
+Call TI
+Call TI
+-40 to 85
+V431I
+TLV431ILPR
+Active
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+-40 to 85
+V431I
+TLV431ILPR.A
+Active
+Production
+TO-92 (LP) | 3
+2000 | LARGE T&R
+Yes
+SN
+N/A for Pkg Type
+-40 to 85
+V431I
+TLV431QPK
+Active
+Production
+SOT-89 (PK) | 3
+1000 | LARGE T&R
+Yes
+SN
+Level-2-260C-1 YEAR
+-40 to 125
+VB
+TLV431QPK.A
+Active
+Production
+SOT-89 (PK) | 3
+1000 | LARGE T&R
+Yes
+SN
+Level-2-260C-1 YEAR
+-40 to 125
+VB
+ 
+(1) Status:  For more details on status, see our product life cycle.
+ 
+(2) Material type:  When designated, preproduction parts are prototypes/experimental devices, and are not yet approved or released for full production. Testing and final process, including without limitation quality assurance,
+reliability performance testing, and/or process qualification, may not yet be complete, and this item is subject to further changes or possible discontinuation. If available for ordering, purchases will be subject to an additional
+waiver at checkout, and are intended for early internal evaluation purposes only. These items are sold without warranties of any kind.
+ 
+(3) RoHS values:  Yes, No, RoHS Exempt. See the TI RoHS Statement for additional information and value definition.
+ 
+(4) Lead finish/Ball material:  Parts may have multiple material finish options. Finish options are separated by a vertical ruled line. Lead finish/Ball material values may wrap to two lines if the finish value exceeds the maximum
+column width.
+ 
+(5) MSL rating/Peak reflow:  The moisture sensitivity level ratings and peak solder (reflow) temperatures. In the event that a part has multiple moisture sensitivity ratings, only the lowest level per JEDEC standards is shown.
+Refer to the shipping label for the actual reflow temperature that will be used to mount the part to the printed circuit board.
+ 
+(6) Part marking:  There may be an additional marking, which relates to the logo, the lot trace code information, or the environmental category of the part.
+ 
+Multiple part markings will be inside parentheses. Only one part marking contained in parentheses and separated by a "~" will appear on a part. If a line is indented then it is a continuation of the previous line and the two
+combined represent the entire part marking for that device.
+ 
+Important Information and Disclaimer:The information provided on this page represents TI's knowledge and belief as of the date that it is provided. TI bases its knowledge and belief on information provided by third parties, and
+makes no representation or warranty as to the accuracy of such information. Efforts are underway to better integrate information from third parties. TI has taken and continues to take reasonable steps to provide representative
+and accurate information but may not have conducted destructive testing or chemical analysis on incoming materials and chemicals. TI and TI suppliers consider certain information to be proprietary, and thus CAS numbers
+and other limited information may not be available for release.
+ 
+In no event shall TI's liability arising out of such information exceed the total purchase price of the TI part(s) at issue in this document sold by TI to Customer on an annual basis.
+ 
+Addendum-Page 7
+
+PACKAGE OPTION ADDENDUM
+www.ti.com
+18-Sep-2026
+ OTHER QUALIFIED VERSIONS OF TLV431A, TLV431B :
+• Automotive : TLV431A-Q1, TLV431B-Q1
+ NOTE: Qualified Version Definitions:
+• Automotive - Q100 devices qualified for high-reliability automotive applications targeting zero defects
+Addendum-Page 8
+
+PACKAGE MATERIALS INFORMATION
+ 
+ 
+www.ti.com
+6-Sep-2026
+TAPE AND REEL INFORMATION
+Reel Width (W1)
+REEL DIMENSIONS
+A0
+B0
+K0
+W
+Dimension designed to accommodate the component length
+Dimension designed to accommodate the component thickness
+Overall width of the carrier tape
+Pitch between successive cavity centers
+Dimension designed to accommodate the component width
+TAPE DIMENSIONS
+K0
+ P1
+B0 W
+A0
+Cavity
+QUADRANT ASSIGNMENTS FOR PIN 1 ORIENTATION IN TAPE
+Pocket Quadrants
+Sprocket Holes
+Q1
+Q1
+Q2
+Q2
+Q3
+Q3
+Q4
+Q4
+User Direction of Feed
+P1
+Reel
+Diameter
+ 
+*All dimensions are nominal
+Device
+Package
+Type
+Package
+Drawing
+Pins
+SPQ
+Reel
+Diameter
+(mm)
+Reel
+Width
+W1 (mm)
+A0
+(mm)
+B0
+(mm)
+K0
+(mm)
+P1
+(mm)
+W
+(mm)
+Pin1
+Quadrant
+TLV431ACDBVR
+SOT-23
+DBV
+5
+3000
+178.0
+9.0
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431ACDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431ACDBVR1G4
+SOT-23
+DBV
+5
+3000
+178.0
+9.0
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431ACDBVR1G4
+SOT-23
+DBV
+5
+3000
+180.0
+8.4
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431ACDBVT
+SOT-23
+DBV
+5
+250
+178.0
+9.0
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431ACDBVT
+SOT-23
+DBV
+5
+250
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431ACDBZR
+SOT-23
+DBZ
+3
+3000
+178.0
+9.0
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431ACDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431ACDBZRG4
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431ACDBZRG4
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431AIDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431AIDBVR
+SOT-23
+DBV
+5
+3000
+178.0
+9.0
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431AIDBVR1G4
+SOT-23
+DBV
+5
+3000
+180.0
+8.4
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431AIDBVT
+SOT-23
+DBV
+5
+250
+178.0
+9.0
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431AIDBVT
+SOT-23
+DBV
+5
+250
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431AIDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+Pack Materials-Page 1
+
+PACKAGE MATERIALS INFORMATION
+ 
+ 
+www.ti.com
+6-Sep-2026
+Device
+Package
+Type
+Package
+Drawing
+Pins
+SPQ
+Reel
+Diameter
+(mm)
+Reel
+Width
+W1 (mm)
+A0
+(mm)
+B0
+(mm)
+K0
+(mm)
+P1
+(mm)
+W
+(mm)
+Pin1
+Quadrant
+TLV431AIDBZR
+SOT-23
+DBZ
+3
+3000
+178.0
+9.0
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431AIDBZRG4
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431AIDBZRG4
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431AIDR
+SOIC
+D
+8
+2500
+330.0
+12.4
+6.4
+5.2
+2.1
+8.0
+12.0
+Q1
+TLV431AQPK
+SOT-89
+PK
+3
+1000
+180.0
+12.4
+4.91
+4.52
+1.9
+8.0
+12.0
+Q3
+TLV431AQPK
+SOT-89
+PK
+3
+1000
+180.0
+12.4
+4.91
+4.52
+1.9
+8.0
+12.0
+Q3
+TLV431BCDBVR
+SOT-23
+DBV
+5
+3000
+178.0
+9.0
+3.3
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BCDBVT
+SOT-23
+DBV
+5
+250
+178.0
+9.0
+3.3
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BCDBVT
+SOT-23
+DBV
+5
+250
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BCDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431BCDBZR
+SOT-23
+DBZ
+3
+3000
+178.0
+9.0
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431BCDBZT
+SOT-23
+DBZ
+3
+250
+178.0
+9.0
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431BCDBZTG4
+SOT-23
+DBZ
+3
+250
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431BCDBZTG4
+SOT-23
+DBZ
+3
+250
+180.0
+8.4
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431BCDCKR
+SC70
+DCK
+6
+3000
+179.0
+8.4
+2.2
+2.5
+1.2
+4.0
+8.0
+Q3
+TLV431BCDCKR
+SC70
+DCK
+6
+3000
+180.0
+8.4
+2.3
+2.55
+1.2
+4.0
+8.0
+Q3
+TLV431BCDCKT
+SC70
+DCK
+6
+250
+180.0
+8.4
+2.3
+2.55
+1.2
+4.0
+8.0
+Q3
+TLV431BCDCKT
+SC70
+DCK
+6
+250
+179.0
+8.4
+2.2
+2.5
+1.2
+4.0
+8.0
+Q3
+TLV431BCPK
+SOT-89
+PK
+3
+1000
+180.0
+12.4
+4.91
+4.52
+1.9
+8.0
+12.0
+Q3
+TLV431BCPK
+SOT-89
+PK
+3
+1000
+180.0
+12.4
+4.91
+4.52
+1.9
+8.0
+12.0
+Q3
+TLV431BIDBVR
+SOT-23
+DBV
+5
+3000
+178.0
+9.0
+3.3
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BIDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BIDBVT
+SOT-23
+DBV
+5
+250
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BIDBVT
+SOT-23
+DBV
+5
+250
+178.0
+9.0
+3.3
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BIDBVT
+SOT-23
+DBV
+5
+250
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BIDBZR
+SOT-23
+DBZ
+3
+3000
+178.0
+9.0
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431BIDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431BIDBZRG4
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431BIDBZRG4
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431BIDBZT
+SOT-23
+DBZ
+3
+250
+178.0
+9.0
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431BIDCKR
+SC70
+DCK
+6
+3000
+179.0
+8.4
+2.2
+2.5
+1.2
+4.0
+8.0
+Q3
+TLV431BIDCKR
+SC70
+DCK
+6
+3000
+180.0
+8.4
+2.3
+2.55
+1.2
+4.0
+8.0
+Q3
+TLV431BIDCKRG4
+SC70
+DCK
+6
+3000
+179.0
+8.4
+2.2
+2.5
+1.2
+4.0
+8.0
+Q3
+TLV431BIDCKT
+SC70
+DCK
+6
+250
+180.0
+8.4
+2.3
+2.55
+1.2
+4.0
+8.0
+Q3
+TLV431BIDCKT
+SC70
+DCK
+6
+250
+179.0
+8.4
+2.2
+2.5
+1.2
+4.0
+8.0
+Q3
+TLV431BIPK
+SOT-89
+PK
+3
+1000
+180.0
+12.4
+4.91
+4.52
+1.9
+8.0
+12.0
+Q3
+TLV431BIPK
+SOT-89
+PK
+3
+1000
+180.0
+12.4
+4.91
+4.52
+1.9
+8.0
+12.0
+Q3
+TLV431BQDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BQDBVR
+SOT-23
+DBV
+5
+3000
+178.0
+9.0
+3.3
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BQDBVRG4
+SOT-23
+DBV
+5
+3000
+179.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BQDBVT
+SOT-23
+DBV
+5
+250
+178.0
+9.0
+3.3
+3.2
+1.4
+4.0
+8.0
+Q3
+Pack Materials-Page 2
+
+PACKAGE MATERIALS INFORMATION
+ 
+ 
+www.ti.com
+6-Sep-2026
+Device
+Package
+Type
+Package
+Drawing
+Pins
+SPQ
+Reel
+Diameter
+(mm)
+Reel
+Width
+W1 (mm)
+A0
+(mm)
+B0
+(mm)
+K0
+(mm)
+P1
+(mm)
+W
+(mm)
+Pin1
+Quadrant
+TLV431BQDBVT
+SOT-23
+DBV
+5
+250
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BQDBVT
+SOT-23
+DBV
+5
+250
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431BQDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431BQDBZR
+SOT-23
+DBZ
+3
+3000
+178.0
+9.0
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431BQDBZRG4
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431BQDBZRG4
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431BQDBZT
+SOT-23
+DBZ
+3
+250
+178.0
+9.0
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431BQDCKR
+SC70
+DCK
+6
+3000
+180.0
+8.4
+2.3
+2.55
+1.2
+4.0
+8.0
+Q3
+TLV431BQDCKR
+SC70
+DCK
+6
+3000
+179.0
+8.4
+2.2
+2.5
+1.2
+4.0
+8.0
+Q3
+TLV431BQDCKT
+SC70
+DCK
+6
+250
+180.0
+8.4
+2.3
+2.55
+1.2
+4.0
+8.0
+Q3
+TLV431BQDCKT
+SC70
+DCK
+6
+250
+179.0
+8.4
+2.2
+2.5
+1.2
+4.0
+8.0
+Q3
+TLV431BQPK
+SOT-89
+PK
+3
+1000
+180.0
+12.4
+4.91
+4.52
+1.9
+8.0
+12.0
+Q3
+TLV431BQPK
+SOT-89
+PK
+3
+1000
+180.0
+12.4
+4.91
+4.52
+1.9
+8.0
+12.0
+Q3
+TLV431CDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431CDBVR
+SOT-23
+DBV
+5
+3000
+178.0
+9.0
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431CDBVT
+SOT-23
+DBV
+5
+250
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431CDBVT
+SOT-23
+DBV
+5
+250
+178.0
+9.0
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431CDBVT
+SOT-23
+DBV
+5
+250
+180.0
+8.4
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431CDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431CDBZR
+SOT-23
+DBZ
+3
+3000
+178.0
+9.0
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431IDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431IDBVR
+SOT-23
+DBV
+5
+3000
+178.0
+9.0
+3.3
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431IDBVR1G4
+SOT-23
+DBV
+5
+3000
+180.0
+8.4
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431IDBVT
+SOT-23
+DBV
+5
+250
+180.0
+8.4
+3.2
+3.2
+1.4
+4.0
+8.0
+Q3
+TLV431IDBVT
+SOT-23
+DBV
+5
+250
+178.0
+9.0
+3.23
+3.17
+1.37
+4.0
+8.0
+Q3
+TLV431IDBZR
+SOT-23
+DBZ
+3
+3000
+178.0
+9.0
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431IDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431IDBZRG4
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+2.9
+3.35
+1.35
+4.0
+8.0
+Q3
+TLV431IDBZRG4
+SOT-23
+DBZ
+3
+3000
+180.0
+8.4
+3.15
+2.77
+1.22
+4.0
+8.0
+Q3
+TLV431QPK
+SOT-89
+PK
+3
+1000
+180.0
+12.4
+4.91
+4.52
+1.9
+8.0
+12.0
+Q3
+TLV431QPK
+SOT-89
+PK
+3
+1000
+180.0
+12.4
+4.91
+4.52
+1.9
+8.0
+12.0
+Q3
+Pack Materials-Page 3
+
+PACKAGE MATERIALS INFORMATION
+ 
+ 
+www.ti.com
+6-Sep-2026
+TAPE AND REEL BOX DIMENSIONS
+Width (mm)
+W
+L
+H
+ 
+*All dimensions are nominal
+Device
+Package Type
+Package Drawing
+Pins
+SPQ
+Length (mm)
+Width (mm)
+Height (mm)
+TLV431ACDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+180.0
+18.0
+TLV431ACDBVR
+SOT-23
+DBV
+5
+3000
+210.0
+185.0
+35.0
+TLV431ACDBVR1G4
+SOT-23
+DBV
+5
+3000
+180.0
+180.0
+18.0
+TLV431ACDBVR1G4
+SOT-23
+DBV
+5
+3000
+183.0
+183.0
+20.0
+TLV431ACDBVT
+SOT-23
+DBV
+5
+250
+180.0
+180.0
+18.0
+TLV431ACDBVT
+SOT-23
+DBV
+5
+250
+210.0
+185.0
+35.0
+TLV431ACDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+180.0
+18.0
+TLV431ACDBZR
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431ACDBZRG4
+SOT-23
+DBZ
+3
+3000
+183.0
+183.0
+20.0
+TLV431ACDBZRG4
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431AIDBVR
+SOT-23
+DBV
+5
+3000
+210.0
+185.0
+35.0
+TLV431AIDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+180.0
+18.0
+TLV431AIDBVR1G4
+SOT-23
+DBV
+5
+3000
+183.0
+183.0
+20.0
+TLV431AIDBVT
+SOT-23
+DBV
+5
+250
+180.0
+180.0
+18.0
+TLV431AIDBVT
+SOT-23
+DBV
+5
+250
+210.0
+185.0
+35.0
+TLV431AIDBZR
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431AIDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+180.0
+18.0
+TLV431AIDBZRG4
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+Pack Materials-Page 4
+
+PACKAGE MATERIALS INFORMATION
+ 
+ 
+www.ti.com
+6-Sep-2026
+Device
+Package Type
+Package Drawing
+Pins
+SPQ
+Length (mm)
+Width (mm)
+Height (mm)
+TLV431AIDBZRG4
+SOT-23
+DBZ
+3
+3000
+183.0
+183.0
+20.0
+TLV431AIDR
+SOIC
+D
+8
+2500
+353.0
+353.0
+32.0
+TLV431AQPK
+SOT-89
+PK
+3
+1000
+190.0
+190.0
+30.0
+TLV431AQPK
+SOT-89
+PK
+3
+1000
+340.0
+340.0
+38.0
+TLV431BCDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+180.0
+18.0
+TLV431BCDBVT
+SOT-23
+DBV
+5
+250
+180.0
+180.0
+18.0
+TLV431BCDBVT
+SOT-23
+DBV
+5
+250
+210.0
+185.0
+35.0
+TLV431BCDBZR
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431BCDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+180.0
+18.0
+TLV431BCDBZT
+SOT-23
+DBZ
+3
+250
+180.0
+180.0
+18.0
+TLV431BCDBZTG4
+SOT-23
+DBZ
+3
+250
+210.0
+185.0
+35.0
+TLV431BCDBZTG4
+SOT-23
+DBZ
+3
+250
+183.0
+183.0
+20.0
+TLV431BCDCKR
+SC70
+DCK
+6
+3000
+203.0
+203.0
+35.0
+TLV431BCDCKR
+SC70
+DCK
+6
+3000
+210.0
+185.0
+35.0
+TLV431BCDCKT
+SC70
+DCK
+6
+250
+210.0
+185.0
+35.0
+TLV431BCDCKT
+SC70
+DCK
+6
+250
+203.0
+203.0
+35.0
+TLV431BCPK
+SOT-89
+PK
+3
+1000
+190.0
+190.0
+30.0
+TLV431BCPK
+SOT-89
+PK
+3
+1000
+340.0
+340.0
+38.0
+TLV431BIDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+180.0
+18.0
+TLV431BIDBVR
+SOT-23
+DBV
+5
+3000
+210.0
+185.0
+35.0
+TLV431BIDBVT
+SOT-23
+DBV
+5
+250
+210.0
+185.0
+35.0
+TLV431BIDBVT
+SOT-23
+DBV
+5
+250
+180.0
+180.0
+18.0
+TLV431BIDBVT
+SOT-23
+DBV
+5
+250
+203.0
+203.0
+35.0
+TLV431BIDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+180.0
+18.0
+TLV431BIDBZR
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431BIDBZRG4
+SOT-23
+DBZ
+3
+3000
+183.0
+183.0
+20.0
+TLV431BIDBZRG4
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431BIDBZT
+SOT-23
+DBZ
+3
+250
+180.0
+180.0
+18.0
+TLV431BIDCKR
+SC70
+DCK
+6
+3000
+203.0
+203.0
+35.0
+TLV431BIDCKR
+SC70
+DCK
+6
+3000
+210.0
+185.0
+35.0
+TLV431BIDCKRG4
+SC70
+DCK
+6
+3000
+203.0
+203.0
+35.0
+TLV431BIDCKT
+SC70
+DCK
+6
+250
+210.0
+185.0
+35.0
+TLV431BIDCKT
+SC70
+DCK
+6
+250
+203.0
+203.0
+35.0
+TLV431BIPK
+SOT-89
+PK
+3
+1000
+340.0
+340.0
+38.0
+TLV431BIPK
+SOT-89
+PK
+3
+1000
+190.0
+190.0
+30.0
+TLV431BQDBVR
+SOT-23
+DBV
+5
+3000
+210.0
+185.0
+35.0
+TLV431BQDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+180.0
+18.0
+TLV431BQDBVRG4
+SOT-23
+DBV
+5
+3000
+200.0
+183.0
+25.0
+TLV431BQDBVT
+SOT-23
+DBV
+5
+250
+180.0
+180.0
+18.0
+TLV431BQDBVT
+SOT-23
+DBV
+5
+250
+210.0
+185.0
+35.0
+TLV431BQDBVT
+SOT-23
+DBV
+5
+250
+203.0
+203.0
+35.0
+TLV431BQDBZR
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431BQDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+180.0
+18.0
+Pack Materials-Page 5
+
+PACKAGE MATERIALS INFORMATION
+ 
+ 
+www.ti.com
+6-Sep-2026
+Device
+Package Type
+Package Drawing
+Pins
+SPQ
+Length (mm)
+Width (mm)
+Height (mm)
+TLV431BQDBZRG4
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431BQDBZRG4
+SOT-23
+DBZ
+3
+3000
+183.0
+183.0
+20.0
+TLV431BQDBZT
+SOT-23
+DBZ
+3
+250
+180.0
+180.0
+18.0
+TLV431BQDCKR
+SC70
+DCK
+6
+3000
+210.0
+185.0
+35.0
+TLV431BQDCKR
+SC70
+DCK
+6
+3000
+200.0
+183.0
+25.0
+TLV431BQDCKT
+SC70
+DCK
+6
+250
+210.0
+185.0
+35.0
+TLV431BQDCKT
+SC70
+DCK
+6
+250
+200.0
+183.0
+25.0
+TLV431BQPK
+SOT-89
+PK
+3
+1000
+340.0
+340.0
+38.0
+TLV431BQPK
+SOT-89
+PK
+3
+1000
+190.0
+190.0
+30.0
+TLV431CDBVR
+SOT-23
+DBV
+5
+3000
+210.0
+185.0
+35.0
+TLV431CDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+180.0
+18.0
+TLV431CDBVT
+SOT-23
+DBV
+5
+250
+210.0
+185.0
+35.0
+TLV431CDBVT
+SOT-23
+DBV
+5
+250
+180.0
+180.0
+18.0
+TLV431CDBVT
+SOT-23
+DBV
+5
+250
+183.0
+183.0
+20.0
+TLV431CDBZR
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431CDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+180.0
+18.0
+TLV431IDBVR
+SOT-23
+DBV
+5
+3000
+210.0
+185.0
+35.0
+TLV431IDBVR
+SOT-23
+DBV
+5
+3000
+180.0
+180.0
+18.0
+TLV431IDBVR1G4
+SOT-23
+DBV
+5
+3000
+183.0
+183.0
+20.0
+TLV431IDBVT
+SOT-23
+DBV
+5
+250
+210.0
+185.0
+35.0
+TLV431IDBVT
+SOT-23
+DBV
+5
+250
+180.0
+180.0
+18.0
+TLV431IDBZR
+SOT-23
+DBZ
+3
+3000
+180.0
+180.0
+18.0
+TLV431IDBZR
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431IDBZRG4
+SOT-23
+DBZ
+3
+3000
+210.0
+185.0
+35.0
+TLV431IDBZRG4
+SOT-23
+DBZ
+3
+3000
+183.0
+183.0
+20.0
+TLV431QPK
+SOT-89
+PK
+3
+1000
+340.0
+340.0
+38.0
+TLV431QPK
+SOT-89
+PK
+3
+1000
+190.0
+190.0
+30.0
+Pack Materials-Page 6
+
+www.ti.com
+PACKAGE OUTLINE
+C
+0.20
+0.08 TYP
+0.25
+2.64
+2.10
+1.12 MAX
+0.10
+0.01 TYP
+3X 0.5
+0.3
+0.6
+0.2 TYP
+1.9
+0.95
+0 -8 TYP
+4X 0 -15
+4X 4 -15
+A
+3.04
+2.80
+B
+1.4
+1.2
+(0.95)
+(0.15)
+(0.125)
+SOT-23 - 1.12 mm max height
+DBZ0003A
+SMALL OUTLINE TRANSISTOR
+4214838/F   08/2024
+NOTES: 
+ 
+1. All linear dimensions are in millimeters. Any dimensions in parenthesis are for reference only. Dimensioning and tolerancing
+    per ASME Y14.5M.
+2. This drawing is subject to change without notice.
+3. Reference JEDEC registration TO-236, except minimum foot length.
+4. Support pin may differ or may not be present.
+5. Body dimensions do not include mold flash, protrusions, or gate burrs. Mold flash, protrusions, or gate burrs shall not exceed
+    0.25mm per side
+ 
+0.2
+C A B
+1
+3
+2
+INDEX AREA
+PIN 1
+NOTE 4
+GAGE PLANE
+SEATING PLANE
+0.1 C
+SCALE  4.000
+
+www.ti.com
+EXAMPLE BOARD LAYOUT
+0.07 MAX
+ALL AROUND
+0.07 MIN
+ALL AROUND
+3X (1.3)
+3X (0.6)
+(2.1)
+2X (0.95)
+(R0.05) TYP
+4214838/F   08/2024
+SOT-23 - 1.12 mm max height
+DBZ0003A
+SMALL OUTLINE TRANSISTOR
+NOTES: (continued)
+ 
+5. Publication IPC-7351 may have alternate designs. 
+6. Solder mask tolerances between and around signal pads can vary based on board fabrication site.
+ 
+SYMM
+LAND PATTERN EXAMPLE
+SCALE:15X
+PKG
+1
+3
+2
+SOLDER MASK
+OPENING
+METAL UNDER
+SOLDER MASK
+SOLDER MASK
+DEFINED
+METAL
+SOLDER MASK
+OPENING
+NON SOLDER MASK
+DEFINED
+(PREFERRED)
+SOLDER MASK DETAILS
+
+www.ti.com
+EXAMPLE STENCIL DESIGN
+(2.1)
+2X(0.95)
+3X (1.3)
+3X (0.6)
+(R0.05) TYP
+SOT-23 - 1.12 mm max height
+DBZ0003A
+SMALL OUTLINE TRANSISTOR
+4214838/F   08/2024
+NOTES: (continued)
+ 
+7. Laser cutting apertures with trapezoidal walls and rounded corners may offer better paste release. IPC-7525 may have alternate
+    design recommendations. 
+8. Board assembly site may have different recommendations for stencil design.
+ 
+SOLDER PASTE EXAMPLE
+BASED ON 0.125 THICK STENCIL
+SCALE:15X
+SYMM
+PKG
+1
+3
+2
+
+
+
+www.ti.com
+PACKAGE OUTLINE
+C
+.228-.244 TYP
+[5.80-6.19]
+.069 MAX
+[1.75]     
+6X .050
+[1.27]
+8X .012-.020
+     [0.31-0.51]
+2X
+.150
+[3.81]
+.005-.010 TYP
+[0.13-0.25]
+0 - 8
+.004-.010
+[0.11-0.25]
+.010
+[0.25]
+.016-.050
+[0.41-1.27]
+4X (0 -15 )
+A
+.189-.197
+[4.81-5.00]
+NOTE 3
+B
+.150-.157
+[3.81-3.98]
+NOTE 4
+4X (0 -15 )
+(.041)
+[1.04]
+SOIC - 1.75 mm max height
+D0008A
+SMALL OUTLINE INTEGRATED CIRCUIT
+4214825/C   02/2019
+NOTES: 
+ 
+1. Linear dimensions are in inches [millimeters]. Dimensions in parenthesis are for reference only. Controlling dimensions are in inches.
+    Dimensioning and tolerancing per ASME Y14.5M. 
+2. This drawing is subject to change without notice. 
+3. This dimension does not include mold flash, protrusions, or gate burrs. Mold flash, protrusions, or gate burrs shall not
+    exceed .006 [0.15] per side. 
+4. This dimension does not include interlead flash.
+5. Reference JEDEC registration MS-012, variation AA.
+ 
+1
+8
+.010 [0.25]
+C A B
+5
+4
+PIN 1 ID AREA
+SEATING PLANE
+.004 [0.1] C
+ SEE DETAIL A
+DETAIL A
+TYPICAL
+SCALE  2.800
+
+www.ti.com
+EXAMPLE BOARD LAYOUT
+.0028 MAX
+[0.07]
+ALL AROUND
+.0028 MIN
+[0.07]
+ALL AROUND
+ 
+(.213)
+[5.4]
+6X (.050 )
+[1.27]
+8X (.061 )
+[1.55]
+8X (.024)
+[0.6]
+(R.002 ) TYP
+[0.05]
+SOIC - 1.75 mm max height
+D0008A
+SMALL OUTLINE INTEGRATED CIRCUIT
+4214825/C   02/2019
+NOTES: (continued)
+ 
+6. Publication IPC-7351 may have alternate designs. 
+7. Solder mask tolerances between and around signal pads can vary based on board fabrication site.
+ 
+METAL
+SOLDER MASK
+OPENING
+NON SOLDER MASK
+DEFINED
+SOLDER MASK DETAILS
+EXPOSED
+METAL
+OPENING
+SOLDER MASK
+METAL UNDER
+SOLDER MASK
+SOLDER MASK
+DEFINED
+EXPOSED
+METAL
+LAND PATTERN EXAMPLE
+EXPOSED METAL SHOWN
+SCALE:8X
+SYMM
+1
+4
+5
+8
+SEE
+DETAILS
+SYMM
+
+www.ti.com
+EXAMPLE STENCIL DESIGN
+8X (.061 )
+[1.55]
+8X (.024)
+[0.6]
+6X (.050 )
+[1.27]
+(.213)
+[5.4]
+(R.002 ) TYP
+[0.05]
+SOIC - 1.75 mm max height
+D0008A
+SMALL OUTLINE INTEGRATED CIRCUIT
+4214825/C   02/2019
+NOTES: (continued)
+ 
+8. Laser cutting apertures with trapezoidal walls and rounded corners may offer better paste release. IPC-7525 may have alternate
+    design recommendations.   
+9. Board assembly site may have different recommendations for stencil design.
+ 
+SOLDER PASTE EXAMPLE
+BASED ON .005 INCH [0.125 MM] THICK STENCIL
+SCALE:8X
+SYMM
+SYMM
+1
+4
+5
+8
+
+www.ti.com
+PACKAGE OUTLINE
+3X 2.67
+2.03
+5.21
+4.44
+5.34
+4.32
+3X
+12.7 MIN
+2X 1.27
+0.13
+3X 0.55
+0.38
+4.19
+3.17
+3.43 MIN
+3X 0.43
+0.35
+(2.54)
+NOTE 3
+2X 2.9
+2.4
+2X
+4 MAX
+SEATING
+PLANE
+6X
+0.076 MAX
+(0.51) TYP
+(1.5) TYP
+TO-92 -  5.34 mm max height
+LP0003A
+TO-92
+4215214/C   04/2025
+NOTES:
+ 
+1. All linear dimensions are in millimeters. Any dimensions in parenthesis are for reference only. Dimensioning and tolerancing
+    per ASME Y14.5M.
+2. This drawing is subject to change without notice.
+3. Lead dimensions are not controlled within this area.
+4. Reference JEDEC TO-226, variation AA.
+5. Shipping method:
+    a. Straight lead option available in bulk pack only.
+    b. Formed lead option available in tape and reel or ammo pack.
+    c. Specific products can be offered in limited combinations of shipping medium and lead options.
+    d. Consult product folder for more information on available options.
+EJECTOR PIN
+OPTIONAL
+PLANE
+SEATING
+STRAIGHT LEAD OPTION
+3
+2
+1
+SCALE  1.200
+FORMED LEAD OPTION
+OTHER DIMENSIONS IDENTICAL
+TO STRAIGHT LEAD OPTION
+SCALE  1.200
+
+www.ti.com
+EXAMPLE BOARD LAYOUT
+0.05 MAX
+ALL AROUND
+TYP
+(1.07)
+(1.5)
+2X (1.5)
+2X (1.07)
+(1.27)
+(2.54)
+FULL R
+TYP
+(
+1.4)
+0.05 MAX
+ALL AROUND
+TYP
+(2.6)
+(5.2)
+(R0.05) TYP
+3X (
+0.9) HOLE
+2X (
+1.4)
+METAL
+3X (
+0.85) HOLE
+(R0.05) TYP
+4215214/C   04/2025
+TO-92 -  5.34 mm max height
+LP0003A
+TO-92
+LAND PATTERN EXAMPLE
+FORMED LEAD OPTION
+NON-SOLDER MASK DEFINED
+SCALE:15X
+SOLDER MASK
+OPENING
+METAL
+2X
+SOLDER MASK
+OPENING
+1
+2
+3
+LAND PATTERN EXAMPLE
+STRAIGHT LEAD OPTION
+NON-SOLDER MASK DEFINED
+SCALE:15X
+METAL
+TYP
+SOLDER MASK
+OPENING
+2X
+SOLDER MASK
+OPENING
+2X
+METAL
+1
+2
+3
+
+www.ti.com
+TAPE SPECIFICATIONS
+19.0
+17.5
+13.7
+11.7
+11.0
+8.5
+0.5 MIN
+3.7-4.3 TYP
+9.75
+8.50
+2.9
+2.4 TYP
+6.75
+5.95
+13.0
+12.4
+(2.5) TYP
+16.5
+15.5
+32
+23
+4215214/C   04/2025
+TO-92 -  5.34 mm max height
+LP0003A
+TO-92
+FOR FORMED LEAD OPTION PACKAGE
+
+www.ti.com
+PACKAGE OUTLINE
+C
+0.22
+0.08 TYP
+0.25
+3.0
+2.6
+2X 0.95
+1.9
+1.45
+0.90
+0.15
+0.00 TYP
+5X 0.5
+0.3
+0.6
+0.3 TYP
+8
+0 TYP
+1.9
+(0.1)
+(0.15)
+4X 0 -15
+4X 4 -15
+A
+3.05
+2.75
+B
+1.75
+1.45
+(1.1)
+SOT-23 - 1.45 mm max height
+DBV0005A
+SMALL OUTLINE TRANSISTOR
+4214839/K   08/2024
+NOTES: 
+ 
+1. All linear dimensions are in millimeters. Any dimensions in parenthesis are for reference only. Dimensioning and tolerancing
+    per ASME Y14.5M.
+2. This drawing is subject to change without notice.
+3. Refernce JEDEC MO-178.
+4. Body dimensions do not include mold flash, protrusions, or gate burrs. Mold flash, protrusions, or gate burrs shall not
+    exceed 0.25 mm per side.
+5. Support pin may differ or may not be present.
+0.2
+C A B
+1
+3
+4
+5
+2
+INDEX AREA
+PIN 1
+ NOTE 5
+GAGE PLANE
+SEATING PLANE
+0.1 C
+SCALE  4.000
+
+www.ti.com
+EXAMPLE BOARD LAYOUT
+0.07 MAX
+ARROUND
+0.07 MIN
+ARROUND
+5X (1.1)
+5X (0.6)
+(2.6)
+(1.9)
+2X (0.95)
+(R0.05) TYP
+4214839/K   08/2024
+SOT-23 - 1.45 mm max height
+DBV0005A
+SMALL OUTLINE TRANSISTOR
+NOTES: (continued)
+ 
+6. Publication IPC-7351 may have alternate designs. 
+7. Solder mask tolerances between and around signal pads can vary based on board fabrication site.
+ 
+SYMM
+LAND PATTERN EXAMPLE
+EXPOSED METAL SHOWN
+SCALE:15X
+PKG
+1
+3
+4
+5
+2
+SOLDER MASK
+OPENING
+METAL UNDER
+SOLDER MASK
+SOLDER MASK
+DEFINED
+EXPOSED METAL
+METAL
+SOLDER MASK
+OPENING
+NON SOLDER MASK
+DEFINED
+(PREFERRED)
+SOLDER MASK DETAILS
+EXPOSED METAL
+
+www.ti.com
+EXAMPLE STENCIL DESIGN
+(2.6)
+(1.9)
+2X(0.95)
+5X (1.1)
+5X (0.6)
+(R0.05) TYP
+SOT-23 - 1.45 mm max height
+DBV0005A
+SMALL OUTLINE TRANSISTOR
+4214839/K   08/2024
+NOTES: (continued)
+ 
+8. Laser cutting apertures with trapezoidal walls and rounded corners may offer better paste release. IPC-7525 may have alternate
+     design recommendations. 
+9. Board assembly site may have different recommendations for stencil design.
+ 
+SOLDER PASTE EXAMPLE
+BASED ON 0.125 mm THICK STENCIL
+SCALE:15X
+SYMM
+PKG
+1
+3
+4
+5
+2
+
+www.ti.com
+PACKAGE OUTLINE
+C
+0.22
+0.08 TYP
+0.15
+2.4
+1.8
+4X 0.65
+1.1
+0.8
+0.1
+0.0 TYP
+6X 0.30
+0.15
+NOTE 5
+0.46
+0.26 TYP
+8
+0 TYP
+1.3
+4X 0 -12
+4X 4 -15
+A
+2.15
+1.85
+B
+1.4
+1.1
+SOT - 1.1 max height
+DCK0006A
+SMALL OUTLINE TRANSISTOR
+4214835/D   11/2024
+NOTES: 
+ 
+1. All linear dimensions are in millimeters. Any dimensions in parenthesis are for reference only. Dimensioning and tolerancing
+    per ASME Y14.5M.
+2. This drawing is subject to change without notice.
+3. Body dimensions do not include mold flash or protrusion. Mold flash and protrusion shall not exceed 0.15 per side.
+4. Falls within JEDEC MO-203 variation AB.
+1
+3
+4
+6
+2
+INDEX AREA
+PIN 1
+NOTE 5
+0.1
+C A B
+GAGE PLANE
+SEATING PLANE
+0.1 C
+SCALE  5.600
+
+www.ti.com
+EXAMPLE BOARD LAYOUT
+0.07 MAX
+ARROUND
+0.07 MIN
+ARROUND
+6X (0.9)
+6X (0.4)
+(2.2)
+4X (0.65)
+(R0.05) TYP
+4214835/D   11/2024
+SOT - 1.1 max height
+DCK0006A
+SMALL OUTLINE TRANSISTOR
+NOTES: (continued)
+ 
+5. Publication IPC-7351 may have alternate designs. 
+6. Solder mask tolerances between and around signal pads can vary based on board fabrication site.
+ 
+SYMM
+LAND PATTERN EXAMPLE
+EXPOSED METAL SHOWN
+SCALE:18X
+PKG
+1
+3
+4
+6
+2
+SOLDER MASK
+OPENING
+METAL UNDER
+SOLDER MASK
+SOLDER MASK
+DEFINED
+EXPOSED METAL
+METAL
+SOLDER MASK
+OPENING
+NON SOLDER MASK
+DEFINED
+(PREFERRED)
+SOLDER MASK DETAILS
+EXPOSED METAL
+
+www.ti.com
+EXAMPLE STENCIL DESIGN
+(2.2)
+4X(0.65)
+6X (0.9)
+6X (0.4)
+(R0.05) TYP
+SOT - 1.1 max height
+DCK0006A
+SMALL OUTLINE TRANSISTOR
+4214835/D   11/2024
+NOTES: (continued)
+ 
+7. Laser cutting apertures with trapezoidal walls and rounded corners may offer better paste release. IPC-7525 may have alternate
+     design recommendations. 
+8. Board assembly site may have different recommendations for stencil design.
+ 
+SOLDER PASTE EXAMPLE
+BASED ON 0.125 THICK STENCIL
+SCALE:18X
+SYMM
+PKG
+1
+3
+4
+6
+2
+
+IMPORTANT NOTICE AND DISCLAIMER
+TI PROVIDES TECHNICAL AND RELIABILITY DATA (INCLUDING DATASHEETS), DESIGN RESOURCES (INCLUDING REFERENCE 
+DESIGNS), APPLICATION OR OTHER DESIGN ADVICE, WEB TOOLS, SAFETY INFORMATION, AND OTHER RESOURCES “AS IS” 
+AND WITH ALL FAULTS, AND DISCLAIMS ALL WARRANTIES, EXPRESS AND IMPLIED, INCLUDING WITHOUT LIMITATION ANY 
+IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NON-INFRINGEMENT OF THIRD 
+PARTY INTELLECTUAL PROPERTY RIGHTS.
+These resources are intended for skilled developers designing with TI products. You are solely responsible for (1) selecting the appropriate 
+TI products for your application, (2) designing, validating and testing your application, and (3) ensuring your application meets applicable 
+standards, and any other safety, security, regulatory or other requirements.
+These resources are subject to change without notice. TI grants you permission to use these resources only for development of an 
+application that uses the TI products described in the resource. Other reproduction and display of these resources is prohibited. No license 
+is granted to any other TI intellectual property right or to any third party intellectual property right. TI disclaims responsibility for, and you fully 
+indemnify TI and its representatives against any claims, damages, costs, losses, and liabilities arising out of your use of these resources.
+TI’s products are provided subject to TI’s Terms of Sale, TI’s General Quality Guidelines, or other applicable terms available either on 
+ti.com or provided in conjunction with such TI products. TI’s provision of these resources does not expand or otherwise alter TI’s applicable 
+warranties or warranty disclaimers for TI products. Unless TI explicitly designates a product as custom or customer-specified, TI products 
+are standard, catalog, general purpose devices.
+TI objects to and rejects any additional or different terms you may propose.
+IMPORTANT NOTICE
+Copyright © 2026, Texas Instruments Incorporated
+Last updated 10/2025

@@ -1,0 +1,302 @@
+[
+  {
+    "path": "datasheets/ap63203.pdf",
+    "bytes": 1226090,
+    "sha256": "ef99daa3789d835bc025dfcb4c605c5c2e6d3e7223e86d40b33e6b497ea5a722",
+    "pages": 18
+  },
+  {
+    "path": "datasheets/ch340.pdf",
+    "bytes": 233534,
+    "sha256": "6a6922d3c4de2d4fc9b7fb2c938985d2bbd73cd381813f10e940b492baebb7c0",
+    "pages": 10
+  },
+  {
+    "path": "datasheets/ch340.txt",
+    "bytes": 27309,
+    "sha256": "f6795401b255eb9aa5821538b526909c42d9645360fa438d60379b0adc988d40"
+  },
+  {
+    "path": "datasheets/cpg151101d13.pdf",
+    "bytes": 3197551,
+    "sha256": "e49ad1b9f11d9e9d84fdec678f7172b31c23b63f83691d27e11b6a447deb1824",
+    "pages": 8
+  },
+  {
+    "path": "datasheets/ds3231.pdf",
+    "bytes": 381096,
+    "sha256": "ec27766ea72ac63e94aff3d81536fcfd37067072a9ea40037017562dc9b5abfb",
+    "pages": 20
+  },
+  {
+    "path": "datasheets/esp32-s3-wroom.pdf",
+    "bytes": 1280501,
+    "sha256": "27d71971da07c280c6068d08c74720d1a25b8f20cf8494dc1765bdd28d40d435",
+    "pages": 53
+  },
+  {
+    "path": "datasheets/inmp441.pdf",
+    "bytes": 459670,
+    "sha256": "b09f1e902210135477966899638b2217e12116e3b70783fef907ee5398252af4",
+    "pages": 21
+  },
+  {
+    "path": "datasheets/max98357.pdf",
+    "bytes": 2648763,
+    "sha256": "abac92d3522a204f093c911257c0e0ffa958d8f8acc1da3103a291d0403e8cd9",
+    "pages": 38
+  },
+  {
+    "path": "datasheets/myoung-bs-12-b3aa003.pdf",
+    "bytes": 123819,
+    "sha256": "ebcfe941a50bf6fe4d7a6bb0d1528eec33317fa0cb46546c6d63e41c1c733357",
+    "pages": 1
+  },
+  {
+    "path": "datasheets/panasonic-zk.pdf",
+    "bytes": 787536,
+    "sha256": "3446295dcc92ffe919575111383fc11e94191ea3c9e9ab4a4344cd6cdcf7b5a1",
+    "pages": 9
+  },
+  {
+    "path": "datasheets/pcf8563.pdf",
+    "bytes": 601986,
+    "sha256": "2ed5d1b0a1051d0e81399417c4ff0ced0658fa36e13c0487670f9cb6dfb4f1d4",
+    "pages": 50
+  },
+  {
+    "path": "datasheets/rkjxv.pdf",
+    "bytes": 269873,
+    "sha256": "93e94102c3b833fe3df9e36728d142192413b8dee45c2b3f1e5d2dc8899b16b4",
+    "pages": 2
+  },
+  {
+    "path": "datasheets/sn74lv1t34.pdf",
+    "bytes": 1142670,
+    "sha256": "512f47938da1eaf50eb0191790db592b2bef4f31dd5f986f1843ce6e92de7df8",
+    "pages": 26
+  },
+  {
+    "path": "datasheets/sn74lv1t34.txt",
+    "bytes": 41036,
+    "sha256": "ad61d482ef5968ebe30bf31709ba5b4cc0e70cb979770e95ca58384f05e5a6ee"
+  },
+  {
+    "path": "datasheets/sn74lvc14a.pdf",
+    "bytes": 2589788,
+    "sha256": "97531f3f9b671fa8509820acb9114011cea15663b85a718dd98cd87204d80b7f",
+    "pages": 41
+  },
+  {
+    "path": "datasheets/sn74lvc1g02.pdf",
+    "bytes": 2832362,
+    "sha256": "38895735614b7fee3e6ccee1c02026dc1256ff83da5375cdcc4022ad84460d0f",
+    "pages": 49
+  },
+  {
+    "path": "datasheets/sn74lvc1g08.pdf",
+    "bytes": 2837825,
+    "sha256": "30b963cc44233cf3ca35c891ff987c8323a2244ecc765e23296ec96ca4b42666",
+    "pages": 50
+  },
+  {
+    "path": "datasheets/sn74lvc1g11.pdf",
+    "bytes": 2242255,
+    "sha256": "ffd953703273b43844eae23cfbf31cfc801a3b9443f2c863d49dde62f5a9232b",
+    "pages": 37
+  },
+  {
+    "path": "datasheets/sn74lvc1g11.txt",
+    "bytes": 47548,
+    "sha256": "38b733249046fa7ba9664829e7eba7cd1f919f65ce63301eadcbdb5ac8c58c8f"
+  },
+  {
+    "path": "datasheets/sn74lvc1g27.pdf",
+    "bytes": 1823902,
+    "sha256": "52eba79ea5ba10a6e4dd1a96de487c4a3c05875ec6da3186794718eb79a7e8af",
+    "pages": 29
+  },
+  {
+    "path": "datasheets/sn74lvc1g32.pdf",
+    "bytes": 2923095,
+    "sha256": "b64786a568abe6a715c6f15dbc8ab1ffde3ad1017a1128a98931200e12c4c416",
+    "pages": 51
+  },
+  {
+    "path": "datasheets/sn74lvc2g02.pdf",
+    "bytes": 774794,
+    "sha256": "ba6416add62208fc2b09122a3cd9978b494b23705acedf5071e6b946beef7278",
+    "pages": 26
+  },
+  {
+    "path": "datasheets/sn74lvc2g02.txt",
+    "bytes": 38223,
+    "sha256": "c7a5bd062c12e82fbc378f68fc0b0ad8c70c80252fe67c9ca541f2ec064145ac"
+  },
+  {
+    "path": "datasheets/thb001p.pdf",
+    "bytes": 240351,
+    "sha256": "6d13cfa7ceb8db7a07610ec1ada61fb369740194b8830ffb00a6b22c95d8d791",
+    "pages": 1
+  },
+  {
+    "path": "datasheets/tlv431.pdf",
+    "bytes": 3466154,
+    "sha256": "6999c7cde8d7d7684045d82f6655e2dc37bf604ee913a693a2cc71f186b6ae2e",
+    "pages": 58
+  },
+  {
+    "path": "datasheets/tlv431.txt",
+    "bytes": 87497,
+    "sha256": "2ec06e00d0619c1fbfac857e584fc3cfc8775ad605059f7a320bec4f5b2adc7a"
+  },
+  {
+    "path": "datasheets/tlv7034.pdf",
+    "bytes": 4353798,
+    "sha256": "8f3dd0bf003112a66a90ac26d7aee94019ab630134c70dfad485dafb1cae43d6",
+    "pages": 69
+  },
+  {
+    "path": "datasheets/tlv7034.txt",
+    "bytes": 98602,
+    "sha256": "6381739b8326d1e6eb7bcf488efdb257cfbfe66ce1e341373a719dbc6cbf630f"
+  },
+  {
+    "path": "datasheets/tps25947.pdf",
+    "bytes": 5316794,
+    "sha256": "8f96de389903091650d4f462dcfad3210071c3ae7093623a7978f34baf8a65b4",
+    "pages": 75
+  },
+  {
+    "path": "datasheets/tps25947.txt",
+    "bytes": 127226,
+    "sha256": "34f28d3d1fae36881ead01df7a43f3c297dbe55d5df04ad10e69b3011b5ff057"
+  },
+  {
+    "path": "datasheets/tusb320.pdf",
+    "bytes": 1601733,
+    "sha256": "1306e448c3f3b169f3b90854710033b9a1aede1d04ba35088f3d2e3ed260d2c4",
+    "pages": 36
+  },
+  {
+    "path": "datasheets/tusb320.txt",
+    "bytes": 75591,
+    "sha256": "2b8f0bfa5ffdef71511786dce0620605b7803029aba2c85958f17fdbfa87f3b5"
+  },
+  {
+    "path": "datasheets/tusb320lai.pdf",
+    "bytes": 1313743,
+    "sha256": "62f7b3f65338e25ebd6fd46ef04474ba806b06b1cc04bc0b3d7b8191b01ca87d",
+    "pages": 38
+  },
+  {
+    "path": "datasheets/tusb320lai.txt",
+    "bytes": 82405,
+    "sha256": "9996ba966728737d813f57a090008a8a33cf9e10abd2836d1c087da94136c6d0"
+  },
+  {
+    "path": "drawings/cpg151101d13-6.png",
+    "bytes": 546731,
+    "sha256": "f59bea68bbaab5a1dfa18f94d6f4b3f57144e06ab9aebe5f2dc16b72367caa98"
+  },
+  {
+    "path": "drawings/cpg151101d13-8.png",
+    "bytes": 319436,
+    "sha256": "ebdd207ff50efee9ca3de995ab169cecbc0201f52222f836d74e225b0e0d88bb"
+  },
+  {
+    "path": "drawings/ds3231-20.png",
+    "bytes": 163072,
+    "sha256": "281b40a343cd6ca21cdff27a3654db3132d4adc2e51ce467b020ddda2ffb41d6"
+  },
+  {
+    "path": "drawings/ds3231-9.png",
+    "bytes": 342788,
+    "sha256": "09b7f1242fe37ce4c56dbe6393616237ebadcef68b7365efe3bdfb4ed2441eba"
+  },
+  {
+    "path": "drawings/inmp441-page-17.png",
+    "bytes": 104528,
+    "sha256": "9eeb73df9a2a4f1da7c0ac05b3880f0b8973e22b3b2fe3b9dc2a965f612a77f8"
+  },
+  {
+    "path": "drawings/inmp441-page-8.png",
+    "bytes": 101771,
+    "sha256": "d1e8b1a5cfcc77da0153d961ed25ddf3f2a07aac32cf1304141b2bf8b369419d"
+  },
+  {
+    "path": "drawings/myoung-bs-12-b3aa003-1.png",
+    "bytes": 278266,
+    "sha256": "0d2b9587716fc3caa2703dde843ae51b07710e994912ed68234ac32ce750f9e3"
+  },
+  {
+    "path": "drawings/rkjxv-2.png",
+    "bytes": 107607,
+    "sha256": "2690287c26fb96080432fe78b5a7f30ffaf1b2b4d3a18a3c674fc1da78269ec1"
+  },
+  {
+    "path": "drawings/sn74lvc1g11-pins-3.png",
+    "bytes": 136549,
+    "sha256": "c3cd678c7e50bf13160f8ae034f55464ae152bfdab75427042b692de8fd0e15a"
+  },
+  {
+    "path": "drawings/sn74lvc2g02-pins-3.png",
+    "bytes": 134916,
+    "sha256": "ede2fe201f6c8093ecd444438d1b59241b8c2078fa4b58df2079e35c51e613f1"
+  },
+  {
+    "path": "drawings/thb001p-1.png",
+    "bytes": 299556,
+    "sha256": "1b168007b322b2383b9beaddbf19f42221c76e7dbb1f1634ddb3c277baaffa45"
+  },
+  {
+    "path": "drawings/thb001p-drill-detail.png",
+    "bytes": 63517,
+    "sha256": "b8b2a24bd65966e0d83e99d0210a5f536a9664e01fdc2252681c5995eda56a2c"
+  },
+  {
+    "path": "drawings/tlv431-pins-3.png",
+    "bytes": 185049,
+    "sha256": "724a9c728faed671d4739971b849082d5b5c1a8943efb1a4aaec62e0af55fbdc"
+  },
+  {
+    "path": "drawings/tlv7034-pins-2.png",
+    "bytes": 162380,
+    "sha256": "5239dc55715ba0c6b955c3307ecac6c8b24392bf2e7ed57b20a4d395b1d03c60"
+  },
+  {
+    "path": "drawings/tlv7034-pins-3.png",
+    "bytes": 177380,
+    "sha256": "5e04d48605a3008ff855003d8e650c72c3c5560dabf32498dc16ca34c7324e64"
+  },
+  {
+    "path": "drawings/tlv7034-pins-4.png",
+    "bytes": 121849,
+    "sha256": "350cd132449680402ee9675f4e1d80173be960231d7f759f4d1addbd69ed22f7"
+  },
+  {
+    "path": "drawings/tlv7034-pins-5.png",
+    "bytes": 160377,
+    "sha256": "7fde9c3f82666353538e4d971e327b29e8273e3e13e206a3a84418580150bbbf"
+  },
+  {
+    "path": "drawings/tps25947-package-72.png",
+    "bytes": 125631,
+    "sha256": "97f732f95d9ce93c0868288253b8d21ea6d84ce0b518e5efd91233f22cfad18b"
+  },
+  {
+    "path": "drawings/tps25947-package-73.png",
+    "bytes": 142058,
+    "sha256": "b59e8f71688b9f4d31b9f4e38eb945c67acc9903c5a1696c72e1e97cde3a8a6c"
+  },
+  {
+    "path": "licenses/kicad-footprints-LICENSE.md",
+    "bytes": 2105,
+    "sha256": "285b027a721577d0bc0198f36e948c6c282ddaa4b58fef8ed826749576eb0aef"
+  },
+  {
+    "path": "licenses/kicad-symbols-LICENSE.md",
+    "bytes": 2105,
+    "sha256": "285b027a721577d0bc0198f36e948c6c282ddaa4b58fef8ed826749576eb0aef"
+  }
+]

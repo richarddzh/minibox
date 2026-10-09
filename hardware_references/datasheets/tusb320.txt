@@ -1,0 +1,2651 @@
+TUSB320 USB Type-C™ Configuration Channel Logic and Port Control
+1 Features
+•
+USB Type-C™ specification 1.1
+•
+Backward compatible with USB Type-C 
+specification 1.0
+•
+Supports up to 3 A of current advertisement and 
+detection
+•
+Mode configuration
+–
+Host only – DFP (source)
+–
+Device only – UFP (sink)
+–
+Dual role port – DRP
+•
+Channel configuration (CC)
+–
+Attach of USB port detection
+–
+Cable orientation detection
+–
+Role detection
+–
+Type-C current mode (default, medium, high)
+•
+VBUS detection
+•
+I2C or GPIO control
+•
+Role configuration control through I2C
+•
+Supply voltage: 2.7 V to 5 V
+•
+Low current consumption
+•
+Industrial temperature range of –40 to 85°C
+2 Applications
+•
+Host, device, dual role port applications
+•
+Mobile phones
+•
+Tablets and notebooks
+•
+USB peripherals
+3 Description
+The TUSB320 device enables USB Type-C ports 
+with the configuration channel (CC) logic needed 
+for Type-C ecosystems. The TUSB320 device uses 
+the CC pins to determine port attach and detach, 
+cable orientation, role detection, and port control 
+for Type-C current mode. The TUSB320 device can 
+be configured as a downstream facing port (DFP), 
+upstream facing port (UFP) or a dual role port (DRP) 
+making it ideal for any application.
+The TUSB320 device alternates configuration as a 
+DFP or UFP according to the Type-C specifications. 
+The CC logic block monitors the CC1 and CC2 pins 
+for pullup or pulldown resistances to determine when 
+a USB port has been attached, the orientation of the 
+cable, and the role detected. The CC logic detects 
+the Type-C current mode as default, medium, or high 
+depending on the role detected. VBUS detection is 
+implemented to determine a successful attach in UFP 
+and DRP modes.
+The device operates over a wide supply range and 
+has low-power consumption. The TUSB320 device 
+is available in industrial and commercial temperature 
+ranges.
+Device Information(1) 
+PART NUMBER
+PACKAGE
+BODY SIZE (NOM)
+TUSB320
+X2QFN (12)
+1.60 mm × 1.60 mm
+TUSB320I
+X2QFN (12)
+1.60 mm × 1.60 mm
+(1)
+For all available packages, see the orderable addendum at 
+the end of the data sheet.
+CC1
+CC2
+GPIO
+CC Logic
+For Mode 
+Configuration and 
+Detection
+GPIOs
+I2C
+VDD
+Controller
+GND
+VBUS
+Detection
+VBUS
+Copyright © 2016, Texas Instruments Incorporated
+Simplified Schematic
+Sample Applications
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+An IMPORTANT NOTICE at the end of this data sheet addresses availability, warranty, changes, use in safety-critical applications, 
+intellectual property matters and other important disclaimers. PRODUCTION DATA.
+
+Table of Contents
+1 Features............................................................................1
+2 Applications.....................................................................1
+3 Description.......................................................................1
+4 Revision History.............................................................. 2
+5 Pin Configuration and Functions...................................4
+6 Specifications.................................................................. 5
+6.1 Absolute Maximum Ratings........................................ 5
+6.2 ESD Ratings............................................................... 5
+6.3 Recommended Operating Conditions.........................5
+6.4 Thermal Information....................................................5
+6.5 Electrical Characteristics.............................................6
+6.6 Timing Requirements..................................................7
+6.7 Switching Characteristics............................................7
+7 Detailed Description........................................................9
+7.1 Overview.....................................................................9
+7.2 Functional Block Diagram...........................................9
+7.3 Feature Description...................................................10
+7.4 Device Functional Modes..........................................13
+7.5 Programming............................................................ 15
+7.6 Register Maps...........................................................16
+8 Application and Implementation..................................20
+8.1 Application Information............................................. 20
+8.2 Typical Application.................................................... 21
+8.3 Initialization Set Up................................................... 27
+9 Power Supply Recommendations................................27
+10 Layout...........................................................................27
+10.1 Layout Guidelines................................................... 27
+10.2 Layout Example...................................................... 27
+11 Device and Documentation Support..........................28
+11.1 Receiving Notification of Documentation Updates..28
+11.2 Support Resources................................................. 28
+11.3 Trademarks............................................................. 28
+11.4 Electrostatic Discharge Caution..............................28
+11.5 Glossary..................................................................28
+12 Mechanical, Packaging, and Orderable 
+Information.................................................................... 28
+4 Revision History
+NOTE: Page numbers for previous revisions may differ from page numbers in the current version.
+Changes from Revision E (May 2017) to Revision F (March 2022)
+Page
+•
+Updated the numbering format for tables, figures, and cross-references throughout the document..................1
+•
+Updated the term master to controller throughout the data sheet to align with MIPI I3C specification and 
+NXP's Inclusive Language Project......................................................................................................................1
+•
+Added the Junction Temperature to the Absolute Maximum Ratings section.....................................................5
+•
+Changed the tCCCB_DEFAULT typical parameter from 168 ms to 133 ms.......................................................7
+•
+Added Functional Block Diagram section...........................................................................................................9
+Changes from Revision D (October 2016) to Revision E (May 2017)
+Page
+•
+Changed RVBUS values From: MIN = 891, TYP = 900, MAX = 909 KΩ To: MIN = 855, TYP = 887, MAX = 920 
+KΩ ......................................................................................................................................................................6
+Changes from Revision C (September 2016) to Revision D (October 2016)
+Page
+•
+Changed text for Pin 7 in the Pin Functions table From: "default current mode detected (H); medium or high 
+current mode detected (L)." To: "Refer to Table 7-3 for more details."............................................................... 4
+•
+Changed text for Pin 8 in the Pin Functions table From: "default or medium current mode detected (H); high 
+current mode detected (L)." To: "Refer to Table 7-3 for more details."............................................................... 4
+Changes from Revision B (March 2016) to Revision C (September 2016)
+Page
+•
+Changed pins CC1 and CC2 values From: MIN = -0.3 MAX = VDD + 0.3 To: MIN -0.3 MAX = 6 in the Section 
+6.1 ......................................................................................................................................................................5
+Changes from Revision A (June 2015) to Revision B (March 2016)
+Page
+•
+Added Note 1 and 2 to the Pin Functions table.................................................................................................. 4
+•
+Changed the DESCRIPTION of pin EN_N pin in the Pin Functions table..........................................................4
+•
+Changed the DESCRIPTION of pin VDD in the Pin Functions table................................................................... 4
+•
+Changed the MIN, TYP, and MAX values for VTH_UFP_CC_USB, VTH_UFP_CC_MED, and VTH_UFP_CC_HIGH in the 
+Section 6.5 table.................................................................................................................................................6
+•
+Added Test Condition "See Figure 6-1" to VBUS_THR in the Section 6.5 ............................................................ 6
+•
+Added Note 2 to the Section 6.5 table ...............................................................................................................6
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+2
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+•
+Updated Section 6.6 table with new values........................................................................................................7
+•
+Added Data hold time, Data valid time, Data valid acknowledge time, and Cbus_400kHz values to Section 6.6 
+table....................................................................................................................................................................7
+•
+Changed the Section 6.7 table .......................................................................................................................... 7
+•
+Added Note: "SW must make sure..." to the Description of INTERRUPT_STATUS in Table 7-7 ....................16
+•
+Added text to list item 2 in the Section 8.3 section........................................................................................... 27
+Changes from Revision * (May 2015) to Revision A (June 2015)
+Page
+•
+Changed device status of TUSB320 from Product Preview to Production Data ............................................... 1
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+3
+Product Folder Links: TUSB320 TUSB320I
+
+5 Pin Configuration and Functions
+CC2
+CC1
+GND         
+SCL/OUT2
+SDA/OUT1
+8
+7
+2
+1
+VBUS_DET
+4
+11
+EN_N
+PORT
+VDD
+3
+12
+ADDR
+5
+10
+ID
+6
+9
+INT_N/OUT3
+Figure 5-1. RWB Package, 12-Pin X2QFN (Top View) 
+Table 5-1. Pin Functions
+PIN
+TYPE(3)
+DESCRIPTION
+NAME
+NO.
+CC1
+1
+I/O
+Type-C configuration channel signal 1
+CC2
+2
+I/O
+Type-C configuration channel signal 2
+PORT(1)
+3
+I
+Tri-level input pin to indicate port mode. The state of this pin is sampled when EN_N is asserted low and VDD is 
+active. This pin is also sampled following a I2C_SOFT_RESET.
+H - DFP (Pull-up to VDD if DFP mode is desired)
+NC - DRP (Leave unconnected if DRP mode is desired)
+L - UFP (Pull-down or tie to GND if UFP mode is desired)
+VBUS_DET(1)
+4
+I
+5- to 28-V VBUS input voltage. VBUS detection determines UFP attachment. One 900-kΩ external resistor 
+required between system VBUS and VBUS_DET pin.
+ADDR(1)
+5
+I
+Tri-level input pin to indicate I2C address or GPIO mode:
+H - I2C is enabled and I2C 7-bit address is 0x61.
+NC - GPIO mode (I2C is disabled)
+L - I2C is enabled and I2C 7-bit address is 0x60.
+ADDR pin should be pulled up to VDD if high configuration is desired
+INT_N/OUT3(1)
+6
+O
+The INT_N/OUT3 is a dual-function pin. When used as the INT_N, the pin is an open drain output in I2C control 
+mode and is an active low interrupt signal for indicating changes in I2C registers. When used as OUT3, the pin is 
+in audio accessory detect in GPIO mode: no detection (H), audio accessory connection detected (L).
+SDA/OUT1(1) (2)
+7
+I/O
+The SDA/OUT1 is a dual-function pin. When I2C is enabled (ADDR pin is high or low), this pin is the I2C 
+communication data signal. When in GPIO mode (ADDR pin is NC), this pin is an open drain output for 
+communicating Type-C current mode detect when the TUSB320 device is in UFP mode: Refer to Table 7-3 for 
+more details.
+SCL/OUT2(1) (2)
+8
+I/O
+The SCL/OUT2 is a dual function pin. When I2C is enabled (ADDR pin is high or low), this pin is the I2C 
+communication clock signal. When in GPIO mode (ADDR pin is NC), this pin is an open drain output for 
+communicating Type-C current mode detect when the TUSB320 device is in UFP mode: Refer to Table 7-3 for 
+more details.
+ID(1)
+9
+O
+Open drain output; asserted low when the CC pins detect device attachment when port is a source (DFP), or 
+dual-role (DRP) acting as source (DFP).
+GND
+10
+G
+Ground
+EN_N
+11
+I
+Enable signal; active low. Pulled up to VDD internally to disable the TUSB320 device. If controlled externally, 
+must be held high at least for 50 ms after VDD has reached its valid voltage level.
+VDD
+12
+P
+Positive supply voltage. VDD must ramp within 25 ms or less
+(1)
+When VDD is off, the TUSB320 non-failsafe pins (VBUS_DET, ADDR, PORT, ID, OUT[3:1] pins) could back-drive the TUSB320 device 
+if not handled properly. When necessary to pull these pins up, it is recommended to pullup PORT, ADDR, INT_N/OUT3, and ID to the 
+device VDD supply. The VBUS_DET must be pulled up to VBUS through a 900-kΩ resistor.
+(2)
+When using the 3.3 V supply for I2C, the end user must ensure that the VDD is 3 V and above. Otherwise the I2C may back power the 
+device.
+(3)
+I = input, O = output, P = power
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+4
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+6 Specifications
+6.1 Absolute Maximum Ratings
+over operating free-air temperature range (unless otherwise noted)(1)
+MIN
+MAX
+UNIT
+Supply voltage
+VDD
+-0.3
+6
+V
+Control pins
+PORT, ADDR, ID, EN_N, INT_N/OUT3
+-0.3
+VDD + 0.3
+V
+CC1, CC2
+-0.3
+6
+SDA/OUT1, SCL/OUT2
+-0.3
+VDD + 0.3
+VBUS_DET
+-0.3
+4
+Storage temperature, Tstg
+-65
+150
+°C
+Junction temperature
+-40
+105
+°C
+(1)
+Stresses beyond those listed under Absolute Maximum Ratings may cause permanent damage to the device. These are stress 
+ratings only, which do not imply functional operation of the device at these or any other conditions beyond those indicated under 
+Recommended Operating Conditions. Exposure to absolute-maximum-rated conditions for extended periods may affect device 
+reliability.
+6.2 ESD Ratings
+VALUE
+UNIT
+V(ESD)
+Electrostatic discharge
+Human-body model (HBM), per ANSI/ESDA/JEDEC JS-001(1)
+±7000
+V
+Charged-device model (CDM), per JEDEC specification JESD22-
+C101(2)
+±1500
+(1)
+JEDEC document JEP155 states that 500-V HBM allows safe manufacturing with a standard ESD control process.
+(2)
+JEDEC document JEP157 states that 250-V CDM allows safe manufacturing with a standard ESD control process.
+6.3 Recommended Operating Conditions
+over operating free-air temperature range (unless otherwise noted)
+MIN
+NOM
+MAX
+UNIT
+VDD
+Supply voltage range
+2.7
+5
+V
+VBUS
+System VBUS voltage
+4
+5
+28
+V
+VBUS_DET
+VBUS_DET threshold voltage on the pin
+4
+V
+TA
+TUSB320I Operating free air temperature range
+–40
+25
+85
+°C
+TUSB320 Operating free air temperature range
+0
+25
+70
+°C
+6.4 Thermal Information
+THERMAL METRIC(1)
+TUSB320
+UNIT
+RWB (X2QFN)
+12 PINS
+RθJA
+Junction-to-ambient thermal resistance
+169.3
+°C/W
+RθJC(top)
+Junction-to-case (top) thermal resistance
+68.1
+°C/W
+RθJB
+Junction-to-board thermal resistance
+83.4
+°C/W
+ψJT
+Junction-to-top characterization parameter
+2.2
+°C/W
+ψJB
+Junction-to-board characterization parameter
+83.4
+°C/W
+RθJC(bot)
+Junction-to-case (bottom) thermal resistance
+N/A
+(1)
+For more information about traditional and new thermal metrics, see the Semiconductor and C Package Thermal Metrics application 
+report, SPRA953.
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+5
+Product Folder Links: TUSB320 TUSB320I
+
+6.5 Electrical Characteristics
+over operating free-air temperature range (unless otherwise noted)
+PARAMETER
+TEST 
+CONDITIONS
+MIN
+TYP
+MAX
+UNIT
+Power Consumption
+IUNATTACHED_UFP
+Current consumption in unattached mode when port is 
+unconnected and waiting for connection. (VDD = 4.5 V, 
+EN_N = L, ADDR = NC, PORT = L)
+100
+µA
+IACTIVE_UFP
+Current consumption in active mode. (VDD = 4.5 V, EN_N = 
+L, ADDR = NC, PORT = L)
+100
+µA
+ISHUTDOWN
+Leakage current when VDD is supplied but the TUSB320 
+device is not enabled. (VDD = 4.5 V, EN_N = H)
+1.7
+µA
+CC1 and CC2 Pins
+RCC_DB
+Pulldown resistor when in dead-battery mode.
+4.1
+5.1
+6.1
+kΩ
+RCC_D
+Pulldown resistor when in UFP or DRP mode.
+4.6
+5.1
+5.6
+kΩ
+VUFP_CC_USB
+Voltage level range for detecting a DFP attach when 
+configured as an UFP and DFP is advertising default 
+current source capability.
+0.25
+0.61
+V
+VUFP_CC_MED
+Voltage level range for detecting a DFP attach when 
+configured as an UFP and DFP is advertising medium (1.5 
+A) current source capability.
+0.7
+1.16
+V
+VUFP_CC_HIGH
+Voltage level range for detecting a DFP attach when 
+configured as an UFP and DFP is advertising high (3 A) 
+current source capability.
+1.31
+2.04
+V
+VTH_DFP_CC_USB
+Voltage threshold for detecting an UFP attach when 
+configured as a DFP and advertising default current source 
+capability.
+1.51
+1.6
+1.64
+V
+VTH_DFP_CC_MED
+Voltage threshold for detecting an UFP attach when 
+configured as a DFP and advertising medium current (1.5 
+A) source capability.
+1.51
+1.6
+1.64
+V
+VTH_DFP_CC_HIGH
+Voltage threshold for detecting an UFP attach when 
+configured as a DFP and advertising high current (3.0 A) 
+source capability.
+2.46
+2.6
+2.74
+V
+ICC_DEFAULT_P
+Default mode pullup current source when operating in DFP 
+or DRP mode.
+64
+80
+96
+µA
+ICC_MED_P
+Medium (1.5 A) mode pullup current source when operating 
+in DFP or DRP mode.
+166
+180
+194
+µA
+ICC_HIGH_P
+High (3 A) mode pullup current source when operating in 
+DFP or DRP mode.(1)
+304
+330
+356
+µA
+Control Pins: PORT, ADDR, INT/OUT3, EN_N, ID
+VIL
+Low-level control signal input voltage, (PORT, ADDR, 
+EN_N)
+0.4
+V
+VIM
+Mid-level control signal input voltage (PORT, ADDR)
+0.28 × VDD
+0.56 × VDD
+V
+VIH
+High-level control signal input voltage (PORT, ADDR, 
+EN_N)
+VDD - 0.3
+V
+IIH
+High-level input current
+–20
+20
+µA
+IIL
+Low-level input current
+–10
+10
+µA
+REN_N
+Internal pullup resistance for EN_N
+1.1
+MΩ
+Rpu (2)
+Internal pullup resistance (PORT, ADDR)
+588
+kΩ
+Rpd (2)
+Internal pulldown resistance (PORT, ADDR)
+1.1
+MΩ
+VOL
+Low-level signal output voltage (open-drain) (INT_N/OUT3, 
+ID)
+IOL = –1.6 mA
+0.4
+V
+Rp_ODext
+External pullup resistor on open drain IOs (INT_N/OUT3, 
+ID)
+200
+kΩ
+Rp_TLext
+Tri-level input external pullup resistor (PORT, ADDR)
+4.7
+kΩ
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+6
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+6.5 Electrical Characteristics (continued)
+over operating free-air temperature range (unless otherwise noted)
+PARAMETER
+TEST 
+CONDITIONS
+MIN
+TYP
+MAX
+UNIT
+I2C - SDA/OUT1, SCL/OUT2 can operate from 1.8 or 3.3 V (±10%)(3)
+VDD_I2C
+Supply range for I2C (SDA/OUT1, SCL/OUT2)
+1.65
+1.8
+3.6
+V
+VIH
+High-level signal voltage
+1.05
+V
+VIL
+Low-level signal voltage
+0.4
+V
+VOL
+Low-level signal output voltage (open drain)
+IOL = –1.6 mA
+0.4
+V
+VBUS_DET IO Pins (Connected to System VBUS signal)
+VBUS_THR
+VBUS threshold range
+See Figure 6-1
+2.95
+3.30
+3.80
+V
+RVBUS
+External resistor between VBUS and VBUS_DET pin
+855
+887
+920
+KΩ
+RVBUS_PD
+Internal pulldown resistance for VBUS_DET
+95
+KΩ
+(1)
+VDD must be 3.5 V or greater to advertise 3 A current.
+(2)
+Internal pullup and pulldown for PORT and ADDR are removed after the device has sampled EN = high or EN_N = low.
+(3)
+When using 3.3 V for I2C, customer must ensure VDD is above 3.0 V at all times.
+6.6 Timing Requirements
+MIN
+NOM
+MAX
+UNIT
+I2C (SDA, SCL)
+tSU:DAT
+Data setup time
+100
+ns
+tHD;DAT
+Data hold time
+10
+ns
+tSU:STA
+Set-up time, SCL to start condition
+0.6
+µs
+tHD:STA
+Hold time, (repeated) start condition to SCL
+0.6
+µs
+tSU:STO
+Set up time for stop condition
+0.6
+µs
+tBUF
+Bus free time between a stop and start condition
+1.3
+µs
+tVD;DAT
+Data valid time
+0.9
+ns
+tVD;ACK
+Data valid acknowledge time
+0.9
+ns
+fSCL
+SCL clock frequency; I2C mode for local I2C control
+400
+kHz
+tr
+Rise time of both SDA and SCL signals
+300
+ns
+tf
+Fall time of both SDA and SCL signals
+300
+ns
+Cbus_100kHz
+Total capacitive load for each bus line when operating at ≤ 100 kHz
+400
+pF
+Cbus_400kHz
+Total capacitive load for each bus line when operating at ≤ 400 kHz
+100
+pF
+6.7 Switching Characteristics
+over operating free-air temperature range (unless otherwise noted)
+PARAMETER
+TEST CONDITIONS
+MIN
+TYP
+MAX
+UNIT
+tCCCB_DEFAULT
+Power on default of CC1 and CC2 voltage debounce 
+time
+DEBOUCE
+register = 2'b00
+133
+ms
+tVBUS_DB
+Debounce of VBUS_DET pin after valid VBUS_THR
+2
+ms
+tDRP_DUTY_CYCLE
+Power-on default of percentage of time DRP 
+advertises DFP during a tDRP
+DRP_DUTY_CYCLE 
+register = 2'b00
+30%
+tDRP
+The period during which the TUSB320 or the 
+TUSB320I in DFP mode completes a DFP to UFP 
+and back advertisement.
+50
+75
+100
+ms
+tI2C_EN
+Time from TUSB320 EN_N low or TUSB320I EN high 
+and VDD active to I2C access available
+100
+ms
+tSOFT_RESET
+Soft reset duration
+26
+49
+95
+ms
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+7
+Product Folder Links: TUSB320 TUSB320I
+
+0 V
+VBUS_THR
+VBUS
+TVBUS_DB
+Figure 6-1. VBUS Detect and Debounce
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+8
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+7 Detailed Description
+7.1 Overview
+The USB Type-C ecosystem operates around a small form factor connector and cable that is flippable and 
+reversible. Because of the nature of the connector, a scheme is needed to determine the connector orientation. 
+Additional schemes are needed to determine when a USB port is attached and the acting role of the USB port 
+(DFP, UFP, and DRP), as well as to communicate Type-C current capabilities. These schemes are implemented 
+over the CC pins according to the USB Type-C specifications. The TUSB320 device provides Configuration 
+Channel (CC) logic for determining USB port attach and detach, role detection, cable orientation, and Type-C 
+current mode. The TUSB320 device also contains several features such as mode configuration and low standby 
+current which make this device ideal for source or sinks in USB 2.0 applications.
+7.2 Functional Block Diagram
+900 K  ±1%
+INT/OUT3
+ID
+CC1
+CC2
+SDA/OUT1
+SCL/OUT2
+ADDR
+PORT
+VDD
+GND
+Connection and
+cable detection
+CSR
+I2C
+Digital Controller
+3-State Buffer
+EN_N
+EN_N Logic
+CTRL_EN
+CTRL_INT
+CTRL_ID
+Open Drain
+Output
+CTRL_INT
+CTRL_ID
+VBUS Detection
+VBUS_DET
+VBUS_ON
+SYS_VBUS
+CTRL_EN_N
+VBUS_ON
+Copyright © 2016, Texas Instruments Incorporated
+Figure 7-1. Functional Block Diagram of TUSB320 
+7.2.1 Cables, Adapters, and Direct Connect Devices
+Type-C Specification 1.1 defines several cables, plugs and receptacles to be used to attach ports. The TUSB320 
+device supports all cables, receptacles, and plugs. The TUSB320 device does not support e-marking.
+7.2.1.1 USB Type-C Receptacles and Plugs
+Below is list of Type-C receptacles and plugs supported by the TUSB320 device:
+•
+USB Type-C receptacle for USB 2.0 platforms and devices
+•
+USB full-featured Type-C plug
+•
+USB 2.0 Type-C plug
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+9
+Product Folder Links: TUSB320 TUSB320I
+
+7.2.1.2 USB Type-C Cables
+Below is a list of Type-C cable types supported by the TUSB320 device:
+•
+USB full-featured Type-C cable
+•
+USB 2.0 Type-C cable with USB 2.0 plug
+•
+Captive cable with either a USB full-featured plug or USB 2.0 plug
+7.2.1.3 Legacy Cables and Adapters
+The TUSB320 device supports legacy cable adapters as defined by the Type-C specification. The cable adapter 
+must correspond to the mode configuration of the TUSB320 device.
+VBUS
+Rp (56k ± 5%)
+CC
+CC
+TUSB320
+Legacy Host Adapter
+Rd (5.1k ± 10%)
+900 kΩ ± 1%
+VBUS_DET
+To System VBUS detection
+Copyright © 2016, Texas Instruments Incorporated
+Figure 7-2. Legacy Adapter Implementation Circuit
+7.2.1.4 Direct Connect Devices
+The TUSB320 device supports the attaching and detaching of a direct-connect device.
+7.2.1.5 Audio Adapters
+Additionally, the TUSB320 device supports audio adapters for audio accessory mode, including:
+•
+Passive audio adapter
+•
+Charge through audio adapter
+7.3 Feature Description
+7.3.1 Port Role Configuration
+The TUSB320 device can be configured as a downstream facing port (DFP), upstream facing port (UFP), or 
+dualrole port (DRP) using the tri-level PORT pin. The PORT pin should be pulled high to VDD using a pullup 
+resistance, low to GND or left as floated on the PCB to achieve the desired mode. This flexibility allows the 
+TUSB320 device to be used in a variety of applications. The TUSB320 device samples the PORT pin after reset 
+and maintains the desired mode until the TUSB320 device is reset again. Table 7-1 lists the supported features 
+in each mode.
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+10
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+Table 7-1. Supported Features for the TUSB320 Device by Mode
+PORT PIN
+HIGH
+(DFP ONLY)
+LOW
+(UFP ONLY)
+NC
+(DRP)
+SUPPORTED 
+FEATURES
+Port attach and 
+detach
+Yes
+Yes
+Yes
+Cable orientation 
+(through I2C)
+Yes
+Yes
+Yes
+Current 
+advertisement
+Yes
+—
+Yes (DFP)
+Current detection
+—
+Yes
+Yes (UFP)
+Accessory modes 
+(audio and debug)
+Yes
+—
+Yes
+Active cable detection
+Yes
+—
+Yes (DFP)
+I2C / GPIO
+Yes
+Yes
+Yes
+Legacy cables
+Yes
+Yes
+Yes
+VBUS detection
+—
+Yes
+Yes (UFP)
+7.3.1.1 Downstream Facing Port (DFP) – Source
+The TUSB320 device can be configured as a DFP only by pulling the PORT pin high through a resistance to 
+VDD. In DFP mode, the TUSB320 device constantly presents Rps on both CC. In DFP mode, the TUSB320 
+device initially advertises default USB Type-C current. The Type-C current can be adjusted through I2C if the 
+system needs to increase the amount advertised. The TUSB320 device adjusts the Rps to match the desired 
+Type-C current advertisement. In GPIO mode, the TUSB320 device only advertises default Type-C current.
+When configured as a DFP, the TUSB320 can operate with older USB Type-C 1.0 devices except for a USB 
+Type-C 1.0 DRP device. The TUSB320 can not operate with a USB Type-C 1.0 DRP device. This limitation is a 
+result of a backwards compatibility problem between USB Type-C 1.1 DFP and a USB Type-C 1.0 DRP.
+7.3.1.2 Upstream Facing Port (UFP) – Sink
+The TUSB320 device can be configured as an UFP only by pulling the PORT pin low to GND. In UFP mode, the 
+TUSB320 device constantly presents pulldown resistors (Rd) on both CC pins. The TUSB320 device monitors 
+the CC pins for the voltage level corresponding to the Type-C mode current advertisement by the connected 
+DFP. The TUSB320 device debounces the CC pins and wait for VBUS detection before successfully attaching. As 
+an UFP, the TUSB320 device detects and communicates the advertised current level of the DFP to the system 
+through the OUT1 and OUT2 GPIOs (if in GPIO mode) or through the I2C CURRENT_MODE_DETECT register 
+one time in the Attached.SNK state.
+After initial connection, the advertised current by the connected DFP could change due to changes in its system 
+power resource. For example, a DFP could advertise high current on initial connection but then decide to reduce 
+to default current because user removed external power adapter from their notebook. Because the TUSB320 
+will only advertise on OUT1 and OUT2 the initial advertised current, it is recommend to monitor the advertised 
+current through the TUSB320’s I2C interface from the CURRENT_MODE_DETECT register. System software 
+must periodically perform a I2C_SOFT_RESET in order for the CURRENT_MODE_DETECT register to be 
+updated based on the state of the CC pins.
+7.3.1.3 Dual Role Port (DRP)
+The TUSB320 device can be configured to operate as a DRP when the PORT pin is left floated on the PCB. In 
+DRP mode, the TUSB320 device toggles between operating as a DFP and an UFP. When functioning as a DFP 
+in DRP mode, the TUSB320 device complies with all operations as defined for a DFP according to the Type-C 
+specification. When presenting as an UFP in DRP mode, the TUSB320 device operates as defined for an UFP 
+according to the Type-C specification.
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+11
+Product Folder Links: TUSB320 TUSB320I
+
+7.3.2 Type-C Current Mode
+When a valid cable detection and attach have been completed, the DFP has the option to advertise the level of 
+Type-C current an UFP can sink. The default current advertisement for the TUSB320 device is 500 mA (for USB 
+2.0) or 900 mA (for USB 3.1). If a higher level of current is available, the I2C registers can be written to provide 
+medium current at 1.5 A or high current at 3 A. When the CURRENT_MODE_ADVERTISE register has been 
+written to advertise higher than default current, the DFP adjusts the Rps for the specified current level. If a DFP 
+advertises 3 A, it ensures that the VDD of the TUSB320 device is 3.5 V or greater. Table 7-2 lists the Type-C 
+current advertisements in GPIO an I2C modes.
+Table 7-2. Type-C Current Advertisement for GPIO and I2C Modes
+TYPE-C CURRENT
+GPIO MODE (ADDR PIN IN NC)
+I2C MODE (ADDR PIN H, L)
+UFP (PORT PIN L)
+DFP (PORT PIN H)
+UFP
+DFP
+Default
+500 mA (USB 
+2.0)
+900 mA (USB 
+3.1)
+Current mode detected 
+and output through 
+OUT1 / OUT2
+Only advertisement
+Current mode detected 
+and read through I2C 
+register
+I2C register default is 500 
+or 900 mA
+Medium – 1.5 A
+N/A
+Advertisement selected 
+through writing I2C register
+High – 3 A
+7.3.3 Accessory Support
+The TUSB320 device supports audio and debug accessories in DFP mode and DRP mode. Audio and debug 
+accessory support is provided through reading of I2C registers. Audio accessory is also supported through GPIO 
+mode with INT_N/OUT3 pin (audio accessory is detected when INT_N/OUT3 pin is low).
+7.3.3.1 Audio Accessory
+Audio accessory mode is supported through two types of adapters. First, the passive audio adapter can be used 
+to convert the Type-C connector into an audio port. To effectively detect the passive audio adapter, the TUSB320 
+device must detect a resistance < Ra on both of the CC pins.
+Secondly, a charge through audio adapter may be used. The primary difference between a passive and charge 
+through adapter is that the charge through adapter supplies 500 mA of current over VBUS. The charge through 
+adapter contains a receptacle and a plug. The plug acts as a DFP and supply VBUS when the plug detects a 
+connection.
+When the TUSB320 device is configured in GPIO mode, OUT3 pin determines if an audio accessory is 
+connected. When an audio accessory is detected, the OUT3 pin is pulled low.
+7.3.3.2 Debug Accessory
+Debug is an additional state supported by USB Type-C. The specification does not define a specific user 
+scenario for this state, but it is important because the end user could use debug accessory mode to enter a test 
+state for production specific to the application. Charge through debug accessory is not supported by TUSB320 
+when in DRP or UFP mode.
+7.3.4 I2C and GPIO Control
+The TUSB320 device can be configured for I2C communication or GPIO outputs using the ADDR pin. The ADDR 
+pin is a tri-level control pin. When the ADDR pin is left floating (NC), the TUSB320 device is in GPIO output 
+mode. When the ADDR pin is pulled high or pulled low, the TUSB320 device is in I2C mode.
+All outputs for the TUSB320 device are open drain configuration.
+The OUT1 and OUT2 pins are used to output the Type-C current mode when in GPIO mode. Additionally, the 
+OUT3 pin is used to communicate the audio accessory mode in GPIO mode. Table 7-3 lists the output pin 
+settings. See the Pin Functions table for more information.
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+12
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+Table 7-3. Simplified Operation for OUT1 and OUT2
+OUT1
+OUT2
+ADVERTISEMENT
+H
+H
+Default Current in Unattached State
+H
+L
+Default Current in Attached State
+L
+H
+Medium Current (1.5 A) in Attached State
+L
+L
+High Current (3.0 A) in Attached State
+When operating in I2C mode, the TUSB320 device uses the SCL and SDA lines for clock and data and 
+the INT_N pin to communicate a change in I2C registers, or an interrupt, to the system. The INT_N pin is 
+pulled low when the TUSB320 device updates the registers with new information. The INT_N pin is open 
+drain. The INTERRUPT_STATUS register should be set when the INT_N pin is pulled low. To clear the 
+INTERRUPT_STATUS register, the end user writes to I2C.
+When operating in GPIO mode, the OUT3 pin is used in place of the INT_N pin to determine if an audio 
+accessory is detected and attached. The OUT3 pin is pulled low when an audio accessory is detected.
+Note
+When using the 3.3 V supply for I2C, the end user must ensure that the VDD is 3 V and above. 
+Otherwise the I2C may back power the device.
+7.3.5 VBUS Detection
+The TUSB320 device supports VBUS detection according to the Type-C specification. VBUS detection is used to 
+determine the attachment and detachment of an UFP and to determine the entering and exiting of accessary 
+modes. VBUS detection is also used to successfully resolve the role in DRP mode.
+The system VBUS voltage must be routed through a 900-kΩ resistor to the VBUS_DET pin on the TUSB320 
+device if the PORT pin is configured as a DRP or an UFP. If the TUSB320 device is configured as a DFP and 
+only ever used in DFP mode, the VBUS_DET pin can be left unconnected.
+7.4 Device Functional Modes
+The TUSB320 device has four functional modes. Table 7-4 lists these modes:
+Table 7-4. USB Type-C States According to TUSB320 Functional Modes
+MODES
+GENERAL BEHAVIOR
+PORT PIN
+STATES(1)
+Unattached
+USB port unattached. ID, PORT 
+operational. I2C on. CC pins 
+configure according to PORT pin.
+UFP
+Unattached.SNK
+AttachWait.SNK
+DRP
+Toggle Unattached.SNK → Unattached.SRC
+AttachedWait.SRC or AttachedWait.SNK
+DFP
+Unattached.SRC
+AttachWait.SRC
+Active
+USB port attached. All GPIOs 
+operational. I2C on.
+UFP
+Attached.SNK
+DRP
+Attached.SNK
+Attached.SRC
+Audio accessory
+Debug accessory
+DFP
+Attached.SRC
+Audio accessory
+Debug accessory
+Dead battery
+No operation.
+VDD not available.
+UFP/DRP/DFP
+Default device state to UFP/SNK with Rd.
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+13
+Product Folder Links: TUSB320 TUSB320I
+
+Table 7-4. USB Type-C States According to TUSB320 Functional Modes (continued)
+MODES
+GENERAL BEHAVIOR
+PORT PIN
+STATES(1)
+Shutdown
+VDD available.
+EN_N pin high.
+UFP/DRP/DFP
+Default device state to UFP/SNK with Rd.
+(1)
+Required; not in sequential order.
+7.4.1 Unattached Mode
+Unattached mode is the primary mode of operation for the TUSB320 device, because a USB port can be 
+unattached for a lengthy period of time. In unattached mode, VDD is available, and all IOs and I2C are 
+operational. After the TUSB320 device is powered up, the part enters unattached mode until a successful attach 
+has been determined. Initially, right after power up, the TUSB320 device comes up as an Unattached.SNK. The 
+TUSB320 device checks the PORT pin and operates according to the mode configuration. The TUSB320 device 
+toggles between the UFP and the DFP if configured as a DRP. In unattached mode, I2C can be used to change 
+the mode configuration or port role if the board configuration of the PORT pin is not the desired mode. Writing 
+to the I2C MODE_SELECT register can override the PORT pin only in unattached mode. The PORT pin is only 
+sampled at reset or power up. I2C must be used after reset to change the device mode configuration.
+7.4.2 Active Mode
+Active mode is defined as the port being attached. In active mode, all GPIOs are operational, and I2C is read / 
+write (R/W). When in active mode, the TUSB320 device communicates to the AP that the USB port is attached. 
+This happens through the ID pin if TUSB320 is configured as a DFP or DRP connect as source. If TUSB320 
+is configured as an UFP or a DRP connected as a sink, the OUT1/OUT2 and INT_N/OUT3 pins are used. The 
+TUSB320 device exits active mode under the following conditions:
+•
+Cable unplug
+•
+VBUS removal if attached as an UFP
+•
+Dead battery; system battery or supply is removed
+•
+EN_N pin floated or pulled high
+During active mode, I2C cannot be used to change the mode configuration. This can only be done if TUSB320 is 
+in an unattached state.
+7.4.3 Dead Battery Mode
+During dead battery mode, VDD is not available. CC pins always default to pulldown resistors in dead battery 
+mode. Dead battery mode means:
+•
+TUSB320 in UFP with 5.1-kΩ ± 20% Rd; cable connected and providing charge
+•
+TUSB320 in UFP with 5.1-kΩ ± 20% Rd; nothing connected (application could be off or have a discharged 
+battery)
+Upon exiting dead battery mode (VDD is active), the software must perform the following sequence in order for 
+Rp to be presented on both CC pins:
+1.
+Write a 0x04 to I2C address 0x45.
+2.
+Wait 30ms.
+3.
+Write a 0x00 to I2C address 0x45.
+Between steps 1 and 3, the status flags will be set. The software must ignore these flags when performing the 
+three steps.
+Note
+When VDD is off, the TUSB320 non-failsafe pins ( VBUS_DET, ADDR, PORT, ID, OUT[3:1] pins) 
+could back-drive the TUSB320 device if not handled properly. When necessary to pull these pins up, 
+it is recommended to pullup PORT, ADDR, INT_N/OUT3, and ID to the device’s VDD supply. The 
+VBUS_DET must be pulled up to VBUS through a 900-kΩ resistor.
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+14
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+7.4.4 Shutdown Mode
+Shutdown mode for TUSB320 device is defined as follows:
+•
+Supply voltage available and EN_N pin is pulled high.
+•
+EN_N pin has internal pullup resistor.
+•
+The TUSB320 device is off, but still maintains the Rd on the CC pins.
+7.5 Programming
+For further programmability, the TUSB320 device can be controlled using I2C. The TUSB320 device local 
+I2C interface is available for reading/writing after TI2C_EN when the device is powered up. The SCL and SDA 
+terminals are used for I2C clock and I2C data respectively. If I2C is the preferred method of control, the ADDR pin 
+must be set accordingly.
+Table 7-5. TUSB320 I2C Addresses
+TUSB320 I2C Target Address
+ADDR pin
+Bit 7 (MSB)
+Bit 6
+Bit 5
+Bit 4
+Bit 3
+Bit 2
+Bit 1
+Bit 0 (W/R)
+H
+1
+1
+0
+0
+0
+0
+1
+0/1
+L
+1
+1
+0
+0
+0
+0
+0
+0/1
+The following procedure should be followed to write to TUSB320 I2C registers:
+1.
+The controller initiates a write operation by generating a start condition (S), followed by the TUSB320 7-bit 
+address and a zero-value R/W bit to indicate a write cycle
+2.
+The TUSB320 device acknowledges the address cycle
+3.
+The controller presents the sub-address (I2C register within the TUSB320 device) to be written, consisting of 
+one byte of data, MSB-first
+4.
+The TUSB320 device acknowledges the sub-address cycle
+5.
+The controller presents the first byte of data to be written to the I2C register
+6.
+The TUSB320 device acknowledges the byte transfer
+7.
+The controller may continue presenting additional bytes of data to be written, with each byte transfer 
+completing with an acknowledge from the TUSB320 device
+8.
+The controller terminates the write operation by generating a stop condition (P)
+The following procedure should be followed to read the TUSB320 I2C registers:
+1.
+The controller initiates a read operation by generating a start condition (S), followed by the TUSB320 7-bit 
+address and a one-value R/W bit to indicate a read cycle
+2.
+The TUSB320 device acknowledges the address cycle
+3.
+The TUSB320 device transmits the contents of the memory registers MSB-first starting at register 00h or 
+last read sub-address+1. If a write to the T I2C register occurred prior to the read, then the TUSB320 device 
+starts at the sub-address specified in the write.
+4.
+The TUSB320 device waits for either an acknowledge (ACK) or a not-acknowledge (NACK) from the 
+controller after each byte transfer; the I2C controller acknowledges reception of each data byte transfer
+5.
+If an ACK is received, the TUSB320 device transmits the next byte of data
+6.
+The controller terminates the read operation by generating a stop condition (P)
+The following procedure should be followed for setting a starting sub-address for I2C reads:
+1.
+The controller initiates a write operation by generating a start condition (S), followed by the TUSB320 7-bit 
+address and a zero-value R/W bit to indicate a read cycle
+2.
+The TUSB320 device acknowledges the address cycle
+3.
+The controller presents the sub-address (I2C register within the TUSB320 device) to be read, consisting of 
+one byte of data, MSB-first
+4.
+The TUSB320 device acknowledges the sub-address cycle
+5.
+The controller terminates the read operation by generating a stop condition (P)
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+15
+Product Folder Links: TUSB320 TUSB320I
+
+Note
+If no sub-addressing is included for the read procedure, then the reads start at register offset 00h and 
+continue byte-by-byte through the registers until the I2C controller terminates the read operation. If a 
+I2C address write occurred prior to the read, then the reads start at the sub-address specified by the 
+address write.
+7.6 Register Maps
+Table 7-6. CSR Registers
+ACCESS 
+TAG
+NAME
+MEANING
+R
+Read
+The field may be read by software.
+W
+Write
+The field may be written by software.
+S
+Set
+The field may be set by a write of one. Writes of zeros to the field have no effect.
+C
+Clear
+The field may be cleared by a write of one. Writes of zeros to the field have no effect.
+U
+Update
+Hardware may autonomously update this field.
+NA
+No Access
+Not accessible or not applicable.
+Table 7-7. CSR Registers Bit Address and Description
+ADDRESS
+BIT(S)
+BIT NAME
+DESCRIPTION
+ACCESS
+0x00 – 0x07
+7:0
+DEVICE_ID
+For the TUSB320 device these fields return a string of 
+ASCII characters returning TUSB320
+Addresses 0x07 - 0x00 = {0x00 0x54 0x55 0x53 0x42 0x33 
+0x32 0x30}
+R
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+16
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+Table 7-7. CSR Registers Bit Address and Description (continued)
+ADDRESS
+BIT(S)
+BIT NAME
+DESCRIPTION
+ACCESS
+0x08
+7:6
+CURRENT_MODE_ADVERTISE
+These bits are programmed by the application to raise the 
+current advertisement from default.
+00 – Default (500 mA / 900 mA) initial value at startup
+01 – Medium (1.5 A)
+10 – High (3 A)
+11 – Reserved
+RW
+5:4
+CURRENT_MODE_DETECT
+These bits are set when an UFP determines the Type-C 
+Current mode.
+00 – Default (value at start up)
+01 – Medium
+10 – Charge through accessory – 500 mA
+11 – High
+RU
+3:1
+ACCESSORY_CONNECTED
+These bits are read by the application to determine if an 
+accessory was attached.
+000 – No accessory attached (default)
+001 – Reserved
+010 – Reserved
+011 – Reserved
+100 – Audio accessory
+101 – Audio charged thru accessory
+110 – Debug accessory
+111 – Reserved
+RU
+0
+ACTIVE_CABLE_DETECTION
+This flag indicates that an active cable has been plugged 
+into the Type-C connector. When this field is set, an active 
+cable is detected.
+RU
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+17
+Product Folder Links: TUSB320 TUSB320I
+
+Table 7-7. CSR Registers Bit Address and Description (continued)
+ADDRESS
+BIT(S)
+BIT NAME
+DESCRIPTION
+ACCESS
+0x09
+7:6
+ATTACHED_STATE
+This is an additional method to communicate attach other 
+than the ID pin. These bits can be read by the application to 
+determine what was attached.
+00 – Not attached (default)
+01 – Attached.SRC (DFP)
+10 – Attached.SNK (UFP)
+11 – Attached to an accessory
+RU
+5
+CABLE_DIR
+Cable orientation. The application can read these bits for 
+cable orientation information.
+0 – CC1
+1 – CC2 (default)
+RU
+4
+INTERRUPT_STATUS
+The INT pin is pulled low whenever a CSR changes. When 
+a CSR change has occurred this bit should be held at 1 until 
+the application clears it.
+0 – Clear
+1 – Interrupt (When INT_N is pulled low, this bit will be 1. 
+This bit is 1 whenever any CSR are changed)
+Note: SW must make sure the INTERRUPT_STATUS has 
+been cleared to zero. Rewrites to this register are needed 
+for the INT_N to be correctly asserted for all interrupt 
+events.
+RCU
+3
+Reserved
+R
+2:1
+DRP_DUTY_CYCLE
+Percentage of time that a DRP advertises DFP during tDRP
+00 – 30% (default)
+01 – 40%
+10 – 50%
+11 – 60%
+RW
+0
+Reserved
+R
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+18
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+Table 7-7. CSR Registers Bit Address and Description (continued)
+ADDRESS
+BIT(S)
+BIT NAME
+DESCRIPTION
+ACCESS
+0x0A
+7:6
+DEBOUNCE
+The nominal amount of time the TUSB320 device 
+debounces the voltages on the CC pins.
+00 – 133 ms (default)
+01 – 116 ms
+10 – 151 ms
+11 – 168 ms
+RW
+5:4
+MODE_SELECT
+This register can be written to set the TUSB320 device 
+mode operation. The ADDR pin must be set to I2C 
+mode. If the default is maintained, the TUSB320 device 
+operates according to the PORT pin levels and modes. 
+The MODE_SELECT can only be changed when in the 
+unattached state.
+00 – Maintain mode according to PORT pin selection 
+(default)
+01 – UFP mode (unattached.SNK)
+10 – DFP mode (unattached.SRC)
+11 – DRP mode (start from unattached.SNK)
+RW
+3
+I2C_SOFT_RESET
+This resets the digital logic. The bit is self-clearing. A write 
+of 1 starts the reset. The following registers maybe affected 
+after setting this bit:
+CURRENT_MODE_DETECT
+ACTIVE_CABLE_DETECTION
+ACCESSORY_CONNECTED
+ATTACHED_STATE
+CABLE_DIR
+RSU
+2:1
+Reserved
+R
+0
+Reserved
+R
+0x45
+7:3
+Reserved
+R
+2
+DISABLE_RD_RP
+When this field is set, Rd and Rp are disabled.
+0 – Normal operation (default)
+1 – Disable Rd and Rp
+RW
+1:0
+Reserved. For TI internal use only. Do not change default 
+value.
+RW
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+19
+Product Folder Links: TUSB320 TUSB320I
+
+8 Application and Implementation
+Note
+Information in the following applications sections is not part of the TI component specification, and 
+TI does not warrant its accuracy or completeness. TI’s customers are responsible for determining 
+suitability of components for their purposes. Customers should validate and test their design 
+implementation to confirm system functionality.
+8.1 Application Information
+The TUSB320 device is a Type-C configuration channel logic and port controller. The TUSB320 device can 
+detect when a Type-C device is attached, what type of device is attached, the orientation of the cable, and power 
+capabilities (both detection and broadcast). The TUSB320 device can be used in a source application (DFP) or 
+in a sink application (UFP).
+CC/Mode 
+Controller
+TUSB320
+VDD
+CC1
+CC2
+DP
+DM
+USB TypeC Port
+PORT
+Processor
+GPIOs 
+VBUS
+GND
+VBUS
+ID
+2.7 - 5 V
+5 V
+I2C
+Copyright © 2016, Texas Instruments Incorporated
+Figure 8-1. TUSB320 in UFP Mode Supporting 
+Default Implementation
+CC/Mode 
+Controller
+PMIC
+TUSB320
+VDD
+VPH
+CC1
+CC2
+DP
+DM
+USB TypeC Port
+PORT
+VBUS
+ID
+Processor
+GPIOs
+VBUS
+I2C
+Copyright © 2016, Texas Instruments Incorporated
+Figure 8-2. TUSB320 in UFP Mode Supporting 
+Advanced Power Delivery
+CC/Mode 
+Controller
+TUSB320
+VDD
+CC1
+CC2
+DP
+DM
+USB TypeC Port
+ID
+PORT
+Processor
+GPIOs
+Legacy TypeA 
+Switch
+5 V
+VBUS
+VBUS
+2.7 - 5 V
+VDD
+I2C
+Copyright © 2016, Texas Instruments Incorporated
+Figure 8-3. TUSB320 in DFP Mode Supporting 
+Default Implementation
+CC/Mode 
+Controller
+PMIC
+TUSB320
+VDD
+VPH
+CC1
+CC2
+DP
+DM
+USB TypeC Port
+PORT
+VBUS
+ID
+Processor
+GPIOs
+VBUS
+VDD
+I2C
+Copyright © 2016, Texas Instruments Incorporated
+Figure 8-4. TUSB320 in DFP Mode Supporting 
+Advanced Power Delivery
+5 V
+2.7 - 5 V
+CC/Mode 
+Controller
+TUSB320
+VDD
+CC1
+CC2
+DP
+DM
+USB TypeC Port
+ID
+PORT
+Processor
+GPIOs 
+VBUS
+VBUS
+Legacy TypeA 
+Switch
+I2C
+Copyright © 2016, Texas Instruments Incorporated
+Figure 8-5. TUSB320 in DRP Mode Supporting 
+Default Implementation
+PMIC
+CC/Mode 
+Controller
+TUSB320
+VDD
+VPH
+CC1
+CC2
+DP
+DM
+USB TypeC Port
+PORT
+VBUS
+ID
+Processor
+GPIOs
+VBUS
+I2C
+Copyright © 2016, Texas Instruments Incorporated
+Figure 8-6. TUSB320 in DRP Mode Supporting 
+Advanced Power Delivery
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+20
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+8.2 Typical Application
+8.2.1 DRP in I2C Mode
+Figure 8-7 shows the TUSB320 device configured as a DRP in I2C mode.
+A1
+A12
+B12
+B1
+A2
+A3
+A4
+A5
+A11
+A6
+A7
+A8
+A9
+A10
+B2
+B3
+B4
+B5
+B6
+B7
+B8
+B9
+B10
+B11
+VBUS
+DP
+DM
+CC1
+CC2
+TUSB320
+CC1
+CC2
+VBUS_DET
+900 K
+USB VBUS Switch 
+(optional BC 1.2 support for legacy)
+DM_IN
+DP_IN
+VOUT
+DM_OUT
+DP_OUT
+VIN
+GND
+150 uF
+VDD
+System VBUS
+PORT
+EN_N
+100 nF
+VBAT
+USB2 
+OTG &
+PMIC
+ADDR
+4.7 K
+4.7 K
+SDA/OUT1
+SCL/OUT2
+INT_N/OUT3
+ID
+200 K
+200 K
+I2C I/O
+1.8 V or 3.3 V
+EN
+SCL
+SDA
+FAULT#
+DM
+DP
+PS_EN
+PS_FAULT#
+VBUS
+ID
+INT#
+SCL
+SDA
+Type C
+Receptacle
+Disconnect 
+bulk cap 
+when UFP
+1 uF
+Copyright © 2016, Texas Instruments Incorporated
+Figure 8-7. DRP in I2C Mode Schematic
+8.2.1.1 Design Requirements
+For this design example, use the parameters listed in Table 8-1:
+Table 8-1. Design Requirements for DRP in I2C Mode
+DESIGN PARAMETER
+VALUE
+VDD (2.75 V to 5 V)
+VBAT (less than 5 V)
+Mode (I2C or GPIO)
+I2C
+ADDR pin must be pulled down or pulled up
+I2C address (0x61 or 0x60)
+0x60
+ADDR pin must be pulled low or tied to GND
+Type-C port type (UFP, DFP, or DRP)
+DRP
+PORT pin is NC
+Shutdown support (EN_N control)
+No
+8.2.1.2 Detailed Design Procedure
+The TUSB320 device supports a VDD in the range of 2.75 V to 5 V. In this particular use case, VBAT which must 
+be in the required VDD range is connected to the VDD pin. A 100-nF capacitor is placed near VDD.
+The TUSB320 device is placed into I2C mode by either pulling the ADDR pin high or low. In this case, the ADDR 
+pin is tied to GND which results in a I2C address of 0x60. The SDA and SCL must be pulled up to either 1.8 V or 
+3.3 V. When pulled up to 3.3 V, the VDD supply must be at least 3 V to keep from back-driving the I2C interface.
+The TUSB320 device can enter shutdown mode by pulling the EN_N pin high, which puts the TUSB320 device 
+into a low power state. In this case, external control of the EN_N pin is not implemented and therefore the EN_N 
+pin is tied to GND.
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+21
+Product Folder Links: TUSB320 TUSB320I
+
+The INT_N/OUT3 pin is used to notify the PMIC when a change in the TUSB320 I2C registers occurs. This pin is 
+an open drain output and requires an external pullup resistor. The pin should be pulled up to VDD using a 200-kΩ 
+resistor.
+The ID pin is used to indicate when a connection has occurred if the TUSB320 device is a DFP while configured 
+for DRP. An OTG USB controller can use this pin to determine when to operate as a USB host or USB device. 
+When this pin is driven low, the OTG USB controller functions as a host and then enables VBUS. The Type-C 
+standard requires that a DFP should not enable VBUS until it is in the Attached.SRC state. If the ID pin is not 
+low but VBUS is detected, then OTG USB controller functions as a device. The ID pin is open drain output and 
+requires an external pullup resistor. It should be pulled up to VDD using a 200-kΩ resistor.
+The Type-C port mode is determined by the state of the PORT pin. When the PORT pin is not connected, the 
+TUSB320 device is in DRP mode. The Type-C port mode can also be controlled by the MODE_SELECT register 
+through the I2C interface when the TUSB320 device is in the unattached state.
+The VBUS_DET pin must be connected through a 900-kΩ resistor to VBUS on the Type-C that is connected. This 
+large resistor is required to protect the TUSB320 device from large VBUS voltage that is possible in present day 
+systems. This resistor along with internal pulldown keeps the voltage observed by the TUSB320 device in the 
+recommended range.
+The USB2 specification requires the bulk capacitance on VBUS based on UFP or DFP. When operating the 
+TUSB320 device in a DRP mode, it alternates between UFP and DFP. If the TUSB320 device connects as an 
+UFP, the large bulk capacitance must be removed. The FET in Figure 8-7 performs this task.
+Table 8-2. USB2 Bulk Capacitance Requirements
+PORT CONFIGURATION
+MIN
+MAX
+UNIT
+Downstream facing port (DFP)
+120
+µF
+Upstream facing port (UFP)
+1
+10
+µF
+8.2.1.3 Application Curves
+Figure 8-8. Application Curve for DRP in I2C Mode
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+22
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+8.2.2 DFP in I2C Mode
+Figure 8-9 shows the TUSB320 device configured as a DFP in I2C mode.
+A1
+A12
+B12
+B1
+A2
+A3
+A4
+A5
+A11
+A6
+A7
+A8
+A9
+A10
+B2
+B3
+B4
+B5
+B6
+B7
+B8
+B9
+B10
+B11
+VBUS
+DP
+DM
+CC1
+CC2
+TUSB320
+CC1
+CC2
+VBUS_DET
+USB VBUS Switch
+(optional BC 1.2 support for legacy)
+DM_IN
+DP_IN
+VOUT
+DM_OUT
+DP_OUT
+VIN
+GND
+150 uF
+VDD
+System VBUS
+PORT
+EN_N
+100 nF
+VDD_5 V
+USB2
+Host &
+PMIC
+ADDR
+4.7 K
+4.7 K
+SDA/OUT1
+SCL/OUT2
+INT_N/OUT3
+ID
+200 K
+200 K
+I2C I/O
+1.8 V or 3.3 V
+EN
+SCL
+SDA
+FAULT#
+DM
+DP
+PS_EN
+PS_FAULT#
+ID
+INT#
+SCL
+SDA
+Type C
+Receptacle
+4.7 K
+Copyright © 2016, Texas Instruments Incorporated
+Figure 8-9. DFP in I2C Mode Schematic
+8.2.2.1 Design Requirements
+For this design example, use the parameters listed in Table 8-3:
+Table 8-3. Design Requirements for DFP in I2C Mode
+DESIGN PARAMETER
+VALUE
+VDD (2.75 V to 5 V)
+5 V
+Mode (I2C or GPIO)
+I2C
+ADDR pin must be pulled down or pulled up
+I2C address (0x61 or 0x60)
+0x60
+ADDR pin must be pulled low or tied to GND
+Type-C port type (UFP, DFP, or DRP)
+DFP
+PORT pin is pulled up
+Shutdown support (EN_N Control)
+No
+8.2.2.2 Detailed Design Procedure
+The TUSB320 device supports a VDD in the range of 2.75 V to 5 V. In this particular case, VDD is set to 5 V. A 
+100-nF capacitor is placed near VDD.
+The TUSB320 device is placed into I2C mode by either pulling the ADDR pin high or low. In this particular case, 
+the ADDR pin is tied to GND which results in an I2C address of 0x60. The SDA and SCL must be pulled up to 
+either 1.8 V or 3.3 V. When pulled up to 3.3 V, the VDD supply must be at least 3 V to keep from back-driving the 
+I2C interface.
+The TUSB320 device can enter shutdown mode by pulling the EN_N pin high, which puts the TUSB320 device 
+into a low power state. In this case, external control of the EN_N pin is not implemented and therefore the EN_N 
+pin is tied to GND.
+The INT_N/OUT3 pin is used to notify the PMIC when a change in the TUSB320 I2C registers occurs. This pin is 
+an open drain output and requires an external pullup resistor. The pin should be pulled up to VDD using a 200-kΩ 
+resistor.
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+23
+Product Folder Links: TUSB320 TUSB320I
+
+The Type-C port mode is determined by the state of the PORT pin. When the PORT pin is pulled high, the 
+TUSB320 device is in DFP mode. The Type-C port mode can also be controlled by the MODE_SELECT register 
+through the I2C interface when the TUSB320 device is in the unattached state.
+The VBUS_DET pin must be connected through a 900-kΩ resistor to VBUS on the Type-C that is connected. This 
+large resistor is required to protect the TUSB320 device from the largest VBUS voltage that is possible in present 
+day systems. This resistor along with internal pulldown keeps the voltage observed by the TUSB320 device in 
+the recommended range.
+The USB2 specification requires the bulk capacitance on VBUS based on UFP or DFP. When operating the 
+TUSB320 device in a DFP mode, a bulk capacitance of at least 120 µF is required. In this particular case, a 
+150-µF capacitor was chosen.
+8.2.2.3 Application Curves
+Figure 8-10. Application Curve for DFP in I2C Mode
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+24
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+8.2.3 UFP in I2C Mode
+Figure 8-11 shows the TUSB320 device configured as a DFP in I2C mode.
+A1
+A12
+B12
+B1
+A2
+A3
+A4
+A5
+A11
+A6
+A7
+A8
+A9
+A10
+B2
+B3
+B4
+B5
+B6
+B7
+B8
+B9
+B10
+B11
+VBUS
+DP
+DM
+CC1
+CC2
+TUSB320
+CC1
+CC2
+VBUS_DET
+GND
+VDD
+Optional power
+TUSB320 with VBUS
+Less than 5.5 V
+PORT
+EN_N
+100 nF
+VDD_5 V
+USB2 
+Device &
+PMIC
+ADDR
+4.7 K
+4.7 K
+SDA/OUT1
+SCL/OUT2
+INT_N/OUT3
+ID
+200 K
+200 K
+I2C I/O
+1.8 V or 3.3 V
+DM
+DP
+VBUS
+INT#
+SCL
+SDA
+Type C
+Receptacle
+1 uF
+4.7 K
+D1
+900 K
+Copyright © 2016, Texas Instruments Incorporated
+Figure 8-11. UFP in I2C Mode Schematic
+8.2.3.1 Design Requirements
+For this design example, use the parameters listed in Table 8-4:
+Table 8-4. Design Requirements for UFP in I2C Mode
+DESIGN PARAMETER
+VALUE
+VDD (2.75 V to 5 V)
+5 V
+Mode (I2C or GPIO)
+I2C
+ADDR pin must be pulled down or pulled up
+I2C address (0x61 or 0x60)
+0x60
+ADDR pin must be pulled low or tied to GND
+Type-C port type (UFP, DFP, or DRP)
+UFP
+PORT pin is pulled down
+Shutdown support (EN_N control)
+No
+8.2.3.2 Detailed Design Procedure
+The TUSB320 device supports a VDD in the range of 2.75 V to 5 V. In this particular case, VDD is set to 5 V. A 
+100-nF capacitor is placed near VDD. If VBUS is guaranteed to be less than 5.5 V, powering the TUSB320 device 
+through a diode can be implemented.
+The TUSB320 device is placed into I2C mode by either pulling the ADDR pin high or low. In this case, the ADDR 
+pin is tied to GND which results in a I2C address of 0x60. The SDA and SCL must be pulled up to either 1.8 V or 
+3.3 V. When pulled up to 3.3 V, the VDD supply must be at least 3 V to keep from back-driving the I2C interface.
+The TUSB320 device can enter shutdown mode by pulling the EN_N pin high, which puts the TUSB320 device 
+into a low power state. In this case, external control of the EN_N pin is not implemented and therefore the EN_N 
+pin is tied to GND.
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+25
+Product Folder Links: TUSB320 TUSB320I
+
+The INT_N/OUT3 pin is used to notify the PMIC when a change in the TUSB320 I2C registers occurs. This pin is 
+an open drain output and requires an external pullup resistor. The pin should be pulled up to VDD using a 200-kΩ 
+resistor.
+The Type-C port mode is determined by the state of the PORT pin. When the PORT pin is pulled low, the 
+TUSB320 device is in UFP mode. The Type-C port mode can also be controlled by the MODE_SELECT register 
+through the I2C interface when the TUSB320 device is in the unattached state.
+The VBUS_DET pin must be connected through a 900-kΩ resistor to VBUS on the Type-C that is connected. This 
+large resistor is required to protect the TUSB320 device from large VBUS voltage that is possible in present day 
+systems. This resistor along with internal pulldown keeps the voltage observed by the TUSB320 device in the 
+recommended range.
+The USB2 specification requires the bulk capacitance on VBUS based on UFP or DFP. When operating the 
+TUSB320 device in an UFP mode, a bulk capacitance between 1 to 10 µF is required. In this particular case, a 
+1-µF capacitor was chosen.
+8.2.3.3 Application Curves
+Figure 8-12. Application Curve for UFP in I2C Mode
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+26
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+8.3 Initialization Set Up
+The general power-up sequence for the TUSB320 device (EN_N tied to ground) is as follows:
+1.
+System is powered off (device has no VDD). The TUSB320 device is configured internally in UFP mode with 
+Rds on CC pins (dead battery).
+2.
+VDD ramps – POR circuit. VDD must ramp within 25 ms or less. IO pull-up power rail (for example, pull up on 
+ID, INT, SCL, SDA, ADDR, and PORT) must ramp with VDD or lag after VDD.
+3.
+I2C supply ramps up.
+4.
+The TUSB320 device enters unattached mode and determines the voltage level from the PORT pin. This 
+determines the mode in which the TUSB320 device operates (DFP, UFP, and DRP).
+5.
+The TUSB320 device monitors the CC pins as a DFP and VBUS for attach as an UFP.
+6.
+The TUSB320 device enters active mode when attach has been successfully detected.
+9 Power Supply Recommendations
+The TUSB320 device has a wide power supply range from 2.7 to 5 V, and can be powered by a battery system.
+10 Layout
+10.1 Layout Guidelines
+1.
+An extra trace (or stub) is created when connecting between more than two points. A trace connecting pin 
+A6 to pin B6 will create a stub because the trace also has to go to the USB Host. Ensure that:
+•
+A stub created by short on pin A6 (DP) and pin B6 (DP) at Type-C receptacle does not exceed 3.5 mm.
+•
+A stub created by short on pin A7 (DM) and pin B7 (DM) at Type-C receptacle does not exceed 3.5 mm.
+2.
+A 100-nF capacitor should be placed as close as possible to the TUSB320 VDD pin.
+10.2 Layout Example
+Figure 10-1. TUSB320 Layout
+www.ti.com
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+Copyright © 2022 Texas Instruments Incorporated
+Submit Document Feedback
+27
+Product Folder Links: TUSB320 TUSB320I
+
+11 Device and Documentation Support
+11.1 Receiving Notification of Documentation Updates
+To receive notification of documentation updates, navigate to the device product folder on ti.com. Click on 
+Subscribe to updates to register and receive a weekly digest of any product information that has changed. For 
+change details, review the revision history included in any revised document.
+11.2 Support Resources
+TI E2E™ support forums are an engineer's go-to source for fast, verified answers and design help — straight 
+from the experts. Search existing answers or ask your own question to get the quick design help you need.
+Linked content is provided "AS IS" by the respective contributors. They do not constitute TI specifications and do 
+not necessarily reflect TI's views; see TI's Terms of Use.
+11.3 Trademarks
+USB Type-C™ is a trademark of USB Implementers Forum.
+TI E2E™ is a trademark of Texas Instruments.
+All trademarks are the property of their respective owners.
+11.4 Electrostatic Discharge Caution
+This integrated circuit can be damaged by ESD. Texas Instruments recommends that all integrated circuits be handled 
+with appropriate precautions. Failure to observe proper handling and installation procedures can cause damage.
+ESD damage can range from subtle performance degradation to complete device failure. Precision integrated circuits may 
+be more susceptible to damage because very small parametric changes could cause the device not to meet its published 
+specifications.
+11.5 Glossary
+TI Glossary 
+This glossary lists and explains terms, acronyms, and definitions.
+12 Mechanical, Packaging, and Orderable Information
+The following pages include mechanical, packaging, and orderable information. This information is the most 
+current data available for the designated devices. This data is subject to change without notice and revision of 
+this document. For browser-based versions of this data sheet, refer to the left-hand navigation.
+TUSB320, TUSB320I
+SLLSEN9F – MAY 2015 – REVISED MARCH 2022
+www.ti.com
+28
+Submit Document Feedback
+Copyright © 2022 Texas Instruments Incorporated
+Product Folder Links: TUSB320 TUSB320I
+
+PACKAGE OPTION ADDENDUM
+www.ti.com
+9-Nov-2025
+PACKAGING INFORMATION
+Orderable part number
+Status
+(1)
+Material type
+(2)
+Package | Pins
+Package qty | Carrier
+RoHS
+(3)
+Lead finish/
+Ball material
+(4)
+MSL rating/
+Peak reflow
+(5)
+Op temp (°C)
+Part marking
+(6)
+TUSB320IRWBR
+Active
+Production
+X2QFN (RWB) | 12
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-2-260C-1 YEAR
+-40 to 85
+70
+TUSB320IRWBR.A
+Active
+Production
+X2QFN (RWB) | 12
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-2-260C-1 YEAR
+-40 to 85
+70
+TUSB320IRWBRG4
+Active
+Production
+X2QFN (RWB) | 12
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+70
+TUSB320IRWBRG4.A
+Active
+Production
+X2QFN (RWB) | 12
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-1-260C-UNLIM
+-40 to 85
+70
+TUSB320RWBR
+Active
+Production
+X2QFN (RWB) | 12
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-2-260C-1 YEAR
+0 to 70
+20
+TUSB320RWBR.A
+Active
+Production
+X2QFN (RWB) | 12
+3000 | LARGE T&R
+Yes
+NIPDAU
+Level-2-260C-1 YEAR
+0 to 70
+20
+ 
+(1) Status:  For more details on status, see our product life cycle.
+ 
+(2) Material type:  When designated, preproduction parts are prototypes/experimental devices, and are not yet approved or released for full production. Testing and final process, including without limitation quality assurance,
+reliability performance testing, and/or process qualification, may not yet be complete, and this item is subject to further changes or possible discontinuation. If available for ordering, purchases will be subject to an additional
+waiver at checkout, and are intended for early internal evaluation purposes only. These items are sold without warranties of any kind.
+ 
+(3) RoHS values:  Yes, No, RoHS Exempt. See the TI RoHS Statement for additional information and value definition.
+ 
+(4) Lead finish/Ball material:  Parts may have multiple material finish options. Finish options are separated by a vertical ruled line. Lead finish/Ball material values may wrap to two lines if the finish value exceeds the maximum
+column width.
+ 
+(5) MSL rating/Peak reflow:  The moisture sensitivity level ratings and peak solder (reflow) temperatures. In the event that a part has multiple moisture sensitivity ratings, only the lowest level per JEDEC standards is shown.
+Refer to the shipping label for the actual reflow temperature that will be used to mount the part to the printed circuit board.
+ 
+(6) Part marking:  There may be an additional marking, which relates to the logo, the lot trace code information, or the environmental category of the part.
+ 
+Multiple part markings will be inside parentheses. Only one part marking contained in parentheses and separated by a "~" will appear on a part. If a line is indented then it is a continuation of the previous line and the two
+combined represent the entire part marking for that device.
+ 
+Important Information and Disclaimer:The information provided on this page represents TI's knowledge and belief as of the date that it is provided. TI bases its knowledge and belief on information provided by third parties, and
+makes no representation or warranty as to the accuracy of such information. Efforts are underway to better integrate information from third parties. TI has taken and continues to take reasonable steps to provide representative
+and accurate information but may not have conducted destructive testing or chemical analysis on incoming materials and chemicals. TI and TI suppliers consider certain information to be proprietary, and thus CAS numbers
+and other limited information may not be available for release.
+ 
+In no event shall TI's liability arising out of such information exceed the total purchase price of the TI part(s) at issue in this document sold by TI to Customer on an annual basis.
+Addendum-Page 1
+
+PACKAGE OPTION ADDENDUM
+www.ti.com
+9-Nov-2025
+ 
+Addendum-Page 2
+
+PACKAGE MATERIALS INFORMATION
+ 
+ 
+www.ti.com
+3-Sep-2026
+TAPE AND REEL INFORMATION
+Reel Width (W1)
+REEL DIMENSIONS
+A0
+B0
+K0
+W
+Dimension designed to accommodate the component length
+Dimension designed to accommodate the component thickness
+Overall width of the carrier tape
+Pitch between successive cavity centers
+Dimension designed to accommodate the component width
+TAPE DIMENSIONS
+K0
+ P1
+B0 W
+A0
+Cavity
+QUADRANT ASSIGNMENTS FOR PIN 1 ORIENTATION IN TAPE
+Pocket Quadrants
+Sprocket Holes
+Q1
+Q1
+Q2
+Q2
+Q3
+Q3
+Q4
+Q4
+User Direction of Feed
+P1
+Reel
+Diameter
+ 
+*All dimensions are nominal
+Device
+Package
+Type
+Package
+Drawing
+Pins
+SPQ
+Reel
+Diameter
+(mm)
+Reel
+Width
+W1 (mm)
+A0
+(mm)
+B0
+(mm)
+K0
+(mm)
+P1
+(mm)
+W
+(mm)
+Pin1
+Quadrant
+TUSB320IRWBR
+X2QFN
+RWB
+12
+3000
+180.0
+8.4
+1.8
+1.8
+0.48
+4.0
+8.0
+Q2
+TUSB320IRWBRG4
+X2QFN
+RWB
+12
+3000
+180.0
+8.4
+1.8
+1.8
+0.48
+4.0
+8.0
+Q2
+TUSB320RWBR
+X2QFN
+RWB
+12
+3000
+180.0
+8.4
+1.8
+1.8
+0.48
+4.0
+8.0
+Q2
+Pack Materials-Page 1
+
+PACKAGE MATERIALS INFORMATION
+ 
+ 
+www.ti.com
+3-Sep-2026
+TAPE AND REEL BOX DIMENSIONS
+Width (mm)
+W
+L
+H
+ 
+*All dimensions are nominal
+Device
+Package Type
+Package Drawing
+Pins
+SPQ
+Length (mm)
+Width (mm)
+Height (mm)
+TUSB320IRWBR
+X2QFN
+RWB
+12
+3000
+210.0
+185.0
+35.0
+TUSB320IRWBRG4
+X2QFN
+RWB
+12
+3000
+210.0
+185.0
+35.0
+TUSB320RWBR
+X2QFN
+RWB
+12
+3000
+210.0
+185.0
+35.0
+Pack Materials-Page 2
+
+www.ti.com
+PACKAGE OUTLINE
+C
+0.4 MAX
+2X 1.2
+2X
+0.4
+6X 0.4
+8X 0.4
+0.2
+12X 0.25
+0.15
+4X 0.6
+0.4
+0.05
+0.00
+B
+1.65
+1.55
+A
+1.65
+1.55
+(0.13)
+TYP
+X2QFN - 0.4 mm max height
+RWB0012A
+PLASTIC QUAD FLATPACK - NO LEAD
+4221631/B   07/2017
+PIN 1 INDEX AREA
+SEATING PLANE
+0.05 C
+1
+2
+3
+12
+0.07
+C B A
+0.05
+C
+NOTES:
+ 
+1. All linear dimensions are in millimeters. Any dimensions in parenthesis are for reference only. Dimensioning and tolerancing
+    per ASME Y14.5M. 
+2. This drawing is subject to change without notice.
+6
+7
+8
+9
+SYMM
+SYMM
+SCALE  6.500
+
+www.ti.com
+EXAMPLE BOARD LAYOUT
+(R0.05) TYP
+0.05 MIN
+ALL AROUND
+0.05 MAX
+ALL AROUND
+12X (0.2)
+8X (0.5)
+(1.3)
+(1.5)
+2X (0.4)
+4X (0.7)
+6X (0.4)
+X2QFN - 0.4 mm max height
+RWB0012A
+PLASTIC QUAD FLATPACK - NO LEAD
+4221631/B   07/2017
+SYMM
+1
+2
+7
+12
+SYMM
+LAND PATTERN EXAMPLE
+EXPOSED METAL SHOWN
+SCALE:30X
+9
+3
+6
+8
+NOTES: (continued)
+ 
+3. For more information, see Texas Instruments literature number SLUA271 (www.ti.com/lit/slua271).
+ 
+ 
+METAL
+SOLDER MASK
+OPENING
+SOLDER MASK DETAILS
+NON SOLDER MASK
+DEFINED
+(PREFERRED)
+EXPOSED METAL
+SOLDER MASK
+OPENING
+METAL UNDER
+SOLDER MASK
+SOLDER MASK
+DEFINED
+EXPOSED METAL
+
+www.ti.com
+EXAMPLE STENCIL DESIGN
+12X (0.2)
+8X (0.5)
+4X (0.67)
+2X (0.4)
+(1.5)
+(1.3)
+6X (0.4)
+(R0.05) TYP
+X2QFN - 0.4 mm max height
+RWB0012A
+PLASTIC QUAD FLATPACK - NO LEAD
+4221631/B   07/2017
+NOTES: (continued)
+ 
+4. Laser cutting apertures with trapezoidal walls and rounded corners may offer better paste release. IPC-7525 may have alternate
+   design recommendations. 
+ 
+SYMM
+SOLDER PASTE EXAMPLE
+BASED ON 0.1 mm THICK STENCIL
+ 
+PADS 1,2,7 & 8
+96% PRINTED SOLDER COVERAGE BY AREA
+SCALE:50X
+1
+2
+3
+6
+7
+8
+9
+12
+SYMM
+METAL
+8X
+
+IMPORTANT NOTICE AND DISCLAIMER
+TI PROVIDES TECHNICAL AND RELIABILITY DATA (INCLUDING DATASHEETS), DESIGN RESOURCES (INCLUDING REFERENCE 
+DESIGNS), APPLICATION OR OTHER DESIGN ADVICE, WEB TOOLS, SAFETY INFORMATION, AND OTHER RESOURCES “AS IS” 
+AND WITH ALL FAULTS, AND DISCLAIMS ALL WARRANTIES, EXPRESS AND IMPLIED, INCLUDING WITHOUT LIMITATION ANY 
+IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE OR NON-INFRINGEMENT OF THIRD 
+PARTY INTELLECTUAL PROPERTY RIGHTS.
+These resources are intended for skilled developers designing with TI products. You are solely responsible for (1) selecting the appropriate 
+TI products for your application, (2) designing, validating and testing your application, and (3) ensuring your application meets applicable 
+standards, and any other safety, security, regulatory or other requirements.
+These resources are subject to change without notice. TI grants you permission to use these resources only for development of an 
+application that uses the TI products described in the resource. Other reproduction and display of these resources is prohibited. No license 
+is granted to any other TI intellectual property right or to any third party intellectual property right. TI disclaims responsibility for, and you fully 
+indemnify TI and its representatives against any claims, damages, costs, losses, and liabilities arising out of your use of these resources.
+TI’s products are provided subject to TI’s Terms of Sale, TI’s General Quality Guidelines, or other applicable terms available either on 
+ti.com or provided in conjunction with such TI products. TI’s provision of these resources does not expand or otherwise alter TI’s applicable 
+warranties or warranty disclaimers for TI products. Unless TI explicitly designates a product as custom or customer-specified, TI products 
+are standard, catalog, general purpose devices.
+TI objects to and rejects any additional or different terms you may propose.
+IMPORTANT NOTICE
+Copyright © 2026, Texas Instruments Incorporated
+Last updated 10/2025
