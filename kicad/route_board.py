@@ -4,7 +4,9 @@ This is a deterministic layout aid, not a substitute for KiCad DRC or
 measuring the actual mating modules.
 """
 
+import argparse
 import json
+import re
 from collections import defaultdict
 from heapq import heappop, heappush
 from functools import lru_cache
@@ -15,6 +17,44 @@ import pcbnew as pcb
 
 
 FILE = Path(__file__).with_name("minibox-carrier.kicad_pcb")
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--nets", nargs="+",
+                    help="Reroute only these nets, preserving other saved tracks")
+args = parser.parse_args()
+selected = set(args.nets) if args.nets else None
+if selected:
+    original = pcb.LoadBoard(str(FILE))
+    known = {p.GetNetname() for f in original.GetFootprints() for p in f.Pads()}
+    if selected - known or "GND" in selected:
+        raise RuntimeError(f"Unsupported reroute nets: {selected - known or {'GND'}}")
+    source = FILE.read_text(encoding="utf-8")
+    removals = []
+    for match in re.finditer(r"(?m)^\t\((segment|via|zone)\b", source):
+        depth, quoted, escaped = 0, False, False
+        for end in range(match.start() + 1, len(source)):
+            char = source[end]
+            if escaped:
+                escaped = False
+            elif quoted and char == "\\":
+                escaped = True
+            elif char == '"':
+                quoted = not quoted
+            elif not quoted:
+                if char == "(":
+                    depth += 1
+                elif char == ")":
+                    depth -= 1
+                    if depth == 0:
+                        break
+        else:
+            raise RuntimeError("Malformed saved PCB routing block")
+        block = source[match.start():end + 1]
+        name = re.search(r'\(net "([^"]+)"\)', block)
+        if name and name.group(1) in selected and "(keepout" not in block:
+            removals.append((match.start(), end + 1))
+    for start, end in reversed(removals):
+        source = source[:start] + source[end:]
+    FILE.write_text(source, encoding="utf-8")
 board = pcb.LoadBoard(str(FILE))
 STEP = 0.25
 edge_points = [
@@ -44,8 +84,8 @@ for area in board.Zones():
             box.GetLeft(), box.GetTop(), box.GetRight(), box.GetBottom()))
         if bounds not in KEEP_OUTS:
             KEEP_OUTS.append(bounds)
-if board.GetCopperLayerCount() != 4 or list(board.GetTracks()):
-    raise RuntimeError("Run generate_board.py before routing the four-layer board")
+if board.GetCopperLayerCount() != 4 or (list(board.GetTracks()) and not selected):
+    raise RuntimeError("Use --nets for partial routing of an existing four-layer board")
 
 
 def layers_for(name):
@@ -291,6 +331,34 @@ def mark(route, name):
                     blocked[layer][(a, b)].add(name)
 
 
+for item in board.GetTracks():
+    name = item.GetNetname()
+    if isinstance(item, pcb.PCB_VIA):
+        x, y = cell(item.GetPosition())
+        radius = mm(item.GetWidth(pcb.F_Cu)) / 2 + WIDTH / 2 + CLEARANCE + STEP / 2
+        for a, b in disk(x, y, radius):
+            via_pad_blocks[(a, b)].add(name)
+            for layer in blocked:
+                layer[(a, b)].add(name)
+    else:
+        start, end = item.GetStart(), item.GetEnd()
+        samples = max(1, ceil(mm(item.GetLength()) / (STEP / 2)))
+        layer = ROUTE_LAYERS.index(item.GetLayer())
+        mark([(layer, *cell(pcb.VECTOR2I(
+            round(start.x + i / samples * (end.x - start.x)),
+            round(start.y + i / samples * (end.y - start.y)))))
+              for i in range(samples + 1)], name)
+if selected:
+    for zone in board.Zones():
+        if zone.GetLayer() != pcb.In2_Cu or zone.GetNetname() not in POWER_WIDTHS:
+            continue
+        for x in range(NX):
+            for y in range(NY):
+                if zone.Outline().Contains(point(*xy(x, y))):
+                    for a, b in disk(x, y, 0.4):
+                        blocked[1][(a, b)].add("POWER_REFERENCE")
+
+
 def apply(route, source, name, from_position=None):
     start = xy(*route[0][1:])
     pad = from_position or source.GetPosition()
@@ -315,24 +383,27 @@ def apply(route, source, name, from_position=None):
 
 
 priority = [
+    "RTC_SDA", "RTC_SCL",
     "AUDIO_DIN", "MIC_SD", "I2S_BCLK", "I2S_WS",
     "BUTTON4", "BUTTON3", "RECORD", "BUTTON1",
     "USB_CC1", "USB_CC2",
     "LCD_BL", "LCD_CS", "LCD_RST", "LCD_DC", "LCD_MOSI", "LCD_SCK",
     "5V_IN",
     "GPIO1", "GPIO2",
-    "RTC_SDA", "RTC_SCL",
     "AMP_GAIN", "AMP_SD",
     "5V_SW",
     "3V3",
 ]
 assert set(priority) == {
     name for name, group in pads.items() if len(group) > 1 and name != "GND"}
+if selected:
+    priority = [name for name in priority if name in selected]
 escapes = {}
 for pad in all_pads:
     reference = pad.GetParentFootprint().GetReference()
     number = int(pad.GetNumber()) if pad.GetNumber().isdigit() else 0
-    if pad.GetNetname() in POWER_WIDTHS or pad.GetNetname() == "GND":
+    if ((selected and pad.GetNetname() not in selected) or
+            pad.GetNetname() in POWER_WIDTHS or pad.GetNetname() == "GND"):
         continue
     if reference == "J4" and pad.GetNetname() in I2S_NETS:
         dx, dy = 5, 0
@@ -435,10 +506,18 @@ def diagonal_clear(start, end, original):
             if segment_distance(start, end, center, center) <= 3.5 + radius:
                 return False
         elif pad.GetNetCode() != original.GetNetCode() and pad.IsOnLayer(original.GetLayer()):
-            box = pad.GetBoundingBox()
-            if rectangle_distance(start, end, mm(box.GetLeft()), mm(box.GetTop()),
-                                  mm(box.GetRight()), mm(box.GetBottom())) <= (
-                    radius + max(CLEARANCE, mm(pad.GetLocalClearance() or 0)) + 0.02):
+            if pad.GetShape() == pcb.PAD_SHAPE_CIRCLE:
+                center = coords(pad.GetPosition())
+                distance = segment_distance(start, end, center, center) - max(
+                    mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2
+            else:
+                box = pad.GetBoundingBox()
+                distance = rectangle_distance(
+                    start, end, mm(box.GetLeft()), mm(box.GetTop()),
+                    mm(box.GetRight()), mm(box.GetBottom()))
+            pad_clearance = max(CLEARANCE, mm(pad.GetLocalClearance() or 0),
+                                0.5 if pad.GetAttribute() == pcb.PAD_ATTRIB_NPTH else 0)
+            if distance <= radius + pad_clearance + 0.02:
                 return False
     for item in board.GetTracks():
         if item.GetNetCode() == original.GetNetCode():
@@ -638,10 +717,13 @@ def add_zone(layer, name, outline=None, priority=0):
     board.Add(zone)
 
 
-for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.B_Cu):
-    add_zone(layer, "GND")
-add_zone(pcb.In2_Cu, "GND")
+if not selected:
+    for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.B_Cu):
+        add_zone(layer, "GND")
+    add_zone(pcb.In2_Cu, "GND")
 for name in ("3V3", "5V_IN", "5V_SW"):
+    if selected and name not in selected:
+        continue
     outline = pcb.SHAPE_POLY_SET()
     for item in tracks:
         if item.GetNetname() != name or item.GetLayer() != pcb.In2_Cu:
@@ -710,15 +792,8 @@ def stitch_near(position, max_distance=3):
 for item in tracks:
     if isinstance(item, pcb.PCB_VIA):
         stitch_near(item.GetPosition())
-    elif item.GetNetname() in I2S_NETS:
-        length = mm(item.GetLength())
-        for index in range(1, ceil(length / 10)):
-            ratio = index / ceil(length / 10)
-            start, end = item.GetStart(), item.GetEnd()
-            stitch_near(point(
-                mm(start.x) + ratio * mm(end.x - start.x),
-                mm(start.y) + ratio * mm(end.y - start.y)))
 
+board.BuildConnectivity()
 if not pcb.ZONE_FILLER(board).Fill(board.Zones()):
     raise RuntimeError("KiCad failed to fill the ground zones")
 pcb.SaveBoard(str(FILE), board)

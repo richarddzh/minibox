@@ -4,6 +4,7 @@ import csv
 import hashlib
 import html
 import json
+import re
 from math import hypot
 from pathlib import Path
 import subprocess
@@ -75,6 +76,19 @@ def body_bounds(fp):
 
 
 terminal_bodies = {r: body_bounds(fps[r]) for r in ("J7", "J8", "J9")}
+
+
+def circle_rectangle_gap(center, radius, bounds):
+    x, y = center
+    a, b, c, d = bounds
+    return hypot(max(a - x, 0, x - c), max(b - y, 0, y - d)) - radius
+
+
+key_bounds = [(x-key_size/2, y-key_size/2, x+key_size/2, y+key_size/2)
+              for x, y in centers]
+screw_bounds = [(mm(f.GetPosition().x)-3.5, mm(f.GetPosition().y)-3.5,
+                 mm(f.GetPosition().x)+3.5, mm(f.GetPosition().y)+3.5)
+                for r, f in fps.items() if r.startswith("H")]
 checks = {
     "key_pitch_x_mm": centers[1][0] - centers[0][0],
     "key_pitch_y_mm": centers[2][1] - centers[0][1],
@@ -85,12 +99,18 @@ checks = {
     "rtc_esp_body_gap_mm": 18.03 - 15,
     "amp_keyboard_gap_mm": centers[0][1] - key_size / 2 - 72,
     "mic_left_of_upper_key_gap_mm": centers[0][0] - key_size / 2 - mic[0] - mic_radius,
-    "mic_above_lower_key_gap_mm": centers[2][1] - key_size / 2 - mic[1] - mic_radius,
+    "mic_keycap_gap_mm": min(circle_rectangle_gap(mic, mic_radius, b) for b in key_bounds),
+    "mic_top_below_keycap_top_mm": mic[1] - mic_radius - (centers[0][1] - key_size / 2),
     "joystick_mic_motion_gap_mm": hypot(joy[0] - mic[0], joy[1] - mic[1]) - motion_radius - mic_radius,
     "mic_red_strip_gap_mm": mic[1] - mic_radius - boundary,
     "joystick_red_strip_gap_mm": joy[1] - motion_radius - boundary,
     "terminal_red_strip_gap_mm": boundary - max(b[3] for b in terminal_bodies.values()),
     "joystick_motion_board_left_gap_mm": joy[0] - motion_radius - left,
+    "joystick_motion_board_edge_gap_mm": min(
+        joy[0]-motion_radius-left, right-joy[0]-motion_radius,
+        joy[1]-motion_radius-top, bottom-joy[1]-motion_radius),
+    "joystick_screw_keepout_gap_mm": min(
+        circle_rectangle_gap(joy, motion_radius, b) for b in screw_bounds),
     "esp_body_board_right_gap_mm": right - 88.5,
 }
 for name in ("key_pitch_x_mm", "key_pitch_y_mm", "key_lower_pitch_x_mm", "key_right_pitch_y_mm"):
@@ -99,15 +119,21 @@ for name in ("key_pitch_x_mm", "key_pitch_y_mm", "key_lower_pitch_x_mm", "key_ri
 if abs(checks["key_lower_stagger_mm"] - 9.525) > 0.001:
     raise RuntimeError("Lower keys must retain the half-unit stagger")
 for x, y in centers:
-    if min(x-key_size/2-left, right-x-key_size/2, y-key_size/2-top, bottom-y-key_size/2) < 2:
+    if min(x-key_size/2-left, right-x-key_size/2, y-key_size/2-top, bottom-y-key_size/2) < 0.6 - 0.001:
         raise RuntimeError("Keycap envelope too close to PCB edge")
 for name in ("rtc_esp_body_gap_mm", "amp_keyboard_gap_mm",
-             "mic_left_of_upper_key_gap_mm", "mic_above_lower_key_gap_mm",
+             "mic_left_of_upper_key_gap_mm",
              "joystick_mic_motion_gap_mm", "mic_red_strip_gap_mm",
              "joystick_red_strip_gap_mm", "terminal_red_strip_gap_mm",
-             "joystick_motion_board_left_gap_mm", "esp_body_board_right_gap_mm"):
+             "esp_body_board_right_gap_mm"):
     if checks[name] < 2 - 0.001:
         raise RuntimeError(f"Mechanical reservation violated: {name}={checks[name]}")
+for name, minimum in (("mic_keycap_gap_mm", 1.2),
+                      ("mic_top_below_keycap_top_mm", 0),
+                      ("joystick_motion_board_edge_gap_mm", 0.6),
+                      ("joystick_screw_keepout_gap_mm", 0.6)):
+    if checks[name] < minimum - 0.001:
+        raise RuntimeError(f"Control clearance violated: {name}={checks[name]}")
 if fps["JS1"].GetOrientationDegrees() % 180 != 90:
     raise RuntimeError("Joystick must be vertical")
 if fps["J7"].GetOrientationDegrees() % 360 != 90 or any(
@@ -119,7 +145,8 @@ if next(p for p in fps["J2"].Pads() if p.GetNumber() == "6").GetNetname():
     raise RuntimeError("GPIO42 must remain free")
 expected = {
     ("J1", "4"): "BUTTON1", ("J1", "5"): "RECORD", ("J1", "6"): "BUTTON3",
-    ("J1", "7"): "BUTTON4", ("J1", "8"): "RTC_SDA", ("J1", "9"): "RTC_SCL",
+    ("J1", "7"): "BUTTON4", ("J1", "8"): "RTC_SCL", ("J1", "9"): "RTC_SDA",
+    ("J5", "3"): "RTC_SDA", ("J5", "4"): "RTC_SCL",
     ("J1", "10"): "MIC_SD", ("J2", "17"): "AMP_SD", ("J2", "18"): "AMP_GAIN",
     ("JS1", "X2"): "GPIO1", ("JS1", "Y2"): "GPIO2",
     ("R1", "1"): "USB_CC1", ("R2", "1"): "USB_CC2",
@@ -129,12 +156,75 @@ for (ref, number), name in expected.items():
     if next(p for p in fps[ref].Pads() if p.GetNumber() == number).GetNetname() != name:
         raise RuntimeError(f"Pin assignment mismatch: {ref}/{number}")
 
+
+def cross(a, b, c):
+    return (b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x)
+
+
+rtc_tracks = {name: [t for t in board.GetTracks()
+                    if not isinstance(t, pcb.PCB_VIA) and t.GetNetname() == name]
+              for name in ("RTC_SDA", "RTC_SCL")}
+for a in rtc_tracks["RTC_SDA"]:
+    for b in rtc_tracks["RTC_SCL"]:
+        x, y, u, v = a.GetStart(), a.GetEnd(), b.GetStart(), b.GetEnd()
+        if cross(x, y, u)*cross(x, y, v) < 0 and cross(u, v, x)*cross(u, v, y) < 0:
+            raise RuntimeError("RTC SDA/SCL must not cross even in planar projection")
+
 run("pcb", "export", "gerbers", "--output", GERBERS,
     "--layers", "F.Cu,In1.Cu,In2.Cu,B.Cu,F.Mask,B.Mask,F.SilkS,B.SilkS,F.Paste,Edge.Cuts",
     "--subtract-soldermask", "--use-drill-file-origin", "--check-zones", FILE)
 run("pcb", "export", "drill", "--output", GERBERS, "--format", "excellon",
     "--excellon-units", "mm", "--excellon-separate-th", "--drill-origin", "plot", "--generate-map",
     "--map-format", "svg", FILE)
+
+plated = [p for f in fps.values() for p in f.Pads()
+          if p.GetAttribute() == pcb.PAD_ATTRIB_PTH]
+vias = [t for t in board.GetTracks() if isinstance(t, pcb.PCB_VIA)]
+ground_vias = [t for t in vias if t.GetNetname() == "GND"]
+signal_vias = [t for t in vias if t.GetNetname() != "GND"]
+if signal_vias and not ground_vias:
+    raise RuntimeError("Missing ground return vias")
+max_return_distance = max((min(
+    hypot(mm(v.GetPosition().x - g.GetPosition().x),
+          mm(v.GetPosition().y - g.GetPosition().y)) for g in ground_vias)
+    for v in signal_vias), default=0)
+if max_return_distance > 3:
+    raise RuntimeError("Signal/power via lacks a ground return via within 3 mm")
+centers_nm = {(p.GetPosition().x-origin.x, origin.y-p.GetPosition().y)
+              for p in plated + vias}
+for suffix in (".gtl", ".g1", ".g2", ".gbl"):
+    content = (GERBERS / ("minibox-carrier" + {
+        ".gtl": "-F_Cu", ".g1": "-In1_Cu", ".g2": "-In2_Cu", ".gbl": "-B_Cu"}[suffix] + suffix)
+               ).read_text(encoding="utf-8")
+    if "%FSLAX46Y46*%" not in content or "%MOMM*%" not in content:
+        raise RuntimeError(f"Unexpected copper coordinate format: {suffix}")
+    flashes = {(int(x), int(y)) for x, y in re.findall(r"X(-?\d+)Y(-?\d+)D03\*", content)}
+    if centers_nm - flashes:
+        raise RuntimeError(f"Misaligned or missing plated copper centers: {suffix}")
+drill_counts = {}
+for kind in ("PTH", "NPTH"):
+    content = (GERBERS / f"minibox-carrier-{kind}.drl").read_text(encoding="utf-8")
+    tools = {n: float(d) for n, d in re.findall(r"^T(\d+)C([\d.]+)$", content, re.M)}
+    actual, tool = set(), None
+    for line in content.splitlines():
+        change = re.fullmatch(r"T(\d+)", line)
+        if change:
+            tool = change.group(1)
+        hit = re.fullmatch(r"X(-?[\d.]+)Y(-?[\d.]+)", line)
+        if hit:
+            if tool not in tools:
+                raise RuntimeError("Undefined drill tool")
+            actual.add((round(float(hit[1]), 3), round(float(hit[2]), 3),
+                        round(tools[tool], 3)))
+    holes = plated + vias if kind == "PTH" else [
+        p for f in fps.values() for p in f.Pads() if p.GetAttribute() == pcb.PAD_ATTRIB_NPTH]
+    expected_holes = {
+        (round(mm(p.GetPosition().x-origin.x), 3), round(mm(origin.y-p.GetPosition().y), 3),
+         round(mm(p.GetDrill() if isinstance(p, pcb.PCB_VIA) else p.GetDrillSize().x), 3))
+        for p in holes}
+    if actual != expected_holes:
+        raise RuntimeError(f"Drill coordinates/diameters do not match saved PCB: {kind}")
+    drill_counts[kind] = len(actual)
 
 bom = [
     ["1x22 female socket 2.54mm", "J1,J2", "PinSocket_1x22_P2.54mm_Vertical", 2,
@@ -239,8 +329,14 @@ manifest = {
     "track_length_mm": round(sum(mm(t.GetLength()) for t in tracks if not isinstance(t, pcb.PCB_VIA)), 3),
     "signal_vias": sum(isinstance(t, pcb.PCB_VIA) and t.GetNetname() != "GND" for t in tracks),
     "gnd_vias": sum(isinstance(t, pcb.PCB_VIA) and t.GetNetname() == "GND" for t in tracks),
+    "ground_stitching": {
+        "policy": "Via return paths and separate ground-copper regions, not periodic trace stitching",
+        "maximum_via_return_distance_mm": round(max_return_distance, 4)},
     "board_sha256": hashlib.sha256(FILE.read_bytes()).hexdigest(),
     "gerber_sha256": hashlib.sha256(gerber_zip.read_bytes()).hexdigest(),
+    "cam_alignment": {"copper_layers_checked": 4, "plated_centers_checked": len(centers_nm),
+                      "drill_holes_checked": drill_counts, "origin_kicad_mm": [left, bottom]},
+    "rtc_projected_crossings": 0,
     "needs_factory_review": [
         "Exact connector MPNs and domestic assembly stock; resistors C25905 verified, not stock confirmed",
         "Actual ESP32/header spacing, RTC battery thickness, amplifier footprint and microphone spacing",

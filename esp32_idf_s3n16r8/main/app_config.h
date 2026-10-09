@@ -25,8 +25,8 @@
 #define BUTTON_3_PIN 6
 #define BUTTON_4_PIN 7
 #define BUTTON_COUNT 4
-#define RTC_SDA_PIN 15
-#define RTC_SCL_PIN 16
+#define RTC_SDA_PIN 16
+#define RTC_SCL_PIN 15
 
 #define MINIBOX_STRINGIFY_INNER(value) #value
 #define MINIBOX_STRINGIFY(value) MINIBOX_STRINGIFY_INNER(value)

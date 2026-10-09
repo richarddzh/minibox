@@ -22,8 +22,8 @@ Bounding-rectangle area is only 1.28% smaller than the old 100 × 112 mm board.
 | RTC | Upright, battery included in 27.5 × 12 mm reservation; 3.03 mm to ESP32 estimate |
 | MAX98357 | Flat 27 × 24 mm reservation; bottom Y=72, above keycap top Y=80.5 |
 | Red boundary | Y=76; upper bodies ≤74, lower operation envelopes ≥78 |
-| Joystick JS1 | Vertical, center (22,93); **30 mm diameter**, not 30 mm radius |
-| Microphone | Center (48.5,87.75), Ø19.5 mm envelope; left of SW1, above SW3 |
+| Joystick JS1 | Vertical, center (20.75,97.5); **30 mm diameter**; 0.75 mm to edge, 0.77 mm to screw keepout |
+| Microphone | Center (46.5,90.25), Ø19.5 mm envelope; top Y80.5 aligned to keycaps; ≥1.22 mm to keys, ≥2.00 mm to joystick |
 | Four keys | Standard 19.05 mm pitch both ways; lower row staggered 9.525 mm left |
 | Keycaps | Maximum accepted envelope 18 × 18 mm; neighboring gap 1.05 mm |
 | Wire entries | J8/J9 left, J7 right; external wire/tool clearance still requires a fit check |
@@ -47,9 +47,13 @@ from the front; THT leads solder from the back.
 
 ## GPIO and Type-C
 
-Keys → GPIO4/5/6/7 (active-low, internal pulls); RTC SDA/SCL →15/16;
+Keys → GPIO4/5/6/7 (active-low, internal pulls); RTC SDA/SCL →16/15;
 MIC_SD →17; amplifier GAIN/SD_MODE →21/47. I2S WS/BCLK/DIN →39/40/41;
 joystick VR1/VR2 wipers →1/2; LCD remains GPIO9–14.
+Actual front silkscreen identifies each module/terminal signal and its GPIO
+using digits only, for example `SDA16`, `BCLK40`, `DIN41`, and `KEY1 4`.
+Power pins retain `3V3`/`5V`/`GND`; disconnected pins retain `NC`.
+Labels are on `F.SilkS`, not just the non-printing fabrication layer.
 See [the authoritative wiring table](../docs/hardware-connections.md).
 Octal-memory GPIO35/36/37 are unused, as are USB19/20 and UART43/44.
 GPIO39–41 cannot simultaneously be used for external JTAG.
@@ -70,9 +74,16 @@ B.Cu signals/GND. I2S prefers F.Cu/In1, with limited B.Cu/In2-ground-reference
 branches. The router checks actual filled reference copper every ≤0.1 mm
 outside necessary same-net antipads and requires one connected In1 region.
 Signal vias receive nearby GND stitching. This is not a signal-integrity test.
+Ground stitching was reduced from 62 to **23 vias**: retain return paths within
+3 mm of every signal/power via and connections to separate ground-copper regions.
+Do not add periodic stitching along same-layer I2S traces merely for their length;
+the continuous reference plane carries their return current.
 
 Signals/clearance **0.20/0.20 mm**, 3V3 feeders0.65 mm, 5V feeders0.80 mm;
 ordinary vias **0.60/0.30 mm**. Copper-edge0.50 mm; PTH hole spacing0.45 mm;
+Track-to-other-net pad clearance is **0.30 mm**, or **0.50 mm** at 5V pads.
+The four keys moved right by1.60 mm together; rightmost keycap-to-edge gap0.60 mm.
+These tighter mechanical edge margins require an enclosure/cap tolerance check.
 silk ≥1.0 mm with0.15 mm strokes. Header holes1.0/pads1.7 mm;
 terminal holes1.3/pads2.6 mm; switch holes1.5/pads2.1 mm.
 Do not treat signal width or these power feeders as a 3 A qualification.
@@ -84,6 +95,9 @@ Actual latest DRC/mechanical metrics and hashes belong in
 `assembly\revision-20261009\manifest.json` and `drc.json`;
 an absent report or failed gate means export is incomplete.
 Only a clean saved board may pass `export_revision.py`.
+The exporter checks all plated-pad/via centers on all four copper CAM layers
+against the saved PCB, and checks PTH/NPTH drill coordinates and diameters using
+the same lower-left origin. This is digital alignment, not factory registration certification.
 R1/R2 use verified UNI-ROYAL 0402WGF5101TCE/C25905, 5.1 kΩ ±1%;
 domestic factory availability is not confirmed. Unconfirmed connector MPNs
 leave the full assembly BOM **review-only**, even if DRC is clean.

@@ -19,7 +19,7 @@ GPIO6、GPIO7 只显示按键状态，不触发录音；不需要摇杆。
 | MAX98357 放大器 | SD/MODE / GAIN | GPIO47 / GPIO21 |
 | 摇杆（当前不初始化） | X / Y | GPIO1 / GPIO2 |
 | 摇杆按压（不使用） | K | 按压焊脚 NC，GPIO42 已释放，驱动不配置按压 GPIO |
-| RTC（当前未实现驱动） | SDA / SCL | GPIO15 / GPIO16 |
+| RTC（当前未实现驱动） | SDA / SCL | GPIO16 / GPIO15 |
 
 直焊机械轴按下接地，必须使用 GPIO 内部上拉及低有效配置。若改接高有效模块，
 先在 `idf.py menuconfig` → `Minibox hardware test` 关闭

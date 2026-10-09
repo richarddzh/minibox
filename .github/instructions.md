@@ -32,7 +32,7 @@
   默认低有效并使用内部上拉，可在菜单中切换为高有效。
   摇杆 X=GPIO1、Y=GPIO2 的代码保留，但当前测试不启用。
   摇杆按压不使用，GPIO42 已释放，PCB 按压触点保持 NC。
-  RTC SDA=GPIO15、SCL=GPIO16，仅预留配置，当前未实现驱动。
+  RTC SDA=GPIO16、SCL=GPIO15，仅预留配置，当前未实现驱动。
 - INMP441 SD=GPIO17、WS=GPIO39、SCK=GPIO40，L/R 接 GND（左声道）；
   MAX98357 DIN=GPIO41、LRC=GPIO39、BCLK=GPIO40、SD/MODE=GPIO47、
   GAIN=GPIO21。GPIO47 播放时为高、其余时间为低，GPIO21 默认高阻；

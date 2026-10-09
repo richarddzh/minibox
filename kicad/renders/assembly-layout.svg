@@ -18,18 +18,18 @@
 <text class="label" x="14.3" y="56.04" text-anchor="middle">J8 &lt; IN</text>
 <rect x="9.35" y="63.41" width="9.9" height="10.260000000000005" fill="#90cf9a" fill-opacity=".55" stroke="#24415c" stroke-width=".25"/>
 <text class="label" x="14.3" y="68.53999999999999" text-anchor="middle">J9 &lt; IN</text>
-<rect x="60.25" y="80.5" width="18.0" height="18.0" fill="#b3d7eb" fill-opacity=".55" stroke="#24415c" stroke-width=".25"/>
-<text class="label" x="69.25" y="89.5" text-anchor="middle">SW1 GPIO4</text>
-<rect x="79.3" y="80.5" width="18.0" height="18.0" fill="#b3d7eb" fill-opacity=".55" stroke="#24415c" stroke-width=".25"/>
-<text class="label" x="88.3" y="89.5" text-anchor="middle">SW2 GPIO5</text>
-<rect x="50.725" y="99.55" width="17.999999999999993" height="18.0" fill="#b3d7eb" fill-opacity=".55" stroke="#24415c" stroke-width=".25"/>
-<text class="label" x="59.724999999999994" y="108.55" text-anchor="middle">SW3 GPIO6</text>
-<rect x="69.775" y="99.55" width="18.0" height="18.0" fill="#b3d7eb" fill-opacity=".55" stroke="#24415c" stroke-width=".25"/>
-<text class="label" x="78.775" y="108.55" text-anchor="middle">SW4 GPIO7</text>
-<circle cx="22.0" cy="93.0" r="15" fill="#d3b6eb" fill-opacity=".25" stroke="#6c4596" stroke-dasharray="1 1" stroke-width=".3"/>
-<text x="22.0" y="93.0" text-anchor="middle">JS1 MOTION D30</text>
-<circle cx="48.5" cy="87.75" r="9.75" fill="#ffe6b3" stroke="#8b6a21" stroke-width=".25"/>
-<text x="48.5" y="87.75" text-anchor="middle">MIC GPIO17</text>
+<rect x="61.849999999999994" y="80.5" width="18.0" height="18.0" fill="#b3d7eb" fill-opacity=".55" stroke="#24415c" stroke-width=".25"/>
+<text class="label" x="70.85" y="89.5" text-anchor="middle">SW1 GPIO4</text>
+<rect x="80.899999" y="80.5" width="18.0" height="18.0" fill="#b3d7eb" fill-opacity=".55" stroke="#24415c" stroke-width=".25"/>
+<text class="label" x="89.899999" y="89.5" text-anchor="middle">SW2 GPIO5</text>
+<rect x="52.324999" y="99.55" width="17.999999999999993" height="18.0" fill="#b3d7eb" fill-opacity=".55" stroke="#24415c" stroke-width=".25"/>
+<text class="label" x="61.32499899999999" y="108.55" text-anchor="middle">SW3 GPIO6</text>
+<rect x="71.375" y="99.55" width="18.0" height="18.0" fill="#b3d7eb" fill-opacity=".55" stroke="#24415c" stroke-width=".25"/>
+<text class="label" x="80.375" y="108.55" text-anchor="middle">SW4 GPIO7</text>
+<circle cx="20.75" cy="97.5" r="15" fill="#d3b6eb" fill-opacity=".25" stroke="#6c4596" stroke-dasharray="1 1" stroke-width=".3"/>
+<text x="20.75" y="97.5" text-anchor="middle">JS1 MOTION D30</text>
+<circle cx="46.5" cy="90.25" r="9.75" fill="#ffe6b3" stroke="#8b6a21" stroke-width=".25"/>
+<text x="46.5" y="90.25" text-anchor="middle">MIC GPIO17</text>
 <circle cx="80.0" cy="44.7" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="77.46" cy="44.7" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="74.92" cy="44.7" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
@@ -52,9 +52,9 @@
 <circle cx="31.74" cy="44.7" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="29.2" cy="44.7" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="26.66" cy="44.7" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="59.725" cy="108.55" r="1.95" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="55.915" cy="106.01" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="62.265" cy="103.47" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="61.324999" cy="108.55" r="1.95" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="57.514999" cy="106.01" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="63.864999" cy="103.47" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="14.0" cy="53.5" r="0.65" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="14.0" cy="58.58" r="0.65" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="88.0" cy="65.0" r="0.65" fill="white" stroke="#485b4e" stroke-width=".15"/>
@@ -71,9 +71,9 @@
 <circle cx="26.49" cy="63.0" r="0.22" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="27.51" cy="63.0" r="0.22" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="94.5" cy="115.0" r="1.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="69.25" cy="89.5" r="1.95" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="65.44" cy="86.96" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="71.79" cy="84.42" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="70.85" cy="89.5" r="1.95" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="67.04" cy="86.96" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="73.39" cy="84.42" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="26.49" cy="58.0" r="0.22" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="27.51" cy="58.0" r="0.22" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="10.0" cy="8.0" r="1.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
@@ -122,31 +122,31 @@
 <circle cx="50.94" cy="10.0" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="53.48" cy="10.0" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <circle cx="56.02" cy="10.0" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="78.775" cy="108.55" r="1.95" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="74.965" cy="106.01" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="81.315" cy="103.47" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="52.31" cy="85.21" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="44.69" cy="85.21" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="52.31" cy="87.75" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="44.69" cy="87.75" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="52.31" cy="90.29" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="44.69" cy="90.29" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="88.3" cy="89.5" r="1.95" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="84.49" cy="86.96" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="90.84" cy="84.42" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="28.325" cy="88.0" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="28.325" cy="98.0" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="15.675" cy="88.0" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="15.675" cy="98.0" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="25.25" cy="82.75" r="0.6" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="25.25" cy="87.25" r="0.6" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="18.75" cy="82.75" r="0.6" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="18.75" cy="87.25" r="0.6" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="13.27" cy="90.5" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="13.27" cy="93.0" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="13.27" cy="95.5" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="19.5" cy="101.73" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="22.0" cy="101.73" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
-<circle cx="24.5" cy="101.73" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="80.375" cy="108.55" r="1.95" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="76.565" cy="106.01" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="82.915" cy="103.47" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="50.31" cy="87.71" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="42.69" cy="87.71" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="50.31" cy="90.25" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="42.69" cy="90.25" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="50.31" cy="92.79" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="42.69" cy="92.79" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="89.899999" cy="89.5" r="1.95" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="86.089999" cy="86.96" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="92.439999" cy="84.42" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="27.075" cy="92.5" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="27.075" cy="102.5" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="14.425" cy="92.5" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="14.425" cy="102.5" r="0.75" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="24.0" cy="87.25" r="0.6" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="24.0" cy="91.75" r="0.6" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="17.5" cy="87.25" r="0.6" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="17.5" cy="91.75" r="0.6" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="12.02" cy="95.0" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="12.02" cy="97.5" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="12.02" cy="100.0" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="18.25" cy="106.23" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="20.75" cy="106.23" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
+<circle cx="23.25" cy="106.23" r="0.5" fill="white" stroke="#485b4e" stroke-width=".15"/>
 <text x="52" y="126" text-anchor="middle">94.5 x 117 mm; envelopes, not exact module models</text>
 </svg>
