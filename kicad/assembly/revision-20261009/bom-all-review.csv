@@ -1,11 +1,11 @@
 ﻿Comment,Designator,Footprint,Quantity,LCSC Part #,Manufacturer Part,Notes
-1x22 female socket 2.54mm,"J1,J2",PinSocket_1x22_P2.54mm_Vertical,2,,,THT; exact height/MPN requires review
-1x3 female socket 2.54mm,"J3A,J3B","Two independent 1x3 strips, row 7.62mm",2,,,THT; NOT a standard 2x3 header
-1x7 female socket 2.54mm,J4,PinSocket_1x07_P2.54mm_Vertical,1,,,THT
-1x6 female socket 2.54mm,J5,PinSocket_1x06_P2.54mm_Vertical,1,,,THT
-1x14 female socket 2.54mm,J6,PinSocket_1x14_P2.54mm_Vertical,1,,,THT
-3-way screw terminal 5.08mm,J7,"Phoenix MKDS-1,5-3-5.08",1,,,THT; wire entry RIGHT; MPN not selected
-2-way screw terminal 5.08mm,"J8,J9","Phoenix MKDS-1,5-2-5.08",2,,,THT; wire entry LEFT; MPN not selected
+LAIL-PM2.54-22P-L,"J1,J2",PinSocket_1x22_P2.54mm_Vertical,2,C54973843,LAILAN LAIL-PM2.54-22P-L,THT; 8.5mm plastic height; assembly fit review
+LAIL-PM2.54-3P-L,"J3A,J3B",PinSocket_1x03_P2.54mm_Vertical,2,C54973828,LAILAN LAIL-PM2.54-3P-L,THT; two 8.5mm-high strips; NOT a standard 2x3 header
+LAIL-PM2.54-7P-L,J4,PinSocket_1x07_P2.54mm_Vertical,1,C54973832,LAILAN LAIL-PM2.54-7P-L,THT; 8.5mm plastic height
+LAIL-PM2.54-6P-L,J5,PinSocket_1x06_P2.54mm_Vertical,1,C54973826,LAILAN LAIL-PM2.54-6P-L,THT; 8.5mm plastic height
+LAIL-PM2.54-14P-L,J6,PinSocket_1x14_P2.54mm_Vertical,1,C54973850,LAILAN LAIL-PM2.54-14P-L,THT; 8.5mm plastic height
+WJ500V-5.08-03P-14-00A,J7,Minibox:WJ500V_5.08_3P,1,C72334,KANGNEX WJ500V-5.08-03P-14-00A,THT; wire entry RIGHT; 1.50mm PTH
+WJ500V-5.08-2P,"J8,J9",Minibox:WJ500V_5.08_2P,2,C8465,KANGNEX WJ500V-5.08-2P,THT; wire entry LEFT; 1.50mm PTH
 CPG151101D13,"SW1,SW2,SW3,SW4",Minibox:CPG151101D13,4,C49234235,HanElectricity CPG151101D13,THT; exact user-selected part; no hot-swap socket
 YV13S-L7.85-B10Ka(60)-0-DL01,JS1,Minibox:YV13S_L7.85_B10Ka_60_0_DL01,1,C37323747,YTL YV13S-L7.85-B10Ka(60)-0-DL01,THT; press unused; mounting leads NC
 5.1k 1% 0402,"R1,R2",R_0402_1005Metric,2,C25905,UNI-ROYAL 0402WGF5101TCE,SMT TOP; actual domestic factory stock must be checked

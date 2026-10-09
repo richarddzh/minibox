@@ -11,6 +11,7 @@ import subprocess
 import zipfile
 
 import pcbnew as pcb
+from export_jlc_positions import write_jlc_positions
 
 
 HERE = Path(__file__).resolve().parent
@@ -76,6 +77,24 @@ def body_bounds(fp):
 
 
 terminal_bodies = {r: body_bounds(fps[r]) for r in ("J7", "J8", "J9")}
+terminal_courtyards = [
+    s.GetBoundingBox() for r in ("J7", "J8", "J9") for s in fps[r].GraphicalItems()
+    if isinstance(s, pcb.PCB_SHAPE) and s.GetLayer() == pcb.F_CrtYd]
+if len(terminal_courtyards) != 3:
+    raise RuntimeError("Each selected terminal requires a tolerance-aware courtyard")
+for ref, count, value in (
+        ("J7", 3, "WJ500V-5.08-03P-14-00A"),
+        ("J8", 2, "WJ500V-5.08-2P"),
+        ("J9", 2, "WJ500V-5.08-2P")):
+    fp = fps[ref]
+    if str(fp.GetFPID().GetLibItemName()) != f"WJ500V_5.08_{count}P" or fp.GetValue() != value:
+        raise RuntimeError(f"Wrong selected terminal footprint/model: {ref}")
+    for pad in fp.Pads():
+        if any(abs(mm(size) - expected) > 0.001
+               for size, expected in ((pad.GetDrillSize().x, 1.5),
+                                      (pad.GetDrillSize().y, 1.5),
+                                      (pad.GetSize().x, 2.6), (pad.GetSize().y, 2.6))):
+            raise RuntimeError(f"Wrong terminal hole/pad dimensions: {ref}")
 
 
 def circle_rectangle_gap(center, radius, bounds):
@@ -105,6 +124,8 @@ checks = {
     "mic_red_strip_gap_mm": mic[1] - mic_radius - boundary,
     "joystick_red_strip_gap_mm": joy[1] - motion_radius - boundary,
     "terminal_red_strip_gap_mm": boundary - max(b[3] for b in terminal_bodies.values()),
+    "terminal_tolerance_envelope_red_strip_gap_mm": boundary - max(
+        mm(box.GetBottom()) for box in terminal_courtyards),
     "joystick_motion_board_left_gap_mm": joy[0] - motion_radius - left,
     "joystick_motion_board_edge_gap_mm": min(
         joy[0]-motion_radius-left, right-joy[0]-motion_radius,
@@ -125,6 +146,7 @@ for name in ("rtc_esp_body_gap_mm", "amp_keyboard_gap_mm",
              "mic_left_of_upper_key_gap_mm",
              "joystick_mic_motion_gap_mm", "mic_red_strip_gap_mm",
              "joystick_red_strip_gap_mm", "terminal_red_strip_gap_mm",
+             "terminal_tolerance_envelope_red_strip_gap_mm",
              "esp_body_board_right_gap_mm"):
     if checks[name] < 2 - 0.001:
         raise RuntimeError(f"Mechanical reservation violated: {name}={checks[name]}")
@@ -227,15 +249,20 @@ for kind in ("PTH", "NPTH"):
     drill_counts[kind] = len(actual)
 
 bom = [
-    ["1x22 female socket 2.54mm", "J1,J2", "PinSocket_1x22_P2.54mm_Vertical", 2,
-     "", "", "THT; exact height/MPN requires review"],
-    ["1x3 female socket 2.54mm", "J3A,J3B", "Two independent 1x3 strips, row 7.62mm", 2,
-     "", "", "THT; NOT a standard 2x3 header"],
-    ["1x7 female socket 2.54mm", "J4", "PinSocket_1x07_P2.54mm_Vertical", 1, "", "", "THT"],
-    ["1x6 female socket 2.54mm", "J5", "PinSocket_1x06_P2.54mm_Vertical", 1, "", "", "THT"],
-    ["1x14 female socket 2.54mm", "J6", "PinSocket_1x14_P2.54mm_Vertical", 1, "", "", "THT"],
-    ["3-way screw terminal 5.08mm", "J7", "Phoenix MKDS-1,5-3-5.08", 1, "", "", "THT; wire entry RIGHT; MPN not selected"],
-    ["2-way screw terminal 5.08mm", "J8,J9", "Phoenix MKDS-1,5-2-5.08", 2, "", "", "THT; wire entry LEFT; MPN not selected"],
+    ["LAIL-PM2.54-22P-L", "J1,J2", "PinSocket_1x22_P2.54mm_Vertical", 2,
+     "C54973843", "LAILAN LAIL-PM2.54-22P-L", "THT; 8.5mm plastic height; assembly fit review"],
+    ["LAIL-PM2.54-3P-L", "J3A,J3B", "PinSocket_1x03_P2.54mm_Vertical", 2,
+     "C54973828", "LAILAN LAIL-PM2.54-3P-L", "THT; two 8.5mm-high strips; NOT a standard 2x3 header"],
+    ["LAIL-PM2.54-7P-L", "J4", "PinSocket_1x07_P2.54mm_Vertical", 1,
+     "C54973832", "LAILAN LAIL-PM2.54-7P-L", "THT; 8.5mm plastic height"],
+    ["LAIL-PM2.54-6P-L", "J5", "PinSocket_1x06_P2.54mm_Vertical", 1,
+     "C54973826", "LAILAN LAIL-PM2.54-6P-L", "THT; 8.5mm plastic height"],
+    ["LAIL-PM2.54-14P-L", "J6", "PinSocket_1x14_P2.54mm_Vertical", 1,
+     "C54973850", "LAILAN LAIL-PM2.54-14P-L", "THT; 8.5mm plastic height"],
+    ["WJ500V-5.08-03P-14-00A", "J7", "Minibox:WJ500V_5.08_3P", 1, "C72334",
+     "KANGNEX WJ500V-5.08-03P-14-00A", "THT; wire entry RIGHT; 1.50mm PTH"],
+    ["WJ500V-5.08-2P", "J8,J9", "Minibox:WJ500V_5.08_2P", 2, "C8465",
+     "KANGNEX WJ500V-5.08-2P", "THT; wire entry LEFT; 1.50mm PTH"],
     ["CPG151101D13", "SW1,SW2,SW3,SW4", "Minibox:CPG151101D13", 4, "C49234235",
      "HanElectricity CPG151101D13", "THT; exact user-selected part; no hot-swap socket"],
     ["YV13S-L7.85-B10Ka(60)-0-DL01", "JS1", "Minibox:YV13S_L7.85_B10Ka_60_0_DL01",
@@ -274,6 +301,7 @@ for ref, fp in sorted(fps.items()):
 csv_file("positions-all-review.csv", ["Designator", "Mid X", "Mid Y", "Layer", "Rotation", "Process"], positions)
 csv_file("pin-map.csv", ["Designator", "PCB footprint", "PCB pad", "Net",
                         "X mm", "Y mm", "Drill mm", "Type"], pin_rows)
+jlc_placement = write_jlc_positions(board, OUT)
 
 svg = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 110 129">',
        '<style>text{font:2px sans-serif} .label{font-weight:bold}</style>',
@@ -333,12 +361,22 @@ manifest = {
         "policy": "Via return paths and separate ground-copper regions, not periodic trace stitching",
         "maximum_via_return_distance_mm": round(max_return_distance, 4)},
     "board_sha256": hashlib.sha256(FILE.read_bytes()).hexdigest(),
+    "terminals": {"J7": "C72334 WJ500V-5.08-03P-14-00A",
+                  "J8_J9": "C8465 WJ500V-5.08-2P", "hole_mm": 1.5, "pad_mm": 2.6,
+                  "radial_annular_ring_mm": 0.55,
+                  "body_height_mm": 14.07, "joining_lug_included": True,
+                  "J8_J9_moved_up_mm": 1.0},
     "gerber_sha256": hashlib.sha256(gerber_zip.read_bytes()).hexdigest(),
     "cam_alignment": {"copper_layers_checked": 4, "plated_centers_checked": len(centers_nm),
                       "drill_holes_checked": drill_counts, "origin_kicad_mm": [left, bottom]},
     "rtc_projected_crossings": 0,
+    "jlc_placement": {
+        "file": "positions-jlc-review.csv", "report": "jlc-placement-review.json",
+        "physical_components": jlc_placement["physical_components"],
+        "cpl_sha256": jlc_placement["cpl_sha256"],
+        "status": jlc_placement["status"]},
     "needs_factory_review": [
-        "Exact connector MPNs and domestic assembly stock; resistors C25905 verified, not stock confirmed",
+        "Selected connector MPNs require factory insertion/soldering approval; catalog stock is not reserved",
         "Actual ESP32/header spacing, RTC battery thickness, amplifier footprint and microphone spacing",
         "Factory stackup, supply current/thermal verification, backfeed check",
         "THT solder process, actual hole tolerances and keycap/joystick cap fit",

@@ -1,0 +1,26 @@
+{
+  "board_sha256": "53f9e010208fbc778e814d2ab5684cee3e6063a76a5b1c2f632669fa7170c595",
+  "source": "JLC editor: saved successfully, refreshed and read back all physical components, 2026-10-09",
+  "coordinate_axes": "X right, Y up; counterclockwise rotation in top view",
+  "website_coordinate_precision_mm": 0.001,
+  "status": "SAVED_PLACEMENT_ONLY_NOT_PRODUCTION_APPROVED",
+  "placements": [
+    {"designator": "J1", "x_mm": 48.330, "y_mm": 100.700, "rotation_deg": 180, "lcsc_part": "C54973843"},
+    {"designator": "J2", "x_mm": 48.330, "y_mm": 75.300, "rotation_deg": 180, "lcsc_part": "C54973843"},
+    {"designator": "J3A", "x_mm": 45.310, "y_mm": 29.750, "rotation_deg": 270, "lcsc_part": "C54973828"},
+    {"designator": "J3B", "x_mm": 37.690, "y_mm": 29.750, "rotation_deg": 270, "lcsc_part": "C54973828"},
+    {"designator": "J4", "x_mm": 35.000, "y_mm": 60.380, "rotation_deg": 270, "lcsc_part": "C54973832"},
+    {"designator": "J5", "x_mm": 64.350, "y_mm": 110.000, "rotation_deg": 0, "lcsc_part": "C54973826"},
+    {"designator": "J6", "x_mm": 34.510, "y_mm": 110.000, "rotation_deg": 0, "lcsc_part": "C54973850"},
+    {"designator": "J7", "x_mm": 83.000, "y_mm": 60.080, "rotation_deg": 90, "lcsc_part": "C72334"},
+    {"designator": "J8", "x_mm": 9.000, "y_mm": 64.960, "rotation_deg": 270, "lcsc_part": "C8465"},
+    {"designator": "J9", "x_mm": 9.000, "y_mm": 52.460, "rotation_deg": 270, "lcsc_part": "C8465"},
+    {"designator": "JS1", "x_mm": 14.556, "y_mm": 23.260, "rotation_deg": 270, "lcsc_part": "C37323747"},
+    {"designator": "R1", "x_mm": 22.000, "y_mm": 62.000, "rotation_deg": 0, "lcsc_part": "C25905"},
+    {"designator": "R2", "x_mm": 22.000, "y_mm": 57.000, "rotation_deg": 0, "lcsc_part": "C25905"},
+    {"designator": "SW1", "x_mm": 65.215, "y_mm": 34.310, "rotation_deg": 0, "lcsc_part": "C49234235"},
+    {"designator": "SW2", "x_mm": 84.265, "y_mm": 34.310, "rotation_deg": 0, "lcsc_part": "C49234235"},
+    {"designator": "SW3", "x_mm": 55.690, "y_mm": 15.260, "rotation_deg": 0, "lcsc_part": "C49234235"},
+    {"designator": "SW4", "x_mm": 74.740, "y_mm": 15.260, "rotation_deg": 0, "lcsc_part": "C49234235"}
+  ]
+}

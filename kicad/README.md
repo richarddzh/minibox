@@ -44,6 +44,15 @@ J3 is two separate 1×3 sockets, row spacing 7.62 mm, **not** a normal 2×3 sock
 Three 5.08 mm screw terminals, four direct-solder switches, one direct-solder
 joystick, and two 0402 resistors complete the assembly. All components install
 from the front; THT leads solder from the back.
+J7 is **KANGNEX WJ500V-5.08-03P-14-00A / C72334**; J8/J9 are
+**WJ500V-5.08-2P / C8465**. Exact local footprints include the 0.60 mm joining
+lug, 10 mm body depth, 14.07 mm height, and a tolerance-aware courtyard.
+J8/J9 were moved up 1 mm together to keep the larger bodies out of the
+Y=74–78 partition; their wire entries and electrical pin order are unchanged.
+The selected terminal holes are **Ø1.50 mm**, with unchanged Ø2.60 mm pads
+and 0.55 mm radial annular rings. No original Phoenix 3D model is reused
+to impersonate the selected WJ500V; current renders show its holes/outline,
+not an exact terminal body.
 
 ## GPIO and Type-C
 
@@ -85,7 +94,7 @@ Track-to-other-net pad clearance is **0.30 mm**, or **0.50 mm** at 5V pads.
 The four keys moved right by1.60 mm together; rightmost keycap-to-edge gap0.60 mm.
 These tighter mechanical edge margins require an enclosure/cap tolerance check.
 silk ≥1.0 mm with0.15 mm strokes. Header holes1.0/pads1.7 mm;
-terminal holes1.3/pads2.6 mm; switch holes1.5/pads2.1 mm.
+terminal holes1.5/pads2.6 mm; switch holes1.5/pads2.1 mm.
 Do not treat signal width or these power feeders as a 3 A qualification.
 Actual factory stackup/copper thickness, temperature rise and power bottlenecks
 remain review items. [Domestic JLC capability rules](../docs/jlc-pcb-design-spec.md)
@@ -99,8 +108,40 @@ The exporter checks all plated-pad/via centers on all four copper CAM layers
 against the saved PCB, and checks PTH/NPTH drill coordinates and diameters using
 the same lower-left origin. This is digital alignment, not factory registration certification.
 R1/R2 use verified UNI-ROYAL 0402WGF5101TCE/C25905, 5.1 kΩ ±1%;
-domestic factory availability is not confirmed. Unconfirmed connector MPNs
-leave the full assembly BOM **review-only**, even if DRC is clean.
+domestic catalog stock is not reserved. Full-assembly BOM now identifies all
+17 physical pieces with C numbers, including the five LAIL female-strip sizes.
+Factory insertion/soldering approval, actual fit and final supply leave the BOM
+**review-only**, even if DRC is clean.
+
+### JLC placement-library mapping
+
+Use `assembly\revision-20261009\positions-jlc-review.csv` for the selected
+domestic JLC library, together with the full BOM and the unchanged Gerber ZIP.
+`positions-all-review.csv` records KiCad pad centres/footprint angles; it is
+**not directly interchangeable** with the JLC file. In the factory library,
+the seven female strips have a different zero angle and JS1 has a different
+head datum. The exporter fits numbered library pads to actual saved PCB pads,
+including the two separate J3 strips, and rejects mismatched parts or geometry.
+`jlc-placement-review.json` records each angle, origin and pad-fit residual.
+It also records the KiCad centre/angle and the factory origin/angle corrections.
+`jlc-saved-placement.json` preserves the actual factory-saved, refreshed readback
+for this board hash. Generated placements are checked against that snapshot at
+the website's coordinate precision. After changing the layout, regenerate from
+the new PCB: reuse library datum definitions, never copy old absolute positions.
+The old snapshot is then historical evidence, not approval of the new layout.
+
+This corrects assembly instructions, not copper or holes. Gerber has no
+component-library rotation/model mapping; do not rotate PCB footprints or
+change Gerber geometry to repair a factory preview. Missing J4/J6 3D models
+are not missing parts. Verify the website's rotation convention and saved
+positions against the actual Gerber pads before approving factory DFM.
+The files remain engineering review inputs, not production approval.
+
+Regenerate only these placement files without rerouting or re-exporting CAM:
+
+```powershell
+& 'C:\Program Files\KiCad\10.0\bin\python.exe' .\kicad\export_jlc_positions.py
+```
 
 ## Current outputs versus legacy files
 

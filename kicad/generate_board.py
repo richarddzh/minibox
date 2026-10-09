@@ -102,10 +102,9 @@ def socket(reference, count, x, y, labels, value, angle=0):
 
 
 def terminal(reference, count, x, y, labels, angle=0):
-    return load(reference, "TerminalBlock_Phoenix",
-                f"TerminalBlock_Phoenix_MKDS-1,5-{count}-5.08_1x{count:02d}_P5.08mm_Horizontal",
+    return load(reference, "Minibox", f"WJ500V_5.08_{count}P",
                 x, y, {str(i + 1): label for i, label in enumerate(labels)},
-                "5.08mm wire terminal", angle)
+                "WJ500V-5.08-2P" if count == 2 else "WJ500V-5.08-03P-14-00A", angle)
 
 
 def text(value, x, y, angle=0, layer=pcb.F_SilkS, size=1):
@@ -171,8 +170,8 @@ lcd = socket("J6", 14, 23, 10,
               "LCD_SCK", "LCD_BL", None, None, None, None, None, None],
              "ST7796 14-pin display", 90)
 sw = terminal("J7", 3, 88, 65, ["5V_IN", "5V_SW", "GND"], 90)
-power = terminal("J8", 2, 14, 53.5, ["5V_IN", "GND"], 270)
-cc = terminal("J9", 2, 14, 66, ["USB_CC1", "USB_CC2"], 270)
+power = terminal("J8", 2, 14, 52.5, ["5V_IN", "GND"], 270)
+cc = terminal("J9", 2, 14, 65, ["USB_CC1", "USB_CC2"], 270)
 joy = load("JS1", "Minibox", "YV13S_L7.85_B10Ka_60_0_DL01", 20.75, 97.5,
            {"X1": "GND", "X2": "GPIO1", "X3": "3V3",
             "Y1": "GND", "Y2": "GPIO2", "Y3": "3V3"},

@@ -48,6 +48,9 @@
 
 - PCB 设计、布局、布线、包地审查和生产资料准备使用
   [design-route-minibox-pcb](skills/design-route-minibox-pcb/SKILL.md)。
+- 嘉立创 PCB、全元件装配询价与下单使用
+  [order-jlc-minibox](skills/order-jlc-minibox/SKILL.md)；
+  区分贴片、插件与模块组装，数量和最终费用确认后才提交购买。
 - 嘉立创工艺能力与项目推荐值见
   [PCB 设计规范](../docs/jlc-pcb-design-spec.md)；生产前核对最新官方参数。
 - 工艺文档不代表现有 PCB 已达标；不得把未完成布线或未确认 BOM 的工程
