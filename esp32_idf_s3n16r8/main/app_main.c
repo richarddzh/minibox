@@ -17,7 +17,7 @@ static const char *TAG = "minibox";
 static QueueHandle_t s_button_states;
 
 typedef struct {
-    bool pressed[3];
+    bool pressed[BUTTON_COUNT];
 } button_snapshot_t;
 
 static void onboard_led_off(void) {
@@ -55,13 +55,13 @@ static void onboard_led_off(void) {
 
 static void sample_buttons(void *arg) {
     (void)arg;
-    const gpio_num_t pins[] = {BUTTON_1_PIN, RECORD_BUTTON_PIN, BUTTON_3_PIN};
-    joystick_button_t buttons[3] = {0};
+    const gpio_num_t pins[] = {BUTTON_1_PIN, RECORD_BUTTON_PIN, BUTTON_3_PIN, BUTTON_4_PIN};
+    joystick_button_t buttons[BUTTON_COUNT] = {0};
     TickType_t last_wake = xTaskGetTickCount();
     for (;;) {
         button_snapshot_t snapshot;
         int64_t now_ms = esp_timer_get_time() / 1000;
-        for (int i = 0; i < 3; ++i) {
+        for (int i = 0; i < BUTTON_COUNT; ++i) {
             bool pressed = gpio_get_level(pins[i]) ==
 #ifdef CONFIG_MINIBOX_BUTTON_ACTIVE_LOW
                            0;
@@ -90,7 +90,8 @@ void app_main(void) {
     const gpio_config_t inputs = {
         .pin_bit_mask = (1ULL << BUTTON_1_PIN) |
                         (1ULL << RECORD_BUTTON_PIN) |
-                        (1ULL << BUTTON_3_PIN),
+                        (1ULL << BUTTON_3_PIN) |
+                        (1ULL << BUTTON_4_PIN),
         .mode = GPIO_MODE_INPUT,
 #ifdef CONFIG_MINIBOX_BUTTON_ACTIVE_LOW
         .pull_up_en = GPIO_PULLUP_ENABLE,

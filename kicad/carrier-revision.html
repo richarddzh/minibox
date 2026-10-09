@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Minibox v1.1 载板布局、接线及装配审核</title>
+<style>
+body{margin:0;background:#f3f5f8;color:#223047;font:16px/1.7 system-ui,"Microsoft YaHei",sans-serif}
+main{max-width:1080px;margin:auto;padding:28px}h1,h2{line-height:1.3}h2{margin-top:38px}
+.warning{background:#fff0d6;border-left:5px solid #b96c0b;padding:16px}
+table{width:100%;border-collapse:collapse;background:white}th,td{border:1px solid #d9dfe8;padding:9px;text-align:left}
+th{background:#e7eef5}code{background:#e7edf3;padding:2px 5px}a{color:#135d9e}
+figure{margin:18px 0;background:white;border:1px solid #d9dfe8;padding:12px}
+figure img{display:block;width:100%;height:auto}figcaption{font-size:14px;margin-top:10px}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.layout{max-width:700px;margin:auto}small{color:#53657a}
+@media(max-width:700px){main{padding:14px}.gallery{grid-template-columns:1fr}table{font-size:13px}}
+@media print{body{background:white}main{padding:0}.warning{border:2px solid #b96c0b}h2{break-after:avoid}figure,table{break-inside:avoid}}
+</style>
+</head>
+<body><main>
+<h1>Minibox v1.1 载板改版</h1>
+<p>2026-10-09 · 工程目录 <code>C:\gitroot\minibox\kicad</code> · 四层 · 正面装配</p>
+<div class="warning"><strong>工程审核稿，不可直接投产。</strong>
+PCB 已按指定键轴、摇杆与后续布局要求修改；当前保存板为<strong>0项DRC违规、0项未连接</strong>。
+本文件不是采购、付款或下单授权。
+请以审核目录内实际存在的 <a href="assembly/revision-20261009/drc.json">DRC</a> 和
+<a href="assembly/revision-20261009/manifest.json">版本清单</a>为准。
+如果报告不存在或门槛失败，导出尚未完成。零 DRC 不代替实物配合、载流、EMC 或工厂验收。
+本工程无原理图，不能宣称完成 ERC 或原理图一致性验证。</div>
+
+<h2>1. 布局与效果图</h2>
+<figure class="layout"><img src="renders/assembly-layout.svg" alt="实际孔位与安装包络布局">
+<figcaption>实际 PCB 孔位叠加安装预留包络。紫圈是摇杆<strong>直径30 mm</strong>活动范围；
+红带是水平分界线两侧各2 mm，蓝框是最大18×18 mm键帽包络。
+模块矩形是允许安装空间，不是未经核实的精确实物模型。</figcaption></figure>
+<div class="gallery">
+<figure><img src="renders/minibox-carrier-front.png" alt="载板正面"><figcaption>实际保存 PCB 的正面渲染</figcaption></figure>
+<figure><img src="renders/minibox-carrier-back.png" alt="载板背面"><figcaption>实际保存 PCB 的背面渲染</figcaption></figure>
+<figure><img src="renders/minibox-carrier-isometric.png" alt="载板斜视"><figcaption>实际保存 PCB 的斜视渲染</figcaption></figure>
+</div>
+<p>母座与端子使用 KiCad 库模型；精确键轴和摇杆没有厂家提供的3D模型，
+因此真实PCB渲染主要显示其焊盘及封装轮廓，不用类似型号冒充。
+完整尺寸以孔图和逐孔表为准，不能用像素量测生产尺寸。
+新版中文尺寸/材质图例：
+<a href="renders/minibox-carrier-front-legend.png">正面图例</a> /
+<a href="renders/minibox-carrier-back-legend.png">背面图例</a>；
+尺寸和孔距读取自当前PCB，蓝色尺寸线不属于生产丝印。</p>
+<table>
+<tr><th>约束</th><th>当前设计值 / 注意事项</th></tr>
+<tr><td>紧凑外形</td><td>94.5×117 mm、R5；相对100×112 mm的包围矩形面积只缩小约1.28%，不以牺牲安装空间换面积。</td></tr>
+<tr><td>安装孔</td><td>4×Ø3.0 mm NPTH，孔中心距84.5×107 mm；Ø3是偏紧的M3配合，工厂及螺钉公差须确认。</td></tr>
+<tr><td>四键</td><td>横向/纵向标准19.05 mm节距，下排向左错半单位9.525 mm。
+18 mm键帽间隙1.05 mm；18 mm是最大允许包络，不是已确认键帽料号。</td></tr>
+<tr><td>麦克风</td><td>左上键左侧、左下键上方；安装包络间隙分别2.00/2.05 mm。</td></tr>
+<tr><td>摇杆</td><td>竖放，活动圈中心(22,93) mm、半径15 mm；与麦克风包络约2.27 mm间隙。</td></tr>
+<tr><td>红线</td><td>Y=76 mm；上部实体≤74，下部操作包络≥78。
+这是装配分区，不是禁止走线跨线。</td></tr>
+<tr><td>功放</td><td>平放27×24 mm预留，下缘Y=72，上排键帽上缘Y=80.5；不压到键盘区。</td></tr>
+<tr><td>RTC / ESP32</td><td>RTC连电池预留27.5×12 mm，至ESP32估计本体3.03 mm。
+电池厚度与模块本体必须实测；不是厂商尺寸保证。</td></tr>
+<tr><td>天线 / 接线端子</td><td>ESP32 USB朝左、天线朝右，估计本体留在板内；全四层天线禁铜。
+J8/J9压线口向左，J7向右，线缆弯折和螺丝刀还须装配确认。</td></tr>
+</table>
+
+<h2>2. GPIO 接线及精确器件</h2>
+<table>
+<tr><th>器件</th><th>信号 / GPIO</th><th>装配与功能</th></tr>
+<tr><td>SW1–SW4</td><td>4 / 5 / 6 / 7，各轴另一触点接GND</td><td>HanElectricity CPG151101D13，C49234235，
+直接焊接，无热插拔母座、无VCC。按下接地、内部上拉；GPIO5保持按住录音/松开回放。</td></tr>
+<tr><td>JS1</td><td>VR1滑动端GPIO1，VR2滑动端GPIO2；端点1=GND、端点3=3.3V</td><td>YTL YV13S-L7.85-B10Ka(60)-0-DL01，
+C37323747，直接焊接、竖放。指定型号有按压机构，但<strong>用户决定不使用，GPIO42释放</strong>。
+四个按压脚及固定脚无网络，不猜触点配对。</td></tr>
+<tr><td>RTC J5</td><td>SDA15 / SCL16 / 3.3V / GND</td><td>CLK/INT NC；确认I²C上拉为3.3V。当前应用不初始化RTC。</td></tr>
+<tr><td>INMP441 J3</td><td>SD17 / WS39 / SCK40，L/R=GND</td><td>3.3V。两个独立1×3母座，排距7.62 mm，不装成普通2×3。</td></tr>
+<tr><td>MAX98357 J4</td><td>DIN41 / BCLK40 / LRC39 / GAIN21 / SD47</td><td>VIN=开关后5V。GAIN默认高阻，SD仅回放使能。
+扬声器接SPK+/SPK-，负端不接GND。</td></tr>
+<tr><td>LCD J6</td><td>BL9 / SCK10 / MOSI11 / DC12 / RST13 / CS14</td><td>14脚母座线序保留；触摸/SDO NC，模块逻辑为3.3V。</td></tr>
+<tr><td>R1 / R2</td><td>各自CC→5.1 kΩ→GND</td><td>UNI-ROYAL 0402WGF5101TCE / C25905，±1%，
+英制0402/公制1005；型号已核实，国内代焊库存及价格未承诺。</td></tr>
+</table>
+<p>GPIO分配核对<a href="https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html">官方DevKitC-1 v1.1排针表</a>。
+Octal存储器GPIO35/36/37、原生USB19/20、UART43/44不分配。
+GPIO39–41已用于I2S，不能同时外接JTAG；GPIO42、8、18未连接。
+官方v1.1 RGB为38，现有实板固件仍是48，须确认开发板版本，不能自动换脚。
+新PCB、固件和线缆必须同步；不要在旧板按旧接线烧录新配置。
+<a href="../docs/hardware-connections.md">权威完整接线表</a>。</p>
+
+<h2>3. Type-C 如何接线</h2>
+<p>外接Type-C母座独立引出 <strong>VBUS、GND、CC1、CC2</strong>：
+VBUS→J8第1脚，GND→J8第2脚，CC1→J9第1脚，CC2→J9第2脚。
+两个CC各自经5.1 kΩ下拉，<strong>不能短接CC1/CC2，也不能并联外接小板已有的Rd</strong>。
+该电路提供普通5V受电端识别，不做USB-PD协商，不检测电流广告，不保证所有充电器兼容或3A输出。
+载板不连接USB数据。</p>
+<p>开关J7：第1脚5V_IN、第2脚5V_SW、第3脚GND。
+正面物理排列从上到下是<strong>GND / OUT / IN</strong>，不能沿用旧端子方向。
+5V_SW给开发板5V及功放，开发板3V3给逻辑模块。须确认外部5V与开发板USB同时连接时不会反灌，
+并核实开发板稳压器负载。不要把3V3接到5V。</p>
+
+<h2>4. 嘉立创工程审核与焊接顺序</h2>
+<table>
+<tr><th>项目</th><th>设计 / 工厂确认边界</th></tr>
+<tr><td>四层 / 板厚</td><td>F信号、In1 GND、In2电源走廊+GND、B信号；名义1.6 mm。
+不编造已获工厂确认的介质、铜厚或阻抗结构。</td></tr>
+<tr><td>规则</td><td>信号0.20/0.20 mm，普通过孔0.60/0.30 mm，铜到边≥0.50 mm，
+PTH孔边距≥0.45 mm，丝印≥1.0 mm高/0.15 mm笔画；具体孔径遵从精确封装。</td></tr>
+<tr><td>插件焊环</td><td>母座1.0孔/1.7盘，端子1.3孔/2.6盘，轴1.5孔/2.1盘，
+均≥0.20 mm径向推荐值；普通过孔径向0.15 mm不与插件标准混用。</td></tr>
+<tr><td>电源</td><td>3V3线0.65 mm、5V线0.80 mm；不能据此宣称3A温升/压降已合格。
+需实际电流预算、订单铜厚、窄入口及热连接复核。</td></tr>
+<tr><td>SMT</td><td>仅正面R1/R2两个0402，单独SMT BOM/CPL。
+经济型官方表支持0402/四层/单面贴片+插件，不能推断本板全部异形插件已获批准。</td></tr>
+<tr><td>插件</td><td>7条母座、3个端子、4个机械轴、1个摇杆，正面插装、背面焊接。
+J3拆为J3A/J3B两个1×3；插件坐标不是自动SMT贴装指令。</td></tr>
+<tr><td>热工艺</td><td>先回流电阻，再装插件/异形件，最后插ESP32/RTC/麦克风/功放模块。
+键轴的波峰焊测试260±5°C/5s、摇杆锡焊测试235±5°C/3±0.5s及耐热260±5°C/5s，
+不等于允许整板回流；工厂须依据各手册批准工序。</td></tr>
+<tr><td>工艺边 / 数量</td><td>经济型不强行套用标准型Mark/工艺边要求，选择标准型则按工厂模板确认。
+先询价和工艺审核，PCB不超过5片；不自动选择数量、付款或授权修改最终R5外形。</td></tr>
+</table>
+<p>国内官方能力核对日期2026-10-09；详见
+<a href="../docs/jlc-pcb-design-spec.md">规则与来源</a>。
+PTH成品孔公差+0.13/−0.08 mm、NPTH±0.10 mm；
+精确键轴/摇杆推荐孔及实物最大引脚配合仍需工厂确认。</p>
+
+<h2>5. 文件怎么使用</h2>
+<table>
+<tr><th>文件</th><th>用途</th></tr>
+<tr><td><a href="fabrication/minibox-v1.1-gerber-review.zip">纯Gerber/钻孔ZIP</a></td><td>当前v1.1 PCB的CAM审核候选，四个铜层、双面阻焊/丝印、正面钢网、板框、分开PTH/NPTH。</td></tr>
+<tr><td><a href="assembly/revision-20261009/bom-smt-review.csv">SMT BOM</a> /
+<a href="assembly/revision-20261009/cpl-smt.csv">SMT CPL</a></td><td>仅R1/R2；C25905需核对国内装配库存。
+坐标以板框左下角为零，X向右、Y向上、Top、mm；上传预览时核对角度及位号。</td></tr>
+<tr><td><a href="assembly/revision-20261009/bom-all-review.csv">全板BOM</a> /
+<a href="assembly/revision-20261009/positions-all-review.csv">插件参考坐标</a></td><td>包含已指定精确轴/摇杆与待确认母座/端子。
+Mid为电气焊脚中心平均值，不保证外壳中心；KiCad角度不等于工厂库零角。</td></tr>
+<tr><td><a href="assembly/revision-20261009/pin-map.csv">逐孔/网名表</a> /
+<a href="assembly/revision-20261009/assembly-pads.svg">实际孔位及装配图</a></td><td>按PCB焊盘号核对前后面、线序、孔径、NC及J3两条母座。</td></tr>
+<tr><td><a href="assembly/revision-20261009/manifest.json">版本、几何、哈希</a> /
+<a href="assembly/revision-20261009/drc.json">DRC报告</a></td><td>核对导出时的实际PCB/Gerber SHA-256、机械间隙及未决审核项。</td></tr>
+<tr><td><a href="assembly/minibox-v1.1-assembly-review.zip">完整工程审核合集</a></td><td>文件生成并核对后用于工厂人工审核，不是纯Gerber上传ZIP，不包含完整精确装配3D模型。</td></tr>
+</table>
+<p>旧 <code>minibox-carrier-jlcpcb.zip</code>、旧顶层装配CSV/询价ZIP/PNG对应v1.0，
+尺寸及GPIO已经失效。勿混用。本次坐标原点在KiCad为(5,120) mm：
+X导出=X_KiCad−5，Y导出=120−Y_KiCad；Gerber/钻孔/CPL使用同一原点，不镜像正面文件。</p>
+
+<h2>6. 交给工厂和上电前仍须确认</h2>
+<p>母座及端子确切MPN、高度/脚型/外壳；ESP32实物排距与天线尺寸；
+RTC电池最大厚度、功放与麦克风外形；键帽/摇杆帽实际全行程；
+孔径公差及螺钉配合；国内物料库存、插件焊接温度、工艺边与最小批量；
+真实叠层、供电电流、热连接和USB反灌；CPL工厂零角和贴装预览。
+这些事项未确认前，文件始终是<strong>草稿，不可生产</strong>。</p>
+<p>断电检查CC1/CC2各约5.1 kΩ对地、无CC互短、四键按下分别接地，
+检查5V_IN/5V_SW/3V3极性和扬声器输出。
+先限流上电，再观察四键显示及GPIO5录放音。RTC/摇杆当前未在应用初始化，
+不能宣称完整功能已实测。固件只构建，不自动烧录。</p>
+<small>精确型号资料已合并到 <code>hardware_references</code> 并记录SHA-256。
+图纸与制造候选、工厂批准、采购及实物测试是不同阶段。</small>
+</main></body></html>

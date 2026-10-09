@@ -28,13 +28,14 @@
   不引入 Arduino 或 TFT_eSPI。
 - 屏幕接线：LED=GPIO9、SCK=GPIO10、SDI=GPIO11、DC/RS=GPIO12、
   Reset=GPIO13、CS=GPIO14。
-- 当前按钮模块 OUT 分别接 GPIO4/5/6，VCC=3.3 V，共地；
+- 当前改版四个机械轴分别接 GPIO4/5/6/7 与 GND，不接 VCC；
   默认低有效并使用内部上拉，可在菜单中切换为高有效。
-  摇杆 X=GPIO1、Y=GPIO2、K=GPIO42 的代码保留，但当前测试不启用。
-  RTC SDA=GPIO47、SCL=GPIO21，仅预留配置，当前未实现驱动。
-- INMP441 SD=GPIO15、WS=GPIO39、SCK=GPIO40，L/R 接 GND（左声道）；
-  MAX98357 DIN=GPIO41、LRC=GPIO39、BCLK=GPIO40、SD/MODE=GPIO7、
-  GAIN=GPIO8。GPIO7 播放时为高、其余时间为低，GPIO8 默认高阻；
+  摇杆 X=GPIO1、Y=GPIO2 的代码保留，但当前测试不启用。
+  摇杆按压不使用，GPIO42 已释放，PCB 按压触点保持 NC。
+  RTC SDA=GPIO15、SCL=GPIO16，仅预留配置，当前未实现驱动。
+- INMP441 SD=GPIO17、WS=GPIO39、SCK=GPIO40，L/R 接 GND（左声道）；
+  MAX98357 DIN=GPIO41、LRC=GPIO39、BCLK=GPIO40、SD/MODE=GPIO47、
+  GAIN=GPIO21。GPIO47 播放时为高、其余时间为低，GPIO21 默认高阻；
   两模块半双工共用时钟，先释放当前 I2S 通道再切换；
   GPIO5 按住录音（最多 3 秒）、松开回放。
 - GPIO48 控制板载 WS2812 RGB LED；启动时发送黑色数据熄灯。
@@ -62,7 +63,7 @@
 - 优先增量构建，不随意执行 `fullclean`、删除构建缓存或重复 `set-target`。
 - 使用最小必要验证。已有模型检查用标准库 unittest，不新增 Python 测试框架。
 - 构建成功、烧录成功、初始化成功与肉眼确认屏幕/按键正常是不同结果，不能混为一谈。
-- 当前测试无需摇杆校准；观察三个按钮的屏幕状态及 GPIO5 的录放音日志。
+- 当前测试无需摇杆校准；观察四个按钮的屏幕状态及 GPIO5 的录放音日志。
 
 ## 代码风格
 

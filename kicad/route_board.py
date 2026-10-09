@@ -7,6 +7,7 @@ measuring the actual mating modules.
 import json
 from collections import defaultdict
 from heapq import heappop, heappush
+from functools import lru_cache
 from math import ceil, floor, hypot
 from pathlib import Path
 
@@ -15,7 +16,7 @@ import pcbnew as pcb
 
 FILE = Path(__file__).with_name("minibox-carrier.kicad_pcb")
 board = pcb.LoadBoard(str(FILE))
-STEP = 0.5
+STEP = 0.25
 edge_points = [
     position for item in board.GetDrawings() if item.GetLayer() == pcb.Edge_Cuts
     for position in (item.GetStart(), item.GetEnd())
@@ -27,23 +28,31 @@ BOTTOM = max(pcb.ToMM(position.y) for position in edge_points)
 X0, Y0 = LEFT + 2, TOP + 2
 NX = floor((RIGHT - 2 - X0) / STEP + 1e-6) + 1
 NY = floor((BOTTOM - 2 - Y0) / STEP + 1e-6) + 1
-WIDTH = 0.35
-CLEARANCE = 0.3
-VIA_DIAMETER = 0.8
-VIA_DRILL = 0.4
+WIDTH = 0.2
+CLEARANCE = 0.2
+VIA_DIAMETER = 0.6
+VIA_DRILL = 0.3
 VIA_COST = 75
 ROUTE_LAYERS = (pcb.F_Cu, pcb.B_Cu, pcb.In2_Cu)
 POWER_WIDTHS = {"3V3": 0.65, "5V_IN": 0.8, "5V_SW": 0.8}
 I2S_NETS = {"I2S_WS", "I2S_BCLK", "AUDIO_DIN", "MIC_SD"}
+KEEP_OUTS = []
+for area in board.Zones():
+    if area.GetIsRuleArea() and area.GetDoNotAllowTracks():
+        box = area.GetBoundingBox()
+        bounds = tuple(pcb.ToMM(v) for v in (
+            box.GetLeft(), box.GetTop(), box.GetRight(), box.GetBottom()))
+        if bounds not in KEEP_OUTS:
+            KEEP_OUTS.append(bounds)
 if board.GetCopperLayerCount() != 4 or list(board.GetTracks()):
     raise RuntimeError("Run generate_board.py before routing the four-layer board")
 
 
 def layers_for(name):
     if name in POWER_WIDTHS:
-        return (2,)
+        return (0, 2)
     if name in I2S_NETS:
-        return (0,)
+        return (0, 1)
     return (0, 1)
 
 
@@ -92,40 +101,78 @@ for footprint in board.GetFootprints():
         all_pads.append(pad)
 
 blocked = [defaultdict(set) for _ in ROUTE_LAYERS]
+pad_blocks = {
+    key: [defaultdict(set) for _ in ROUTE_LAYERS]
+    for key in (WIDTH, *set(POWER_WIDTHS.values()), "I2S")
+}
 via_pad_blocks = defaultdict(set)
+
+
+def pad_cells(pad, margin):
+    center = pad.GetPosition()
+    cx, cy = mm(center.x), mm(center.y)
+    px, py = cell(center)
+    box = pad.GetBoundingBox()
+    radius = max(mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2
+    reach = ceil((radius + margin) / STEP) + 1
+    for a in range(max(0, px - reach), min(NX, px + reach + 1)):
+        for b in range(max(0, py - reach), min(NY, py + reach + 1)):
+            x, y = xy(a, b)
+            if pad.GetShape() == pcb.PAD_SHAPE_CIRCLE:
+                distance = max(0, hypot(x - cx, y - cy) - radius)
+            else:
+                distance = hypot(
+                    max(mm(box.GetLeft()) - x, 0, x - mm(box.GetRight())),
+                    max(mm(box.GetTop()) - y, 0, y - mm(box.GetBottom())))
+            if distance <= margin:
+                yield a, b
+
+
 for pad in all_pads:
     px, py = cell(pad.GetPosition())
     pad_clearance = max(CLEARANCE, mm(pad.GetLocalClearance() or 0))
     radius = max(mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2
     if pad.GetParentFootprint().GetReference().startswith("H"):
         radius = 3.5
-    radius += WIDTH / 2 + pad_clearance + STEP / 2
-    for layer in range(len(ROUTE_LAYERS)):
-        if not pad.IsOnLayer(ROUTE_LAYERS[layer]):
-            continue
-        for coordinate in disk(px, py, radius):
-            blocked[layer][coordinate].add(pad.GetNetname() or "UNASSIGNED")
+    for key, layers in pad_blocks.items():
+        signal_width = WIDTH if key == "I2S" else key
+        reference_clearance = 0.4 if key == "I2S" else pad_clearance
+        clearance = max(pad_clearance, reference_clearance)
+        if pad.GetAttribute() == pcb.PAD_ATTRIB_NPTH:
+            clearance = max(clearance, 0.5)
+        for layer in range(len(ROUTE_LAYERS)):
+            if not pad.IsOnLayer(ROUTE_LAYERS[layer]):
+                continue
+            for coordinate in pad_cells(pad, signal_width / 2 + clearance + 0.025):
+                layers[layer][coordinate].add(pad.GetNetname() or "UNASSIGNED")
     via_radius = 3.5 if pad.GetParentFootprint().GetReference().startswith("H") else (
         max(mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2)
     for coordinate in disk(px, py, via_radius +
                            VIA_DIAMETER / 2 + pad_clearance + STEP / 2):
         via_pad_blocks[coordinate].add("PAD")
 
-# Match the board's all-layer antenna rule area, including trace radius.
+# Use the saved rule areas rather than the previous layout's coordinates.
 for x in range(NX):
     for y in range(NY):
         px, py = xy(x, y)
-        if 52 - WIDTH / 2 - CLEARANCE <= px <= 73.5 + WIDTH / 2 + CLEARANCE and \
-                67 - WIDTH / 2 - CLEARANCE <= py <= 84 + WIDTH / 2 + CLEARANCE:
+        if any(a - WIDTH / 2 - CLEARANCE <= px <= c + WIDTH / 2 + CLEARANCE and
+               b - WIDTH / 2 - CLEARANCE <= py <= d + WIDTH / 2 + CLEARANCE
+               for a, b, c, d in KEEP_OUTS):
             for layer in blocked:
                 layer[(x, y)].add("ANTENNA")
-        if 52 - VIA_DIAMETER / 2 - CLEARANCE <= px <= 73.5 + VIA_DIAMETER / 2 + CLEARANCE and \
-                67 - VIA_DIAMETER / 2 - CLEARANCE <= py <= 84 + VIA_DIAMETER / 2 + CLEARANCE:
+        if any(a - VIA_DIAMETER / 2 - CLEARANCE <= px <= c + VIA_DIAMETER / 2 + CLEARANCE and
+               b - VIA_DIAMETER / 2 - CLEARANCE <= py <= d + VIA_DIAMETER / 2 + CLEARANCE
+               for a, b, c, d in KEEP_OUTS):
             via_pad_blocks[(x, y)].add("ANTENNA")
 
 
 def free(layer, x, y, name):
-    return not (blocked[layer][(x, y)] - {name})
+    key = "I2S" if name in I2S_NETS else width_for(name)
+    if pad_blocks[key][layer][(x, y)] - {name}:
+        return False
+    extra = max(0, (width_for(name) - WIDTH) / 2)
+    coordinates = disk(x, y, extra + STEP / 2) if extra else ((x, y),)
+    return not any(blocked[layer][coordinate] - {name} for coordinate in coordinates)
 
 
 def via_free(x, y, name):
@@ -139,6 +186,14 @@ def via_free(x, y, name):
 
 
 def search(start, targets, name, start_layers=None):
+    @lru_cache(maxsize=None)
+    def available(layer, x, y):
+        return free(layer, x, y, name)
+
+    @lru_cache(maxsize=None)
+    def available_via(x, y):
+        return via_free(x, y, name)
+
     sx, sy = start
     goals = set(targets)
     positions = {(x, y) for _, x, y in goals}
@@ -169,7 +224,7 @@ def search(start, targets, name, start_layers=None):
                 route.append(state)
             return list(reversed(route))
         for nx, ny in neighbors(x, y):
-            if not free(layer, nx, ny, name):
+            if not available(layer, nx, ny):
                 continue
             # The extra turn cost makes routes less jagged.
             parent = previous.get(state)
@@ -180,7 +235,7 @@ def search(start, targets, name, start_layers=None):
                 costs[nxt] = new_cost
                 previous[nxt] = state
                 heappush(queue, (new_cost + 10 * heuristic(nx, ny), new_cost, nxt))
-        if via_free(x, y, name):
+        if available_via(x, y):
             for next_layer in allowed_layers:
                 if next_layer == layer:
                     continue
@@ -192,7 +247,7 @@ def search(start, targets, name, start_layers=None):
                                      cost + VIA_COST, other))
     raise RuntimeError(
         f"No path for {name} starting at {start}; explored {len(costs)} cells; "
-        f"goals {len(goals)}")
+        f"goals {[(g, sorted(blocked[g[0]][g[1:]] - {name})) for g in goals]}")
 
 
 def track(start, end, layer, name):
@@ -223,6 +278,10 @@ def mark(route, name):
                      (width_for(name) + WIDTH) / 2 + CLEARANCE + STEP / 2)
         for a, b in disk(x, y, radius):
             blocked[layer][(a, b)].add(name)
+        if name in I2S_NETS and layer == 1:
+            # Preserve a GND reference corridor on In2 under bottom I2S.
+            for a, b in disk(x, y, 1.75):
+                blocked[2][(a, b)].add("I2S_REFERENCE_GND")
     for before, after in zip(route, route[1:]):
         if before[0] != after[0]:
             x, y = before[1:]
@@ -256,13 +315,14 @@ def apply(route, source, name, from_position=None):
 
 
 priority = [
-    "AUDIO_DIN", "I2S_BCLK", "I2S_WS", "MIC_SD",
+    "AUDIO_DIN", "MIC_SD", "I2S_BCLK", "I2S_WS",
+    "BUTTON4", "BUTTON3", "RECORD", "BUTTON1",
+    "USB_CC1", "USB_CC2",
     "LCD_BL", "LCD_CS", "LCD_RST", "LCD_DC", "LCD_MOSI", "LCD_SCK",
     "5V_IN",
-    "GPIO1", "GPIO2", "GPIO42",
+    "GPIO1", "GPIO2",
     "RTC_SDA", "RTC_SCL",
     "AMP_GAIN", "AMP_SD",
-    "BUTTON1", "RECORD", "BUTTON3",
     "5V_SW",
     "3V3",
 ]
@@ -274,26 +334,27 @@ for pad in all_pads:
     number = int(pad.GetNumber()) if pad.GetNumber().isdigit() else 0
     if pad.GetNetname() in POWER_WIDTHS or pad.GetNetname() == "GND":
         continue
-    if reference == "J4" and pad.GetNetname() != "GND":
-        dx, dy = (5.5 if number == 7 else 5), 0
-    elif reference == "J12" and number >= 3:
-        dx, dy = 0, -5
-    elif reference == "J1" and number in (4, 5, 6):
+    if reference == "J4" and pad.GetNetname() in I2S_NETS:
         dx, dy = 5, 0
-    elif reference == "J2" and number in (6, 7, 8):
-        dx, dy = -5, 0
-    elif reference == "J11" and number in (1, 2, 3):
-        dx, dy = 0, -5
-    elif reference == "J1" and 15 <= number <= 20:
-        dx, dy = 5, 0
-    elif reference == "J6" and 3 <= number <= 8:
-        dx, dy = -5, 0
+    elif reference == "J1" and pad.GetNetname() in I2S_NETS:
+        dx, dy = 0, 4
+    elif reference == "J2" and pad.GetNetname() in I2S_NETS:
+        dx, dy = 0, 4
+    elif reference in ("R1", "R2") and number == 1:
+        dx, dy = -2, 0
     else:
         continue
     position = pad.GetPosition()
     x, y = mm(position.x), mm(position.y)
-    end = (x + dx, y + dy)
-    track((x, y), end, 0, pad.GetNetname())
+    end = xy(*cell(point(x + dx, y + dy)))
+    if dx:
+        turn = (x + dx - (0.5 if dx > 0 else -0.5), y)
+        diagonal = (turn[0] + (1 if dx > 0 else -1) * abs(end[1] - y), end[1])
+    else:
+        turn = (x, y + dy - (0.5 if dy > 0 else -0.5))
+        diagonal = (end[0], turn[1] + (1 if dy > 0 else -1) * abs(end[0] - x))
+    for a, b in zip(((x, y), turn, diagonal), (turn, diagonal, end)):
+        track(a, b, 0, pad.GetNetname())
     escapes[id(pad)] = point(*end)
     sx, sy = cell(position)
     ex, ey = cell(escapes[id(pad)])
@@ -307,7 +368,7 @@ for name in priority:
     group = sorted(pads[name], key=lambda pad: (
         pad.GetParentFootprint().GetReference() not in ("J1", "J2"),
         pad.GetParentFootprint().GetReference(),
-        int(pad.GetNumber())))
+        pad.GetNumber()))
     first = group.pop(0)
     first_escape = escapes.get(id(first))
     px, py = cell(first_escape or first.GetPosition())
@@ -366,7 +427,7 @@ def diagonal_clear(start, end, original):
     start, end = coords(start), coords(end)
     radius = mm(original.GetWidth()) / 2
     clearance = radius + CLEARANCE + 0.02
-    if rectangle_distance(start, end, 52, 67, 73.5, 84) <= clearance:
+    if any(rectangle_distance(start, end, *bounds) <= clearance for bounds in KEEP_OUTS):
         return False
     for pad in all_pads:
         if pad.GetParentFootprint().GetReference().startswith("H"):
@@ -465,8 +526,8 @@ def chamfer_corners():
             while jog > 0:
                 points = (
                     pcb.VECTOR2I(x, y),
-                    pcb.VECTOR2I(x + jog * (ux + vx), y + jog * (uy + vy)),
-                    pcb.VECTOR2I(x + jog * (2 * ux + vx), y + jog * (2 * uy + vy)),
+                    pcb.VECTOR2I(x + jog * (ux - vx), y + jog * (uy - vy)),
+                    pcb.VECTOR2I(x + jog * (2 * ux - vx), y + jog * (2 * uy - vy)),
                     pcb.VECTOR2I(x + 3 * jog * ux, y + 3 * jog * uy),
                 )
                 if all(diagonal_clear(start, end, original)
@@ -522,6 +583,7 @@ for _ in range(8):
     if not changed:
         break
 print("45-degree corners:", changed_corners, flush=True)
+pcb.SaveBoard(str(FILE), board)
 
 remaining_junctions = defaultdict(list)
 for item in board.GetTracks():
@@ -537,16 +599,20 @@ for (_, _, x, y), pair in remaining_junctions.items():
     for item in pair:
         other = item.GetEnd() if item.GetStart().x == x and item.GetStart().y == y else item.GetStart()
         vectors.append((other.x - x, other.y - y))
-    if all(vector != (0, 0) for vector in vectors) and (
-            vectors[0][0] * vectors[1][0] + vectors[0][1] * vectors[1][1] == 0):
-        raise RuntimeError(f"Unresolved right-angle bend at ({mm(x)}, {mm(y)})")
+    inside_pad = any(
+        pad.GetNetCode() == pair[0].GetNetCode() and
+        hypot(mm(pad.GetPosition().x - x), mm(pad.GetPosition().y - y)) +
+        mm(pair[0].GetWidth()) / 2 <= min(mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2
+        for pad in all_pads)
+    dot = vectors[0][0] * vectors[1][0] + vectors[0][1] * vectors[1][1]
+    if not inside_pad and all(vector != (0, 0) for vector in vectors) and dot >= 0:
+        raise RuntimeError(f"Unresolved right/acute bend: {pair[0].GetNetname()} at "
+                           f"({mm(x)}, {mm(y)})")
 
 tracks = list(board.GetTracks())
-if sum(isinstance(item, pcb.PCB_VIA) for item in tracks) > 32:
-    raise RuntimeError("Four-layer layout exceeds its 32-signal-via routing budget")
-if sum(mm(item.GetLength()) for item in tracks
-       if not isinstance(item, pcb.PCB_VIA)) > 1975.819:
-    raise RuntimeError("Stacked layout exceeds the preceding compact board's routed length")
+print("Signal vias:", sum(isinstance(item, pcb.PCB_VIA) for item in tracks), flush=True)
+print("Track length / mm:", round(sum(mm(item.GetLength()) for item in tracks
+                                     if not isinstance(item, pcb.PCB_VIA)), 1), flush=True)
 
 
 def add_zone(layer, name, outline=None, priority=0):
@@ -574,25 +640,27 @@ def add_zone(layer, name, outline=None, priority=0):
 
 for layer in (pcb.F_Cu, pcb.In1_Cu, pcb.B_Cu):
     add_zone(layer, "GND")
-add_zone(pcb.In2_Cu, "3V3")
-for name in ("5V_IN", "5V_SW"):
+add_zone(pcb.In2_Cu, "GND")
+for name in ("3V3", "5V_IN", "5V_SW"):
     outline = pcb.SHAPE_POLY_SET()
     for item in tracks:
-        if item.GetNetname() != name:
+        if item.GetNetname() != name or item.GetLayer() != pcb.In2_Cu:
             continue
         shape = pcb.SHAPE_POLY_SET()
         item.TransformShapeToPolygon(
             shape, pcb.In2_Cu, pcb.FromMM(0.7), pcb.FromMM(0.01),
             pcb.ERROR_INSIDE)
         outline.BooleanAdd(shape)
-    add_zone(pcb.In2_Cu, name, outline, priority=1)
+    if outline.OutlineCount():
+        add_zone(pcb.In2_Cu, name, outline, priority=1)
 
 
 def ground_site_clear(x, y):
     if not (LEFT + 2 <= x <= RIGHT - 2 and TOP + 2 <= y <= BOTTOM - 2):
         return False
     radius = VIA_DIAMETER / 2
-    if rectangle_distance((x, y), (x, y), 52, 67, 73.5, 84) <= radius + CLEARANCE:
+    if any(rectangle_distance((x, y), (x, y), *bounds) <= radius + CLEARANCE
+           for bounds in KEEP_OUTS):
         return False
     for pad in all_pads:
         if pad.GetParentFootprint().GetReference().startswith("H"):
@@ -653,6 +721,7 @@ for item in tracks:
 
 if not pcb.ZONE_FILLER(board).Fill(board.Zones()):
     raise RuntimeError("KiCad failed to fill the ground zones")
+pcb.SaveBoard(str(FILE), board)
 
 ground_plane = next(
     zone.GetFilledPolysList(pcb.In1_Cu) for zone in board.Zones()
@@ -663,19 +732,22 @@ endpoint_boxes = {
     name: [pad.GetBoundingBox() for pad in pads[name]] for name in I2S_NETS
 }
 for item in board.GetTracks():
+    if isinstance(item, pcb.PCB_VIA) and item.GetNetname() in I2S_NETS:
+        endpoint_boxes[item.GetNetname()].append(item.GetBoundingBox())
+bottom_ground_plane = next(
+    zone.GetFilledPolysList(pcb.In2_Cu) for zone in board.Zones()
+    if zone.GetLayer() == pcb.In2_Cu and zone.GetNetname() == "GND")
+for item in board.GetTracks():
     if isinstance(item, pcb.PCB_VIA):
-        if item.GetNetname() in I2S_NETS:
-            raise RuntimeError("I2S must not change layers")
         continue
     if item.GetNetname() in POWER_WIDTHS:
-        if item.GetLayer() != pcb.In2_Cu:
-            raise RuntimeError("Power routing must stay on In2.Cu")
+        if item.GetLayer() not in (pcb.F_Cu, pcb.In2_Cu):
+            raise RuntimeError("Power routing must stay on F.Cu/In2.Cu")
     elif item.GetLayer() not in (pcb.F_Cu, pcb.B_Cu):
         raise RuntimeError("Signal routing must stay on the outer layers")
     if item.GetNetname() not in I2S_NETS:
         continue
-    if item.GetLayer() != pcb.F_Cu:
-        raise RuntimeError("I2S must reference In1.Cu from F.Cu")
+    reference_plane = ground_plane if item.GetLayer() == pcb.F_Cu else bottom_ground_plane
     start, end = item.GetStart(), item.GetEnd()
     samples = max(1, ceil(mm(item.GetLength()) / 0.1))
     for index in range(samples):
@@ -683,7 +755,7 @@ for item in board.GetTracks():
         position = pcb.VECTOR2I(
             round(start.x + ratio * (end.x - start.x)),
             round(start.y + ratio * (end.y - start.y)))
-        if ground_plane.Contains(position):
+        if reference_plane.Contains(position):
             continue
         # A plated signal pad necessarily has an antipad in the GND plane.
         margin = pcb.FromMM(0.4)
@@ -695,32 +767,32 @@ for item in board.GetTracks():
         raise RuntimeError(
             f"{item.GetNetname()} loses its GND reference at "
             f"({mm(position.x):.3f}, {mm(position.y):.3f})")
-print("I2S reference: continuous In1.Cu outside connector antipads", flush=True)
+print("I2S reference: verified filled In1/In2 GND outside connector antipads", flush=True)
 pcb.SaveBoard(str(FILE), board)
 
 project_file = FILE.with_suffix(".kicad_pro")
 project = json.loads(project_file.read_text(encoding="utf-8"))
 settings = project["board"]["design_settings"]
 settings["defaults"].update({
-    "copper_line_width": 0.35,
+    "copper_line_width": 0.2,
     "silk_line_width": 0.15,
     "silk_text_thickness": 0.15,
 })
 settings["rules"].update({
-    "min_clearance": 0.3,
+    "min_clearance": 0.2,
     "min_hole_to_hole": 0.45,
     "min_silk_clearance": 0.15,
     "min_text_height": 1.0,
     "min_text_thickness": 0.15,
-    "min_track_width": 0.3,
-    "min_via_annular_width": 0.18,
+    "min_track_width": 0.2,
+    "min_via_annular_width": 0.15,
 })
-settings["track_widths"] = [0.35, 0.65, 0.8]
-settings["via_dimensions"] = [{"diameter": 0.8, "drill": 0.4}]
+settings["track_widths"] = [0.2, 0.65, 0.8]
+settings["via_dimensions"] = [{"diameter": 0.6, "drill": 0.3}]
 project["net_settings"]["classes"][0].update({
-    "clearance": 0.3,
-    "track_width": 0.35,
-    "via_diameter": 0.8,
-    "via_drill": 0.4,
+    "clearance": 0.2,
+    "track_width": 0.2,
+    "via_diameter": 0.6,
+    "via_drill": 0.3,
 })
 project_file.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")

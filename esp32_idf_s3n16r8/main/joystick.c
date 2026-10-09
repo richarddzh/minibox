@@ -49,12 +49,14 @@ esp_err_t joystick_init(joystick_state_t *state) {
                         TAG, "X channel");
     ESP_RETURN_ON_ERROR(adc_oneshot_config_channel(s_adc, s_y_channel, &channel),
                         TAG, "Y channel");
+#if JOYSTICK_K_PIN >= 0
     const gpio_config_t button = {
         .pin_bit_mask = 1ULL << JOYSTICK_K_PIN,
         .mode = GPIO_MODE_INPUT,
         .pull_up_en = GPIO_PULLUP_ENABLE,
     };
     ESP_RETURN_ON_ERROR(gpio_config(&button), TAG, "button pin");
+#endif
     ESP_LOGI(TAG, "X=%d Y=%d K=%d (pressed level=%d); release joystick during calibration",
              JOYSTICK_X_PIN, JOYSTICK_Y_PIN, JOYSTICK_K_PIN, JOYSTICK_K_ACTIVE_LEVEL);
     int total_x = 0, total_y = 0;
@@ -79,10 +81,15 @@ esp_err_t joystick_init(joystick_state_t *state) {
                         max_x - min_x <= 300 && max_y - min_y <= 300,
                         ESP_ERR_INVALID_STATE, TAG,
                         "calibration invalid; check wiring, release stick, reset");
+#if JOYSTICK_K_PIN >= 0
     state->raw_k = gpio_get_level(JOYSTICK_K_PIN);
     state->button.candidate = state->raw_k == JOYSTICK_K_ACTIVE_LEVEL;
     state->button.pressed = state->button.candidate;
     state->button.changed_ms = esp_timer_get_time() / 1000;
+#else
+    ESP_LOGI(TAG, "Joystick press disabled; no button GPIO configured");
+    state->raw_k = !JOYSTICK_K_ACTIVE_LEVEL;
+#endif
     return joystick_read(state);
 }
 
@@ -102,8 +109,10 @@ esp_err_t joystick_read(joystick_state_t *state) {
     state->percent_y = joystick_percent(state->raw_y, state->center_y, invert_y);
     state->direction_x = joystick_direction(state->percent_x, state->direction_x);
     state->direction_y = joystick_direction(state->percent_y, state->direction_y);
+#if JOYSTICK_K_PIN >= 0
     state->raw_k = gpio_get_level(JOYSTICK_K_PIN);
     joystick_button_update(&state->button, state->raw_k == JOYSTICK_K_ACTIVE_LEVEL,
                            esp_timer_get_time() / 1000);
+#endif
     return ESP_OK;
 }

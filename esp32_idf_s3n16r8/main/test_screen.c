@@ -26,7 +26,7 @@ static int s_number_x;
 static int s_number_y;
 static int64_t s_numbers_at_us;
 static bool s_audio_valid;
-static bool s_audio_buttons[3];
+static bool s_audio_buttons[BUTTON_COUNT];
 static audio_phase_t s_audio_phase;
 static struct {
     int x;
@@ -153,15 +153,15 @@ esp_err_t test_screen_audio_init(void) {
     return st7796_backlight_on();
 }
 
-esp_err_t test_screen_audio_update(const bool pressed[3], audio_phase_t audio) {
+esp_err_t test_screen_audio_update(const bool pressed[BUTTON_COUNT], audio_phase_t audio) {
     if (s_audio_valid && s_audio_phase == audio &&
         memcmp(s_audio_buttons, pressed, sizeof(s_audio_buttons)) == 0) {
         return ESP_OK;
     }
     rect(1, 80, LCD_WIDTH - 2, 208, BLACK);
-    const int pins[3] = {BUTTON_1_PIN, RECORD_BUTTON_PIN, BUTTON_3_PIN};
-    for (int i = 0; i < 3; ++i) {
-        int y = 90 + i * 43;
+    const int pins[BUTTON_COUNT] = {BUTTON_1_PIN, RECORD_BUTTON_PIN, BUTTON_3_PIN, BUTTON_4_PIN};
+    for (int i = 0; i < BUTTON_COUNT; ++i) {
+        int y = 86 + i * 35;
         rect(16, y, 25, 25, pressed[i] ? GREEN : GRAY);
         char label[48];
         snprintf(label, sizeof(label), "GPIO%d %s%s", pins[i],
@@ -175,7 +175,7 @@ esp_err_t test_screen_audio_update(const bool pressed[3], audio_phase_t audio) {
                          audio == AUDIO_ERROR ? "AUDIO ERROR - SEE SERIAL" :
                          audio == AUDIO_WAIT_RESET ? "PLAY DONE - RELEASE" :
                          "PRESS " RECORD_GPIO_LABEL " TO RECORD";
-    text(16, 237, status, audio == AUDIO_ERROR ? YELLOW : CYAN);
+    text(16, 247, status, audio == AUDIO_ERROR ? YELLOW : CYAN);
     ESP_RETURN_ON_ERROR(flush_dynamic(), TAG, "audio status");
     memcpy(s_audio_buttons, pressed, sizeof(s_audio_buttons));
     s_audio_phase = audio;

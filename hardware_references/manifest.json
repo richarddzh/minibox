@@ -1,5 +1,10 @@
 [
   {
+    "path": "carrier-revision-references.md",
+    "bytes": 3860,
+    "sha256": "cd78061e56d286f2776f489db975c25dd1a81038861c7dbbb5d24997bf1d0b26"
+  },
+  {
     "path": "datasheets/ap63203.pdf",
     "bytes": 1226090,
     "sha256": "ef99daa3789d835bc025dfcb4c605c5c2e6d3e7223e86d40b33e6b497ea5a722",
@@ -195,12 +200,37 @@
     "sha256": "9996ba966728737d813f57a090008a8a33cf9e10abd2836d1c087da94136c6d0"
   },
   {
+    "path": "datasheets/yv13s-l7.85-b10ka-60-0-dl01.pdf",
+    "bytes": 638156,
+    "sha256": "954709ccaf0202879e64b1c17a8ba384c11486283fe826515f4fd022c0393874"
+  },
+  {
     "path": "drawings/cpg151101d13-6.png",
     "bytes": 546731,
     "sha256": "f59bea68bbaab5a1dfa18f94d6f4b3f57144e06ab9aebe5f2dc16b72367caa98"
   },
   {
     "path": "drawings/cpg151101d13-8.png",
+    "bytes": 319436,
+    "sha256": "ebdd207ff50efee9ca3de995ab169cecbc0201f52222f836d74e225b0e0d88bb"
+  },
+  {
+    "path": "drawings/cpg151101d13-lcsc-pcb.png",
+    "bytes": 16702,
+    "sha256": "9bad69535aa4420f30e992834c21de497d60c76f8d9cabb344aefef23c01f4e3"
+  },
+  {
+    "path": "drawings/cpg151101d13-lcsc-sch.png",
+    "bytes": 9029,
+    "sha256": "12f354f38ab2f69a823ff7a8f63df1afd3a49e02e245677f1f0baac1a6b17cb0"
+  },
+  {
+    "path": "drawings/cpg151101d13-page-6.png",
+    "bytes": 546731,
+    "sha256": "f59bea68bbaab5a1dfa18f94d6f4b3f57144e06ab9aebe5f2dc16b72367caa98"
+  },
+  {
+    "path": "drawings/cpg151101d13-page-8.png",
     "bytes": 319436,
     "sha256": "ebdd207ff50efee9ca3de995ab169cecbc0201f52222f836d74e225b0e0d88bb"
   },
@@ -228,6 +258,16 @@
     "path": "drawings/myoung-bs-12-b3aa003-1.png",
     "bytes": 278266,
     "sha256": "0d2b9587716fc3caa2703dde843ae51b07710e994912ed68234ac32ce750f9e3"
+  },
+  {
+    "path": "drawings/requested-layout-20261009.png",
+    "bytes": 49704,
+    "sha256": "bc4ee59d03dc3b0a4e4e746fb34c8bd315de4d84fae29d4c50ef3406aa753f8f"
+  },
+  {
+    "path": "drawings/requested-layout.png",
+    "bytes": 50946,
+    "sha256": "de667c84999b1239ee09430fb0cbe544d166c699ed173c828f67b7f8b42b86bc"
   },
   {
     "path": "drawings/rkjxv-2.png",
@@ -290,6 +330,21 @@
     "sha256": "b59e8f71688b9f4d31b9f4e38eb945c67acc9903c5a1696c72e1e97cde3a8a6c"
   },
   {
+    "path": "drawings/yv13s-l7.85-b10ka-60-0-dl01-page-1.png",
+    "bytes": 245733,
+    "sha256": "5499e73c719ba4eb0fcb11a90ff8a852202d8c3cb776e5030d1deb93027cdeb6"
+  },
+  {
+    "path": "drawings/yv13s-l7.85-b10ka-60-0-dl01-page-2.png",
+    "bytes": 146331,
+    "sha256": "f428e22b419fe060e663831ddf943d790aa25c400214abb98073956c50e10b0a"
+  },
+  {
+    "path": "drawings/yv13s-lcsc-sch.png",
+    "bytes": 18454,
+    "sha256": "9eef4cf683b683efbd9baba3b4fe318df837595e248cb2b5f3fddc59093edd95"
+  },
+  {
     "path": "licenses/kicad-footprints-LICENSE.md",
     "bytes": 2105,
     "sha256": "285b027a721577d0bc0198f36e948c6c282ddaa4b58fef8ed826749576eb0aef"
@@ -298,5 +353,10 @@
     "path": "licenses/kicad-symbols-LICENSE.md",
     "bytes": 2105,
     "sha256": "285b027a721577d0bc0198f36e948c6c282ddaa4b58fef8ed826749576eb0aef"
+  },
+  {
+    "path": "README.md",
+    "bytes": 3256,
+    "sha256": "eb95b3fe1f2c3db631fa9527db1cacb40b78a0c68c9716621c4798eb85b1d347"
   }
 ]

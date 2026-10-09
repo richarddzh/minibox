@@ -140,7 +140,7 @@ def add_legend(side, font_path, geometry):
     draw.text((x, y), "正面 · 元件插装面" if side == "front" else "背面 · 手工焊接面",
               font=title, fill="#18212b")
     draw.text((x, y + round(85 * scale)), "颜色图例 / LEGEND", font=heading, fill="#344253")
-    draw.text((x, y + round(150 * scale)), "两层铜：F.Cu + B.Cu，无内层铜",
+    draw.text((x, y + round(150 * scale)), "四层：F.Cu / In1 GND / In2 / B.Cu",
               font=body, fill="#344253")
     rows = [
         ("#50543b", "阻焊覆盖的铜",

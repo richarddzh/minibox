@@ -14,28 +14,31 @@
 #define ONBOARD_LED_PIN 48
 #define AUDIO_BCLK_PIN 40
 #define AUDIO_WS_PIN 39
-#define MIC_SD_PIN 15
+#define MIC_SD_PIN 17
 #define SPEAKER_DIN_PIN 41
-#define SPEAKER_SD_MODE_PIN 7
-#define SPEAKER_GAIN_PIN 8
+#define SPEAKER_SD_MODE_PIN 47
+#define SPEAKER_GAIN_PIN 21
 #define AUDIO_SAMPLE_RATE 16000
 #define AUDIO_MAX_SECONDS 3
 #define BUTTON_1_PIN 4
 #define RECORD_BUTTON_PIN 5
 #define BUTTON_3_PIN 6
-#define RTC_SDA_PIN 47
-#define RTC_SCL_PIN 21
+#define BUTTON_4_PIN 7
+#define BUTTON_COUNT 4
+#define RTC_SDA_PIN 15
+#define RTC_SCL_PIN 16
 
 #define MINIBOX_STRINGIFY_INNER(value) #value
 #define MINIBOX_STRINGIFY(value) MINIBOX_STRINGIFY_INNER(value)
 #define BUTTON_GPIO_LABELS "GPIO" MINIBOX_STRINGIFY(BUTTON_1_PIN) "/" \
                           MINIBOX_STRINGIFY(RECORD_BUTTON_PIN) "/" \
-                          MINIBOX_STRINGIFY(BUTTON_3_PIN)
+                          MINIBOX_STRINGIFY(BUTTON_3_PIN) "/" \
+                          MINIBOX_STRINGIFY(BUTTON_4_PIN)
 #define RECORD_GPIO_LABEL "GPIO" MINIBOX_STRINGIFY(RECORD_BUTTON_PIN)
 
 #define JOYSTICK_X_PIN CONFIG_MINIBOX_JOYSTICK_X_PIN
 #define JOYSTICK_Y_PIN CONFIG_MINIBOX_JOYSTICK_Y_PIN
-#define JOYSTICK_K_PIN CONFIG_MINIBOX_JOYSTICK_K_PIN
+#define JOYSTICK_K_PIN (-1)
 #ifdef CONFIG_MINIBOX_JOYSTICK_K_ACTIVE_LOW
 #define JOYSTICK_K_ACTIVE_LEVEL 0
 #else
@@ -52,13 +55,21 @@ _Static_assert(JOYSTICK_X_PIN >= 1 && JOYSTICK_X_PIN <= 10 &&
 _Static_assert(JOYSTICK_X_PIN != BUTTON_1_PIN &&
                JOYSTICK_X_PIN != RECORD_BUTTON_PIN &&
                JOYSTICK_X_PIN != BUTTON_3_PIN &&
+               JOYSTICK_X_PIN != BUTTON_4_PIN &&
                JOYSTICK_Y_PIN != BUTTON_1_PIN &&
                JOYSTICK_Y_PIN != RECORD_BUTTON_PIN &&
                JOYSTICK_Y_PIN != BUTTON_3_PIN &&
+               JOYSTICK_Y_PIN != BUTTON_4_PIN &&
                JOYSTICK_K_PIN != BUTTON_1_PIN &&
                JOYSTICK_K_PIN != RECORD_BUTTON_PIN &&
-               JOYSTICK_K_PIN != BUTTON_3_PIN,
+               JOYSTICK_K_PIN != BUTTON_3_PIN &&
+               JOYSTICK_K_PIN != BUTTON_4_PIN,
                "Joystick pins must not conflict with keypad pins");
+_Static_assert(MIC_SD_PIN != RTC_SDA_PIN && MIC_SD_PIN != RTC_SCL_PIN &&
+               SPEAKER_SD_MODE_PIN != BUTTON_4_PIN &&
+               SPEAKER_GAIN_PIN != RTC_SDA_PIN && SPEAKER_GAIN_PIN != RTC_SCL_PIN &&
+               SPEAKER_SD_MODE_PIN != RTC_SDA_PIN && SPEAKER_SD_MODE_PIN != RTC_SCL_PIN,
+               "Revised carrier GPIOs must not share peripheral functions");
 _Static_assert(JOYSTICK_X_PIN != SPEAKER_SD_MODE_PIN &&
                JOYSTICK_Y_PIN != SPEAKER_SD_MODE_PIN &&
                JOYSTICK_K_PIN != SPEAKER_SD_MODE_PIN &&

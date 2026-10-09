@@ -1,10 +1,11 @@
 menu "Minibox hardware test"
 
 config MINIBOX_BUTTON_ACTIVE_LOW
-    bool "GPIO4/5/6 buttons pressed at low level (internal pull-ups)"
+    bool "GPIO4/5/6/7 buttons pressed at low level (internal pull-ups)"
     default y
     help
-        Use 3.3 V button modules with active-low OUT and common ground.
+        Direct-solder mechanical switches require this option enabled.
+        Each switch shorts its GPIO to common ground when pressed.
         Disable for modules that output a high level when pressed.
 
 config MINIBOX_WIFI_SSID
@@ -27,14 +28,6 @@ config MINIBOX_JOYSTICK_Y_PIN
     range 1 2
     default 2
 
-config MINIBOX_JOYSTICK_K_PIN
-    int "Joystick K GPIO (carrier wiring)"
-    range 42 42
-    default 42
-    help
-        The carrier routes the joystick button to GPIO42.
-        Other GPIOs are reserved for peripherals or development-board functions.
-
 config MINIBOX_JOYSTICK_X_INVERTED
     bool "Invert joystick X"
     default y
@@ -43,12 +36,8 @@ config MINIBOX_JOYSTICK_Y_INVERTED
     bool "Invert joystick Y"
     default n
 
-config MINIBOX_JOYSTICK_K_ACTIVE_LOW
-    bool "Joystick K pressed at low level (off = active high)"
-    default n
-
 config MINIBOX_AMP_GAIN_12DB
-    bool "MAX98357 GAIN: drive GPIO8 low for 12 dB (off = floating, 9 dB)"
+    bool "MAX98357 GAIN: drive GPIO21 low for 12 dB (off = floating, 9 dB)"
     default n
 
 config MINIBOX_LCD_SPI_MHZ
