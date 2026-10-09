@@ -24,8 +24,8 @@ figure img{display:block;width:100%;height:auto}figcaption{font-size:14px;margin
 <div class="warning"><strong>工程审核稿，不可直接投产。</strong>
 PCB 已按指定键轴、摇杆与后续布局要求修改；当前保存板为<strong>0项DRC违规、0项未连接</strong>。
 本文件不是采购、付款或下单授权。
-请以审核目录内实际存在的 <a href="assembly/revision-20261009/drc.json">DRC</a> 和
-<a href="assembly/revision-20261009/manifest.json">版本清单</a>为准。
+请以审核目录内实际存在的 <a href="assembly/drc.json">DRC</a> 和
+<a href="assembly/manifest.json">版本清单</a>为准。
 如果报告不存在或门槛失败，导出尚未完成。零 DRC 不代替实物配合、载流、EMC 或工厂验收。
 本工程无原理图，不能宣称完成 ERC 或原理图一致性验证。</div>
 
@@ -138,18 +138,18 @@ PTH成品孔公差+0.13/−0.08 mm、NPTH±0.10 mm；
 <h2>5. 文件怎么使用</h2>
 <table>
 <tr><th>文件</th><th>用途</th></tr>
-<tr><td><a href="fabrication/minibox-v1.1-gerber-review.zip">纯Gerber/钻孔ZIP</a></td><td>当前v1.1 PCB的CAM审核候选，四个铜层、双面阻焊/丝印、正面钢网、板框、分开PTH/NPTH。</td></tr>
-<tr><td><a href="assembly/revision-20261009/bom-smt-review.csv">SMT BOM</a> /
-<a href="assembly/revision-20261009/cpl-smt.csv">SMT CPL</a></td><td>仅R1/R2；C25905需核对国内装配库存。
+<tr><td><a href="fabrication/minibox-gerber-review.zip">纯Gerber/钻孔ZIP</a></td><td>当前v1.1 PCB的CAM审核候选，四个铜层、双面阻焊/丝印、正面钢网、板框、分开PTH/NPTH。</td></tr>
+<tr><td><a href="assembly/bom-smt-review.csv">SMT BOM</a> /
+<a href="assembly/cpl-smt.csv">SMT CPL</a></td><td>仅R1/R2；C25905需核对国内装配库存。
 坐标以板框左下角为零，X向右、Y向上、Top、mm；上传预览时核对角度及位号。</td></tr>
-<tr><td><a href="assembly/revision-20261009/bom-all-review.csv">全板BOM</a> /
-<a href="assembly/revision-20261009/positions-all-review.csv">插件参考坐标</a></td><td>包含全部17个物理件的型号与C编号；母座/端子插装及焊接工艺仍待工厂确认。
+<tr><td><a href="assembly/bom-all-review.csv">全板BOM</a> /
+<a href="assembly/positions-jlc-review.csv">嘉立创专用坐标</a></td><td>包含全部17个物理件的型号与C编号及工厂库中心/角度修正；母座/端子插装及焊接工艺仍待工厂确认。
 Mid为电气焊脚中心平均值，不保证外壳中心；KiCad角度不等于工厂库零角。</td></tr>
-<tr><td><a href="assembly/revision-20261009/pin-map.csv">逐孔/网名表</a> /
-<a href="assembly/revision-20261009/assembly-pads.svg">实际孔位及装配图</a></td><td>按PCB焊盘号核对前后面、线序、孔径、NC及J3两条母座。</td></tr>
-<tr><td><a href="assembly/revision-20261009/manifest.json">版本、几何、哈希</a> /
-<a href="assembly/revision-20261009/drc.json">DRC报告</a></td><td>核对导出时的实际PCB/Gerber SHA-256、机械间隙及未决审核项。</td></tr>
-<tr><td><a href="assembly/minibox-v1.1-assembly-review.zip">完整工程审核合集</a></td><td>文件生成并核对后用于工厂人工审核，不是纯Gerber上传ZIP，不包含完整精确装配3D模型。</td></tr>
+<tr><td><a href="assembly/pin-map.csv">逐孔/网名表</a> /
+<a href="assembly/assembly-pads.svg">实际孔位及装配图</a></td><td>按PCB焊盘号核对前后面、线序、孔径、NC及J3两条母座。</td></tr>
+<tr><td><a href="assembly/manifest.json">版本、几何、哈希</a> /
+<a href="assembly/drc.json">DRC报告</a></td><td>核对导出时的实际PCB/Gerber SHA-256、机械间隙及未决审核项。</td></tr>
+<tr><td><a href="assembly/minibox-assembly-review.zip">完整工程审核合集</a></td><td>文件生成并核对后用于工厂人工审核，不是纯Gerber上传ZIP，不包含完整精确装配3D模型。</td></tr>
 </table>
 <p>旧 <code>minibox-carrier-jlcpcb.zip</code>、旧顶层装配CSV/询价ZIP/PNG对应v1.0，
 尺寸及GPIO已经失效。勿混用。本次坐标原点在KiCad为(5,120) mm：

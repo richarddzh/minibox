@@ -12,13 +12,14 @@ import zipfile
 
 import pcbnew as pcb
 from export_jlc_positions import write_jlc_positions
+from package_review import package_review
 
 
 HERE = Path(__file__).resolve().parent
 CLI = Path(r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe")
 FILE = HERE / "minibox-carrier.kicad_pcb"
-OUT = HERE / "assembly" / "revision-20261009"
-GERBERS = HERE / "fabrication" / "revision-20261009"
+OUT = HERE / "assembly"
+GERBERS = HERE / "fabrication"
 RENDERS = HERE / "renders"
 OUT.mkdir(parents=True, exist_ok=True)
 GERBERS.mkdir(parents=True, exist_ok=True)
@@ -341,7 +342,7 @@ svg.extend([f'<text x="52" y="126" text-anchor="middle">{width:g} x {height:g} m
 run("pcb", "export", "svg", "--output", OUT / "assembly-pads.svg",
     "--layers", "F.Fab,F.SilkS,Edge.Cuts,Dwgs.User", "--mode-single",
     "--fit-page-to-board", "--exclude-drawing-sheet", "--sketch-pads-on-fab-layers", FILE)
-gerber_zip = HERE / "fabrication" / "minibox-v1.1-gerber-review.zip"
+gerber_zip = GERBERS / "minibox-gerber-review.zip"
 with zipfile.ZipFile(gerber_zip, "w", zipfile.ZIP_DEFLATED) as archive:
     for p in sorted(GERBERS.iterdir()):
         if p.suffix.lower() in (".gtl", ".gbl", ".g1", ".g2", ".gtp", ".gto", ".gbo",
@@ -349,7 +350,8 @@ with zipfile.ZipFile(gerber_zip, "w", zipfile.ZIP_DEFLATED) as archive:
             archive.write(p, p.name)
 tracks = list(board.GetTracks())
 manifest = {
-    "revision": "2026-10-09 v1.1", "status": "ENGINEERING_REVIEW_NOT_PRODUCTION_APPROVED",
+    "version_control": "Git history; current outputs use fixed paths",
+    "status": "ENGINEERING_REVIEW_NOT_PRODUCTION_APPROVED",
     "board": {"width_mm": width, "height_mm": height, "nominal_thickness_mm": 1.6,
               "layers": 4, "origin_kicad_mm": [left, bottom], "coordinate_axes": "X right, Y up, top view"},
     "drc_violations": len(drc["violations"]), "unconnected_items": len(drc["unconnected_items"]),
@@ -383,4 +385,5 @@ manifest = {
         "JLC CPL zero-angle/pin-1 preview; THT data are review coordinates, not SMT placement instructions"],
 }
 (OUT / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+package_review()
 print(json.dumps(manifest, ensure_ascii=False, indent=2))

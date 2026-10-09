@@ -169,6 +169,11 @@ KiCad不走AD/99SE/PADS源文件自动提取入口。使用纯Gerber、完整BOM
 ## 工厂坐标映射：先在文件解决，不在网页逐件重调
 
 下次上传前读取工程README与当前manifest，从实际保存PCB重新导出。
+当前资料固定在`kicad\assembly`与`kicad\fabrication`，历史使用Git提交；
+不查找日期revision目录，不使用旧quote文件。完整BOM为
+`kicad\assembly\bom-all-review.csv`，上传坐标为
+`kicad\assembly\positions-jlc-review.csv`，纯CAM为
+`kicad\fabrication\minibox-gerber-review.zip`。
 沿用已核验的采购ID、库编号焊盘和库原点定义；仅布局变化时重算绝对坐标，
 不要重新找同一元件或复制上一版网页中心。
 
@@ -216,6 +221,12 @@ KiCad footprint角度不等于工厂库零角；pad平均中心也不一定是�
 和控件阻塞，不只反复说“待确认”，不编完成时间。
 订单失败/超时先查现有记录，避免重复提交。账号、地址、会话ID和认证信息
 不进入Git；操作日志留会话artifacts，交付文件只保留必要的脱敏工艺数据。
+
+每次下单结束或交接时，把sub-agent实际验证的页面入口、可见按钮、
+旋转/组操作区别、上传列映射、保存/刷新步骤与失败解决方式合入本skill。
+没有实际走通的步骤明确标为未验证，不把建议写成经验。
+下次先读这些路径，页面没变就直接复用，只探索缺失或已变化的局部。
+具体元件ID、中心及角度修正仍放工程BOM/CPL/报告，不混进通用流程。
 
 ## 交付说明
 

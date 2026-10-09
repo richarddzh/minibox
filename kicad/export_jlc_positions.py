@@ -12,7 +12,7 @@ import pcbnew as pcb
 
 HERE = Path(__file__).resolve().parent
 BOARD = HERE / "minibox-carrier.kicad_pcb"
-OUT = HERE / "assembly" / "revision-20261009"
+OUT = HERE / "assembly"
 
 # JLC library head-relative pads, in millimetres, X right/Y up, read 2026-10-09.
 SOCKETS = {

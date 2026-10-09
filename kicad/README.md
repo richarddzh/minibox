@@ -101,7 +101,7 @@ remain review items. [Domestic JLC capability rules](../docs/jlc-pcb-design-spec
 distinguish limits from recommendations.
 
 Actual latest DRC/mechanical metrics and hashes belong in
-`assembly\revision-20261009\manifest.json` and `drc.json`;
+`assembly\manifest.json` and `drc.json`;
 an absent report or failed gate means export is incomplete.
 Only a clean saved board may pass `export_revision.py`.
 The exporter checks all plated-pad/via centers on all four copper CAM layers
@@ -115,7 +115,7 @@ Factory insertion/soldering approval, actual fit and final supply leave the BOM
 
 ### JLC placement-library mapping
 
-Use `assembly\revision-20261009\positions-jlc-review.csv` for the selected
+Use `assembly\positions-jlc-review.csv` for the selected
 domestic JLC library, together with the full BOM and the unchanged Gerber ZIP.
 `positions-all-review.csv` records KiCad pad centres/footprint angles; it is
 **not directly interchangeable** with the JLC file. In the factory library,
@@ -143,7 +143,7 @@ Regenerate only these placement files without rerouting or re-exporting CAM:
 & 'C:\Program Files\KiCad\10.0\bin\python.exe' .\kicad\export_jlc_positions.py
 ```
 
-## Current outputs versus legacy files
+## Current outputs and Git history
 
 | Current revision | Purpose |
 |---|---|
@@ -151,13 +151,15 @@ Regenerate only these placement files without rerouting or re-exporting CAM:
 | `renders\minibox-carrier-front.png` / `back.png` | Genuine saved-board renders |
 | `renders\minibox-carrier-isometric.png` | Genuine saved-board perspective |
 | `renders\minibox-carrier-front-legend.png` / `back-legend.png` | Current Chinese material legends and board/hole dimensions |
-| `assembly\revision-20261009` | DRC, manifest, SMT BOM/CPL, separate THT positions, pin map |
-| `fabrication\revision-20261009` | Four-copper-layer Gerbers and separate PTH/NPTH drills |
-| `fabrication\minibox-v1.1-gerber-review.zip` | PCB CAM review archive |
+| `assembly` | DRC, manifest, SMT BOM/CPL, separate THT positions, pin map |
+| `fabrication` | Four-copper-layer Gerbers and separate PTH/NPTH drills |
+| `fabrication\minibox-gerber-review.zip` | PCB CAM review archive |
 
-Old top-level `assembly` quote CSV/ZIP/PNG and `fabrication\minibox-carrier-jlcpcb.zip`
-describe **v1.0 and are obsolete for this board**.
-They are retained for historical records, not current submission.
+Only fixed current paths are retained. Previous quote CSVs, dated revision
+directories and older archives are recoverable from Git history, not alternate
+submission inputs. The manifest records PCB/artifact hashes rather than a date
+as a version identifier. Do not embed the current commit SHA in generated files:
+it would describe the pre-export commit and change again when those files commit.
 No order, upload, purchase or payment is authorized by these files.
 
 ## Reproducible commands
@@ -175,3 +177,6 @@ Inspect every command's result; do not continue after a failure.
 For PNGs, use KiCad `pcb render --side top|bottom --quality basic` (high is optional).
 Then run `python .\kicad\add_render_legends.py`; its dimensions are read
 from the saved PCB, and the legends now correctly identify four copper layers.
+After updating renders or documentation, run `python .\kicad\package_review.py`
+to refresh `assembly\minibox-assembly-review.zip` and all artifact hashes.
+Every PCB/part change requires the full export, not only the coordinate command.

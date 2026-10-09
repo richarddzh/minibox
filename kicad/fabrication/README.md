@@ -1,15 +1,9 @@
-# PCB 工程审核资料
+# 当前 PCB CAM 资料
 
-`revision-20261009` 及 `minibox-v1.1-gerber-review.zip` 是当前载板
-工程审核输出：94.5×117 mm、四层、名义1.6 mm、R5，
-分开 PTH/NPTH 的 Excellon 毫米钻孔。
-只有导出门槛通过、文件确实生成并核对之后才是有效的审核候选。
-此包不代表生产批准、工厂验收、上传授权或下单许可。
+本目录固定保存当前板的Gerber、PTH/NPTH钻孔与钻孔图。
+上传PCB使用`minibox-gerber-review.zip`；它仅含CAM，不含BOM或操作文档。
+历史版本由Git保存，不创建日期revision目录或并存旧版ZIP。
 
-`minibox-carrier-jlcpcb.zip` 是**旧 v1.0** 的100×112 mm资料，
-已经失效，不能用于本次改版。当前 BOM/CPL 和插件装配资料另见
-`..\assembly\revision-20261009`，不要把包含文档的整个审核合集当作
-纯 Gerber 文件上传。
-
-工厂需确认实际铜厚/叠层、器件和孔公差、名义板厚的配合、
-载流/反灌以及工艺边/拼板方案；未确认前为**草稿，不可生产**。
+运行`..\export_revision.py`重新检查实际PCB、四层CAM与钻孔配套。
+装配BOM、工厂坐标及哈希清单在`..\assembly`。
+零DRC与数字对位不代表工厂叠层、插件工艺、实物配合或生产批准。
