@@ -80,8 +80,10 @@ physical board identification, not an automatic firmware change.
 The requested independent GPIO audit checked all44 J1/J2 pads against the
 [official v1.1 J1/J3 table](https://docs.espressif.com/projects/esp-dev-kits/zh_CN/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html#j3):
 no mapping errors or peripheral conflicts were found. Verify the clone's
-actual pinout/RGB and whether its INMP441 module includes the required SD
-100 kΩ pull-down before production; neither module assumption is proven by DRC.
+actual pinout/RGB before production. The user has tested the actual INMP441
+module and confirmed no additional SD pull-down is needed; keep the carrier,
+firmware and BOM unchanged. This does not establish the module's internal
+resistor arrangement or apply to other module variants.
 
 External Type-C VBUS/GND →J8; independent CC1/CC2 →J9 pads1/2.
 R1/R2 each pull their own CC to GND through **5.1 kΩ, 0402, 1%**.

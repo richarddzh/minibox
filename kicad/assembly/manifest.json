@@ -1,6 +1,10 @@
 {
   "version_control": "Git history; current outputs use fixed paths",
   "status": "ENGINEERING_REVIEW_NOT_PRODUCTION_APPROVED",
+  "confirmed_module_conditions": {
+    "inmp441_additional_sd_pull_down_required": false,
+    "basis": "User tested the actual INMP441 module and confirmed no additional SD pull-down is needed; internal resistor arrangement is not inferred"
+  },
   "board": {
     "width_mm": 94.5,
     "height_mm": 117.0,
@@ -95,7 +99,6 @@
   "needs_factory_review": [
     "Selected connector MPNs require factory insertion/soldering approval; catalog stock is not reserved",
     "Actual ESP32/header spacing, RTC battery thickness, amplifier footprint and microphone spacing",
-    "Verify actual INMP441 module SD has the required approximately100k pull-down; carrier/firmware do not provide it",
     "Factory stackup, supply current/thermal verification, backfeed check",
     "THT solder process, actual hole tolerances and keycap/joystick cap fit",
     "JLC CPL zero-angle/pin-1 preview; THT data are review coordinates, not SMT placement instructions"
@@ -104,7 +107,7 @@
     ".github/instructions.md": "6c33fb02e7c93d00b182cb0759f6d766cfe2e2ab57338c9050dbcadd021414a1",
     ".github/skills/design-route-minibox-pcb/SKILL.md": "69f9d5a6665d2700ab15587639bfe287c391b0e264deb35605b853a0405996c4",
     ".github/skills/order-jlc-minibox/SKILL.md": "cf742ed3bf33480f99e94a1f6308db75194323699edb8cbed46459e4ad9926a6",
-    "docs/hardware-connections.md": "5bc6d288f24eaba0b14d0ee9e9ae6c54ea1306e8e435c9f9ccfd730b95e55296",
+    "docs/hardware-connections.md": "eb8422a7b8525804185ab46a717876b4bc313f33de0e4347abdef49b6125b0e1",
     "docs/jlc-pcb-design-spec.md": "eece672158efca9758cb3e3c98cac7c38060780abeccb122b3d84a00a39fae6b",
     "hardware_references/carrier-revision-references.md": "84e01fc7f5082840e9473a77ea13e3013520c88ab4edea9fe1b2e2bc8993ec75",
     "hardware_references/datasheets/cpg151101d13.pdf": "e49ad1b9f11d9e9d84fdec678f7172b31c23b63f83691d27e11b6a447deb1824",
@@ -128,9 +131,9 @@
     "kicad/assembly/positions-all-review.csv": "d2bd6619000697f871a9c2cd6765cff6e2a8f23d7caa53ea62e785bf24e33f46",
     "kicad/assembly/positions-jlc-review.csv": "4c1b4f91e7e63f59468826c9fd520dc34df753a303128ad5458e1c8ffc67fdb5",
     "kicad/assembly/README.md": "cb67bdc7cbb586f7b9b520bc6738631733bc21634a7e80b010ed411fa1a4e28c",
-    "kicad/carrier-revision.html": "844eccf34f422980afe3cd8389b52bea4bd3f1fe2ea610cb504443e347c835a9",
+    "kicad/carrier-revision.html": "3098e719b8f51d794fce2a9c8d3d3a19676a9c584449b6f2ac49b20729768103",
     "kicad/export_jlc_positions.py": "f38c9565d1ea7d3e43d0bae9ec99704a0f2cb45125a8aa621e6181da5eaeeeee",
-    "kicad/export_revision.py": "4f895d55ddf53a84feab6f456fcfe3ed39378b94f41db23cd72aabeddd447a2d",
+    "kicad/export_revision.py": "fd9d08a983e7254a411f6272611cf88ce104e961565d7bc8bd9db54f5dbf604b",
     "kicad/fabrication/minibox-carrier-B_Cu.gbl": "e4de71a5487d2f3fcde6e0e4773f37b38ed52ec853d03ddcabfbe35869a23715",
     "kicad/fabrication/minibox-carrier-B_Mask.gbs": "926fb2941af604b6ea3a2db32d51ccd25e0b4d4dc996ed9488c8d68a2ec474cf",
     "kicad/fabrication/minibox-carrier-B_Silkscreen.gbo": "f1d8f19a1443a8790fb11ffffdb4595e4dd7f8020cc558612661d859506ed979",
@@ -150,7 +153,7 @@
     "kicad/fabrication/README.md": "ccb5b73ff06fa46009aaf7031cc71bbca23cd79407df1eb11a3806da7154e91b",
     "kicad/fp-lib-table": "dfac98c162f9adfc0ab2e91fb975e915e23b91d17544a5ca7dc5712d6f0a359e",
     "kicad/generate_board.py": "4996036a7437d9b23d28c05d5942e58eff415af691732c53da98f9f655a2eba1",
-    "kicad/layout-revision-plan.md": "d76e398cddfe0aad7634d37a87f8df30cd2c153d377e536fbd1c89a8bb9b8e2b",
+    "kicad/layout-revision-plan.md": "d11296f6445c72b5c4f8eeb6dbec3011241414ea723bbc4211de0d3ec401f639",
     "kicad/minibox-carrier.kicad_pcb": "e40a87b0d2009916b5e084106307c251a7c6df4715fd0ba02d18fdece75a6b1c",
     "kicad/minibox-carrier.kicad_pro": "7d729eca3e2b8b2d6a9a64ce8b1dfe7e7398e500bffcba8f2ba58a5ad7701a72",
     "kicad/Minibox.pretty/CPG151101D13.kicad_mod": "78b0342dd0c3c120bea5b5aeb407b33e0b97f963601617bbb95484f34c9dd4a6",
@@ -160,7 +163,7 @@
     "kicad/Minibox.pretty/YV13S_L7.85_B10Ka_60_0_DL01.kicad_mod": "51f56d53dff9443497fbc55af53241af899d4875338e35f5cd604ade90dc46cd",
     "kicad/package_review.py": "373da7b2e196a8300e4e0e7b2ca5bffd0eed2ce1a52dac807bf8a5308d276ecb",
     "kicad/prune_ground_vias.py": "6317de116c0f239cf93284962f0de0130f279704ac8959ac793a03acc1585bd8",
-    "kicad/README.md": "b69a3934a8234bbfb2cd3d9c0824a48af86948945f48231a79e5d8f52fb6b593",
+    "kicad/README.md": "56f6c7f336f0594e755c8d0af408087e6871008503b562f96b2b7d5c5b8bb155",
     "kicad/renders/assembly-layout.svg": "57d80b0bcd6906251d69bc52ddbf19add7824d32c874c1de9baf33aa15d42eb7",
     "kicad/renders/minibox-carrier-back-legend.png": "1292b22cef07484f2e59e627f2992b56fe81c40eb57bd03d0df42194bc020e7f",
     "kicad/renders/minibox-carrier-back.png": "37105cef4e61e212fec00b5a2f5d3a83b3e6db7a225d101aa74997b970288c9a",

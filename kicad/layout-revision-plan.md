@@ -82,7 +82,8 @@ PCB页面报价￥241.70，快递支付时核定；尚非全装配总价。
 44/44覆盖、错配0、缺失0、外设GPIO冲突0；载板J2对应官方J3。
 GPIO1/2为ADC1_CH0/CH1；GPIO39–42占用四线JTAG信号，USB19/20保留。
 仍待实物确认克隆板RGB48/官方RGB38差异及模块电气前提：
-INMP441 SD需约100 kΩ下拉（模块可能自带，载板/固件未提供），
+INMP441当前实际模块已由用户实测确认无需增加SD下拉，取消该待确认项；
+PCB、固件和BOM不新增元件，不推断模块内部电阻配置。
 GAIN42保持高阻或输出低，不能输出高；摇杆上端超过ADC标称有效范围须标定。
 出处：[官方排针表](https://docs.espressif.com/projects/esp-dev-kits/zh_CN/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html#j3)、
 [ESP-IDF GPIO](https://docs.espressif.com/projects/esp-idf/en/v5.3.5/esp32s3/api-reference/peripherals/gpio.html)、

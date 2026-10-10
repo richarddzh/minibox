@@ -435,6 +435,9 @@ tracks = list(board.GetTracks())
 manifest = {
     "version_control": "Git history; current outputs use fixed paths",
     "status": "ENGINEERING_REVIEW_NOT_PRODUCTION_APPROVED",
+    "confirmed_module_conditions": {
+        "inmp441_additional_sd_pull_down_required": False,
+        "basis": "User tested the actual INMP441 module and confirmed no additional SD pull-down is needed; internal resistor arrangement is not inferred"},
     "board": {"width_mm": width, "height_mm": height, "nominal_thickness_mm": 1.6,
               "layers": 4, "origin_kicad_mm": [left, bottom], "coordinate_axes": "X right, Y up, top view"},
     "drc_violations": len(drc["violations"]), "unconnected_items": len(drc["unconnected_items"]),
@@ -465,7 +468,6 @@ manifest = {
     "needs_factory_review": [
         "Selected connector MPNs require factory insertion/soldering approval; catalog stock is not reserved",
         "Actual ESP32/header spacing, RTC battery thickness, amplifier footprint and microphone spacing",
-        "Verify actual INMP441 module SD has the required approximately100k pull-down; carrier/firmware do not provide it",
         "Factory stackup, supply current/thermal verification, backfeed check",
         "THT solder process, actual hole tolerances and keycap/joystick cap fit",
         "JLC CPL zero-angle/pin-1 preview; THT data are review coordinates, not SMT placement instructions"],
