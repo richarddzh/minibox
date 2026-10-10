@@ -31,11 +31,12 @@
 - 当前改版四个机械轴分别接 GPIO4/5/6/7 与 GND，不接 VCC；
   默认低有效并使用内部上拉，可在菜单中切换为高有效。
   摇杆 X=GPIO1、Y=GPIO2 的代码保留，但当前测试不启用。
-  摇杆按压不使用，GPIO42 已释放，PCB 按压触点保持 NC。
-  RTC SDA=GPIO16、SCL=GPIO15，仅预留配置，当前未实现驱动。
-- INMP441 SD=GPIO17、WS=GPIO39、SCK=GPIO40，L/R 接 GND（左声道）；
+  摇杆按压不使用，PCB 按压触点保持 NC；GPIO17 悬空 NC。
+  RTC SDA=GPIO15、SCL=GPIO16，仅预留配置，当前未实现驱动。
+- INMP441 SD=GPIO21、WS=GPIO39、SCK=GPIO40，L/R 接 GND（左声道）；
+  模块正面视角左列从上到下为 L/R、WS、SCK，右列为 GND、VCC、SD。
   MAX98357 DIN=GPIO41、LRC=GPIO39、BCLK=GPIO40、SD/MODE=GPIO47、
-  GAIN=GPIO21。GPIO47 播放时为高、其余时间为低，GPIO21 默认高阻；
+  GAIN=GPIO42。GPIO47 播放时为高、其余时间为低，GPIO42 默认高阻；
   两模块半双工共用时钟，先释放当前 I2S 通道再切换；
   GPIO5 按住录音（最多 3 秒）、松开回放。
 - GPIO48 控制板载 WS2812 RGB LED；启动时发送黑色数据熄灯。

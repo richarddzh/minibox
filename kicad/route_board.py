@@ -14,6 +14,7 @@ from math import ceil, floor, hypot
 from pathlib import Path
 
 import pcbnew as pcb
+from routing_checks import verify_routing
 
 
 FILE = Path(__file__).with_name("minibox-carrier.kicad_pcb")
@@ -171,6 +172,8 @@ def pad_cells(pad, margin):
 for pad in all_pads:
     px, py = cell(pad.GetPosition())
     pad_clearance = max(CLEARANCE, mm(pad.GetLocalClearance() or 0))
+    if pad.GetParentFootprint().GetReference() == "J2" and pad.GetNumber() == "1":
+        pad_clearance = max(pad_clearance, 0.8)
     radius = max(mm(pad.GetSize().x), mm(pad.GetSize().y)) / 2
     if pad.GetParentFootprint().GetReference().startswith("H"):
         radius = 3.5
@@ -409,6 +412,8 @@ for pad in all_pads:
         dx, dy = 5, 0
     elif reference == "J1" and pad.GetNetname() in I2S_NETS:
         dx, dy = 0, 4
+    elif reference == "J2" and pad.GetNetname() == "MIC_SD":
+        dx, dy = 0, 1.25
     elif reference == "J2" and pad.GetNetname() in I2S_NETS:
         dx, dy = 0, 4
     elif reference in ("R1", "R2") and number == 1:
@@ -794,54 +799,32 @@ for item in tracks:
         stitch_near(item.GetPosition())
 
 board.BuildConnectivity()
+joy = next(f for f in board.GetFootprints() if f.GetReference() == "JS1")
+joy_x, joy_y = mm(joy.GetPosition().x), mm(joy.GetPosition().y)
+for zone in board.Zones():
+    if zone.GetLayer() != pcb.In1_Cu or zone.GetNetname() != "GND":
+        continue
+    outline = zone.Outline()
+    outline.RemoveAllContours()
+    outline.NewOutline()
+    vertices = [(LEFT+1, TOP+1), (RIGHT-1, TOP+1),
+                (RIGHT-1, BOTTOM-1), (LEFT+1, BOTTOM-1)]
+    if joy_x - 8.73 - 1.225 <= LEFT + 1:
+        # Trim an edge-side thermal pocket only when a signal antipad reaches the edge.
+        notch = joy_x - 8.73 + 0.23
+        vertices += [(LEFT+1, joy_y-0.25), (notch, joy_y-1.5),
+                     (notch, joy_y-3), (LEFT+1, joy_y-4.25)]
+    for x, y in vertices:
+        outline.Append(pcb.FromMM(x), pcb.FromMM(y))
 if not pcb.ZONE_FILLER(board).Fill(board.Zones()):
     raise RuntimeError("KiCad failed to fill the ground zones")
 pcb.SaveBoard(str(FILE), board)
+board.BuildConnectivity()
+if not pcb.ZONE_FILLER(board).Fill(board.Zones()):
+    raise RuntimeError("KiCad failed to settle the updated zone connectivity")
+pcb.SaveBoard(str(FILE), board)
 
-ground_plane = next(
-    zone.GetFilledPolysList(pcb.In1_Cu) for zone in board.Zones()
-    if zone.GetLayer() == pcb.In1_Cu and zone.GetNetname() == "GND")
-if ground_plane.OutlineCount() != 1:
-    raise RuntimeError("The inner GND plane must remain a single connected region")
-endpoint_boxes = {
-    name: [pad.GetBoundingBox() for pad in pads[name]] for name in I2S_NETS
-}
-for item in board.GetTracks():
-    if isinstance(item, pcb.PCB_VIA) and item.GetNetname() in I2S_NETS:
-        endpoint_boxes[item.GetNetname()].append(item.GetBoundingBox())
-bottom_ground_plane = next(
-    zone.GetFilledPolysList(pcb.In2_Cu) for zone in board.Zones()
-    if zone.GetLayer() == pcb.In2_Cu and zone.GetNetname() == "GND")
-for item in board.GetTracks():
-    if isinstance(item, pcb.PCB_VIA):
-        continue
-    if item.GetNetname() in POWER_WIDTHS:
-        if item.GetLayer() not in (pcb.F_Cu, pcb.In2_Cu):
-            raise RuntimeError("Power routing must stay on F.Cu/In2.Cu")
-    elif item.GetLayer() not in (pcb.F_Cu, pcb.B_Cu):
-        raise RuntimeError("Signal routing must stay on the outer layers")
-    if item.GetNetname() not in I2S_NETS:
-        continue
-    reference_plane = ground_plane if item.GetLayer() == pcb.F_Cu else bottom_ground_plane
-    start, end = item.GetStart(), item.GetEnd()
-    samples = max(1, ceil(mm(item.GetLength()) / 0.1))
-    for index in range(samples):
-        ratio = (index + 0.5) / samples
-        position = pcb.VECTOR2I(
-            round(start.x + ratio * (end.x - start.x)),
-            round(start.y + ratio * (end.y - start.y)))
-        if reference_plane.Contains(position):
-            continue
-        # A plated signal pad necessarily has an antipad in the GND plane.
-        margin = pcb.FromMM(0.4)
-        if any(
-                box.GetLeft() - margin <= position.x <= box.GetRight() + margin and
-                box.GetTop() - margin <= position.y <= box.GetBottom() + margin
-                for box in endpoint_boxes[item.GetNetname()]):
-            continue
-        raise RuntimeError(
-            f"{item.GetNetname()} loses its GND reference at "
-            f"({mm(position.x):.3f}, {mm(position.y):.3f})")
+verify_routing(board)
 print("I2S reference: verified filled In1/In2 GND outside connector antipads", flush=True)
 pcb.SaveBoard(str(FILE), board)
 

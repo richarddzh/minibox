@@ -37,8 +37,13 @@ config MINIBOX_JOYSTICK_Y_INVERTED
     default n
 
 config MINIBOX_AMP_GAIN_12DB
-    bool "MAX98357 GAIN: drive GPIO21 low for 12 dB (off = floating, 9 dB)"
+    bool "MAX98357 GAIN: drive GPIO42 low for 12 dB (off = floating, 9 dB)"
     default n
+    help
+        GPIO42 controls amplifier gain, not the unused joystick switch.
+        Enable to drive GAIN low for approximately 12 dB.
+        Disable to leave GAIN high-impedance without pull-ups or pull-downs
+        for approximately 9 dB. SD/MODE remains on GPIO47.
 
 config MINIBOX_LCD_SPI_MHZ
     int "ST7796 SPI clock (MHz)"

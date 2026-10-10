@@ -8,11 +8,15 @@ import re
 from math import hypot
 from pathlib import Path
 import subprocess
+import sys
+from tempfile import NamedTemporaryFile
 import zipfile
 
 import pcbnew as pcb
+from PIL import Image
 from export_jlc_positions import write_jlc_positions
 from package_review import package_review
+from routing_checks import verify_routing
 
 
 HERE = Path(__file__).resolve().parent
@@ -47,6 +51,13 @@ drc = json.loads((OUT / "drc.json").read_text(encoding="utf-8"))
 if drc["violations"] or drc["unconnected_items"]:
     raise RuntimeError("Export gate: fix the saved board's DRC/unconnected items first")
 board = pcb.LoadBoard(str(FILE))
+routing_review = verify_routing(board)
+ground_review_path = OUT / "ground-stitching-review.json"
+if ground_review_path.exists():
+    ground_review = json.loads(ground_review_path.read_text(encoding="utf-8"))
+    if ground_review["board_sha256"] == hashlib.sha256(FILE.read_bytes()).hexdigest():
+        ground_review.update({"needs_final_drc": False, "drc_violations": 0, "unconnected_items": 0})
+        ground_review_path.write_text(json.dumps(ground_review, indent=2) + "\n", encoding="utf-8")
 if board.GetCopperLayerCount() != 4 or abs(mm(board.GetDesignSettings().GetBoardThickness()) - 1.6) > 0.001:
     raise RuntimeError("Expected four copper layers and nominal 1.6 mm thickness")
 fps = {f.GetReference(): f for f in board.GetFootprints()}
@@ -115,6 +126,8 @@ checks = {
     "key_lower_pitch_x_mm": centers[3][0] - centers[2][0],
     "key_right_pitch_y_mm": centers[3][1] - centers[1][1],
     "key_lower_stagger_mm": centers[0][0] - centers[2][0],
+    "key_lower_row_center_fraction_of_upper_left": (
+        (centers[2][0] + centers[3][0]) / 2 - (centers[0][0] - key_size / 2)) / key_size,
     "keycap_gap_mm": centers[1][0] - centers[0][0] - key_size,
     "rtc_esp_body_gap_mm": 18.03 - 15,
     "amp_keyboard_gap_mm": centers[0][1] - key_size / 2 - 72,
@@ -134,12 +147,29 @@ checks = {
     "joystick_screw_keepout_gap_mm": min(
         circle_rectangle_gap(joy, motion_radius, b) for b in screw_bounds),
     "esp_body_board_right_gap_mm": right - 88.5,
+    "power_body_top_alignment_error_mm": terminal_bodies["J8"][1] - 45.97,
+    "power_terminal_left_courtyard_gap_mm": min(
+        mm(s.GetBoundingBox().GetLeft()) - left for r in ("J8", "J9")
+        for s in fps[r].GraphicalItems()
+        if isinstance(s, pcb.PCB_SHAPE) and s.GetLayer() == pcb.F_CrtYd),
 }
 for name in ("key_pitch_x_mm", "key_pitch_y_mm", "key_lower_pitch_x_mm", "key_right_pitch_y_mm"):
     if abs(checks[name] - 19.05) > 0.001:
         raise RuntimeError(f"Nonstandard keyboard pitch: {name}")
-if abs(checks["key_lower_stagger_mm"] - 9.525) > 0.001:
-    raise RuntimeError("Lower keys must retain the half-unit stagger")
+if abs(checks["key_lower_stagger_mm"] - 8.1) > 0.001:
+    raise RuntimeError("Lower row must move right 1.425 mm, limited by the screw square")
+def rectangle_gap(a, b):
+    return hypot(max(a[0]-b[2], b[0]-a[2], 0),
+                 max(a[1]-b[3], b[1]-a[3], 0))
+
+checks["keycap_screw_square_gap_mm"] = min(
+    rectangle_gap(a, b) for a in key_bounds for b in screw_bounds)
+if checks["keycap_screw_square_gap_mm"] < 0.2 - 0.001:
+    raise RuntimeError("Keycap overlaps or approaches the mounting-screw square")
+if abs(checks["power_body_top_alignment_error_mm"]) > 0.001:
+    raise RuntimeError("J8 body top must align with the ESP32 body bottom")
+if checks["power_terminal_left_courtyard_gap_mm"] < 0.2 - 0.001:
+    raise RuntimeError("Left terminal tolerance envelope is outside the board")
 for x, y in centers:
     if min(x-key_size/2-left, right-x-key_size/2, y-key_size/2-top, bottom-y-key_size/2) < 0.6 - 0.001:
         raise RuntimeError("Keycap envelope too close to PCB edge")
@@ -153,7 +183,6 @@ for name in ("rtc_esp_body_gap_mm", "amp_keyboard_gap_mm",
         raise RuntimeError(f"Mechanical reservation violated: {name}={checks[name]}")
 for name, minimum in (("mic_keycap_gap_mm", 1.2),
                       ("mic_top_below_keycap_top_mm", 0),
-                      ("joystick_motion_board_edge_gap_mm", 0.6),
                       ("joystick_screw_keepout_gap_mm", 0.6)):
     if checks[name] < minimum - 0.001:
         raise RuntimeError(f"Control clearance violated: {name}={checks[name]}")
@@ -164,13 +193,47 @@ if fps["J7"].GetOrientationDegrees() % 360 != 90 or any(
     raise RuntimeError("Wire entries must face the nearest outer side")
 if any(p.GetNetname() for p in fps["JS1"].Pads() if p.GetNumber().startswith("SW")):
     raise RuntimeError("Joystick press must remain disconnected")
-if next(p for p in fps["J2"].Pads() if p.GetNumber() == "6").GetNetname():
-    raise RuntimeError("GPIO42 must remain free")
+if next(p for p in fps["J1"].Pads() if p.GetNumber() == "10").GetNetname():
+    raise RuntimeError("GPIO17 must remain disconnected")
+if any(t.GetStart() == next(p for p in fps["J1"].Pads() if p.GetNumber() == "10").GetPosition()
+       or t.GetEnd() == next(p for p in fps["J1"].Pads() if p.GetNumber() == "10").GetPosition()
+       for t in board.GetTracks() if not isinstance(t, pcb.PCB_VIA)):
+    raise RuntimeError("GPIO17 has a trace attached")
+joy_body = body_bounds(fps["JS1"])
+checks["joystick_body_board_left_gap_mm"] = joy_body[0] - left
+checks["joystick_body_left_copper_boundary_gap_mm"] = joy_body[0] - (left + 1)
+checks["joystick_pad_left_copper_boundary_gap_mm"] = min(
+    mm(p.GetBoundingBox().GetLeft()) - (left + 1) for p in fps["JS1"].Pads())
+if min(checks["joystick_body_left_copper_boundary_gap_mm"],
+       checks["joystick_pad_left_copper_boundary_gap_mm"]) < 1 - 0.001:
+    raise RuntimeError("Joystick body and pad copper need 1 mm to the left copper boundary")
+if min(joy_body[0]-left, right-joy_body[2], joy_body[1]-top, bottom-joy_body[3]) < 0.5 - 0.001:
+    raise RuntimeError("Only the joystick motion envelope may extend beyond the PCB")
+
+def microphone_control_gap(x):
+    return min(hypot(x - joy[0], mic[1] - joy[1]) - motion_radius - mic_radius,
+               *(circle_rectangle_gap((x, mic[1]), mic_radius, b) for b in key_bounds))
+
+a, c = joy[0], centers[0][0] - key_size / 2
+for _ in range(80):
+    u, v = a + (c - a) / 3, c - (c - a) / 3
+    if microphone_control_gap(u) < microphone_control_gap(v):
+        a = u
+    else:
+        c = v
+checks["mic_horizontal_optimal_x_mm"] = (a + c) / 2
+checks["mic_control_minimum_gap_mm"] = microphone_control_gap(mic[0])
+checks["mic_horizontal_optimum_loss_mm"] = (
+    microphone_control_gap(checks["mic_horizontal_optimal_x_mm"]) - checks["mic_control_minimum_gap_mm"])
+if checks["mic_horizontal_optimum_loss_mm"] > 0.001:
+    raise RuntimeError("Microphone is not at the horizontal maximin control clearance")
 expected = {
     ("J1", "4"): "BUTTON1", ("J1", "5"): "RECORD", ("J1", "6"): "BUTTON3",
-    ("J1", "7"): "BUTTON4", ("J1", "8"): "RTC_SCL", ("J1", "9"): "RTC_SDA",
-    ("J5", "3"): "RTC_SDA", ("J5", "4"): "RTC_SCL",
-    ("J1", "10"): "MIC_SD", ("J2", "17"): "AMP_SD", ("J2", "18"): "AMP_GAIN",
+    ("J1", "7"): "BUTTON4", ("J1", "8"): "RTC_SDA", ("J1", "9"): "RTC_SCL",
+    ("J5", "3"): "RTC_SCL", ("J5", "4"): "RTC_SDA",
+    ("J2", "6"): "AMP_GAIN", ("J2", "17"): "AMP_SD", ("J2", "18"): "MIC_SD",
+    ("J3", "1"): "GND", ("J3", "2"): "GND", ("J3", "3"): "3V3",
+    ("J3", "4"): "I2S_WS", ("J3", "5"): "MIC_SD", ("J3", "6"): "I2S_BCLK",
     ("JS1", "X2"): "GPIO1", ("JS1", "Y2"): "GPIO2",
     ("R1", "1"): "USB_CC1", ("R2", "1"): "USB_CC2",
     ("R1", "2"): "GND", ("R2", "2"): "GND",
@@ -330,7 +393,7 @@ svg.extend([
     f'<circle cx="{joy[0]}" cy="{joy[1]}" r="15" fill="#d3b6eb" fill-opacity=".25" stroke="#6c4596" stroke-dasharray="1 1" stroke-width=".3"/>',
     f'<text x="{joy[0]}" y="{joy[1]}" text-anchor="middle">JS1 MOTION D30</text>',
     f'<circle cx="{mic[0]}" cy="{mic[1]}" r="{mic_radius}" fill="#ffe6b3" stroke="#8b6a21" stroke-width=".25"/>',
-    f'<text x="{mic[0]}" y="{mic[1]}" text-anchor="middle">MIC GPIO17</text>'])
+    f'<text x="{mic[0]}" y="{mic[1]}" text-anchor="middle">MIC GPIO21</text>'])
 for fp in fps.values():
     for p in fp.Pads():
         x, y = mm(p.GetPosition().x), mm(p.GetPosition().y)
@@ -342,6 +405,26 @@ svg.extend([f'<text x="52" y="126" text-anchor="middle">{width:g} x {height:g} m
 run("pcb", "export", "svg", "--output", OUT / "assembly-pads.svg",
     "--layers", "F.Fab,F.SilkS,Edge.Cuts,Dwgs.User", "--mode-single",
     "--fit-page-to-board", "--exclude-drawing-sheet", "--sketch-pads-on-fab-layers", FILE)
+for svg_file in (OUT / "assembly-pads.svg", *GERBERS.glob("*-drl_map.svg")):
+    content = svg_file.read_text(encoding="utf-8")
+    svg_file.write_text(re.sub(r"[ \t]+$", "", content, flags=re.M), encoding="utf-8")
+for view, side, extra in (
+        ("front", "top", ()), ("back", "bottom", ()),
+        ("isometric", "top", ("--rotate", "315,0,30", "--perspective"))):
+    width_px, height_px, zoom = (2184, 1568, 0.6) if view == "isometric" else (1568, 2184, 0.8)
+    destination = RENDERS / f"minibox-carrier-{view}.png"
+    with NamedTemporaryFile(dir=RENDERS, suffix=".png", delete=False) as staging:
+        temporary = Path(staging.name)
+    try:
+        run("pcb", "render", "--output", temporary,
+            "--width", width_px, "--height", height_px, "--background", "opaque",
+            "--quality", "basic", "--zoom", zoom, "--side", side, *extra, FILE)
+        with Image.open(temporary) as image:
+            image.verify()
+        temporary.replace(destination)
+    finally:
+        temporary.unlink(missing_ok=True)
+subprocess.run([sys.executable, str(HERE / "add_render_legends.py")], check=True)
 gerber_zip = GERBERS / "minibox-gerber-review.zip"
 with zipfile.ZipFile(gerber_zip, "w", zipfile.ZIP_DEFLATED) as archive:
     for p in sorted(GERBERS.iterdir()):
@@ -363,11 +446,13 @@ manifest = {
         "policy": "Via return paths and separate ground-copper regions, not periodic trace stitching",
         "maximum_via_return_distance_mm": round(max_return_distance, 4)},
     "board_sha256": hashlib.sha256(FILE.read_bytes()).hexdigest(),
+    "render_source_board_sha256": hashlib.sha256(FILE.read_bytes()).hexdigest(),
+    "routing_review": routing_review,
     "terminals": {"J7": "C72334 WJ500V-5.08-03P-14-00A",
                   "J8_J9": "C8465 WJ500V-5.08-2P", "hole_mm": 1.5, "pad_mm": 2.6,
                   "radial_annular_ring_mm": 0.55,
                   "body_height_mm": 14.07, "joining_lug_included": True,
-                  "J8_J9_moved_up_mm": 1.0},
+                  "J8_J9_moved_up_mm": 3.94, "J8_J9_moved_left_mm": 2.5},
     "gerber_sha256": hashlib.sha256(gerber_zip.read_bytes()).hexdigest(),
     "cam_alignment": {"copper_layers_checked": 4, "plated_centers_checked": len(centers_nm),
                       "drill_holes_checked": drill_counts, "origin_kicad_mm": [left, bottom]},
@@ -380,6 +465,7 @@ manifest = {
     "needs_factory_review": [
         "Selected connector MPNs require factory insertion/soldering approval; catalog stock is not reserved",
         "Actual ESP32/header spacing, RTC battery thickness, amplifier footprint and microphone spacing",
+        "Verify actual INMP441 module SD has the required approximately100k pull-down; carrier/firmware do not provide it",
         "Factory stackup, supply current/thermal verification, backfeed check",
         "THT solder process, actual hole tolerances and keycap/joystick cap fit",
         "JLC CPL zero-angle/pin-1 preview; THT data are review coordinates, not SMT placement instructions"],

@@ -1,4 +1,4 @@
-# Minibox carrier v1.1 — 2026-10-09
+# Minibox carrier v1.2 — 2026-10-10
 
 This is the user's actual `kicad` carrier, not the separate integrated design.
 Open `minibox-carrier.kicad_pro` in KiCad 10. There is **no schematic**:
@@ -22,9 +22,9 @@ Bounding-rectangle area is only 1.28% smaller than the old 100 × 112 mm board.
 | RTC | Upright, battery included in 27.5 × 12 mm reservation; 3.03 mm to ESP32 estimate |
 | MAX98357 | Flat 27 × 24 mm reservation; bottom Y=72, above keycap top Y=80.5 |
 | Red boundary | Y=76; upper bodies ≤74, lower operation envelopes ≥78 |
-| Joystick JS1 | Vertical, center (20.75,97.5); **30 mm diameter**; 0.75 mm to edge, 0.77 mm to screw keepout |
-| Microphone | Center (46.5,90.25), Ø19.5 mm envelope; top Y80.5 aligned to keycaps; ≥1.22 mm to keys, ≥2.00 mm to joystick |
-| Four keys | Standard 19.05 mm pitch both ways; lower row staggered 9.525 mm left |
+| Joystick JS1 | Vertical, center (16.8,95.5); **30 mm diameter** motion may overhang 3.20 mm; body/pad copper retain ≥1 mm to the left copper boundary |
+| Microphone | Center (44.455,90.25), Ø19.5 mm envelope; top Y80.5; horizontal maximin clearance to all keycaps and joystick motion is approximately 3.40 mm |
+| Four keys | Standard 19.05 mm pitch both ways; lower row moves right 1.425 mm, retaining 8.10 mm left stagger and 0.20 mm to the screw square |
 | Keycaps | Maximum accepted envelope 18 × 18 mm; neighboring gap 1.05 mm |
 | Wire entries | J8/J9 left, J7 right; external wire/tool clearance still requires a fit check |
 
@@ -32,7 +32,7 @@ SW1–SW4 use **HanElectricity CPG151101D13 / C49234235**; JS1 uses
 **YTL YV13S-L7.85-B10Ka(60)-0-DL01 / C37323747**.
 Their local footprints are traced to the exact linked drawings, not generic
 MX/joystick substitutes. The joystick has a press mechanism but **it is intentionally
-unused**; switch and mounting leads have no net, and **GPIO42 is free**.
+unused**; switch and mounting leads have no net; **GPIO42 now controls amplifier GAIN**.
 Reference PDFs and layout images are in [`hardware_references`](../hardware_references/carrier-revision-references.md).
 The exact parts lack precise supplied 3D models; renders must not be mistaken
 for complete assembled-product models. Module envelopes and keycap size are
@@ -47,8 +47,9 @@ from the front; THT leads solder from the back.
 J7 is **KANGNEX WJ500V-5.08-03P-14-00A / C72334**; J8/J9 are
 **WJ500V-5.08-2P / C8465**. Exact local footprints include the 0.60 mm joining
 lug, 10 mm body depth, 14.07 mm height, and a tolerance-aware courtyard.
-J8/J9 were moved up 1 mm together to keep the larger bodies out of the
-Y=74–78 partition; their wire entries and electrical pin order are unchanged.
+J8/J9 move left2.5/up3.94 mm from the prior version, with anchors
+(11.5,48.56)/(11.5,61.06). J8's actual body top aligns with the estimated
+ESP32 body bottom at Y45.97; their wire entries and electrical order are unchanged.
 The selected terminal holes are **Ø1.50 mm**, with unchanged Ø2.60 mm pads
 and 0.55 mm radial annular rings. No original Phoenix 3D model is reused
 to impersonate the selected WJ500V; current renders show its holes/outline,
@@ -56,18 +57,31 @@ not an exact terminal body.
 
 ## GPIO and Type-C
 
-Keys → GPIO4/5/6/7 (active-low, internal pulls); RTC SDA/SCL →16/15;
-MIC_SD →17; amplifier GAIN/SD_MODE →21/47. I2S WS/BCLK/DIN →39/40/41;
+Keys → GPIO4/5/6/7 (active-low, internal pulls); RTC SDA/SCL →15/16;
+MIC_SD →21; amplifier GAIN/SD_MODE →42/47; GPIO17 is NC. I2S WS/BCLK/DIN →39/40/41;
 joystick VR1/VR2 wipers →1/2; LCD remains GPIO9–14.
 Actual front silkscreen identifies each module/terminal signal and its GPIO
-using digits only, for example `SDA16`, `BCLK40`, `DIN41`, and `KEY1 4`.
+using digits only, for example `SDA15`, `BCLK40`, `DIN41`, and `KEY1 4`.
 Power pins retain `3V3`/`5V`/`GND`; disconnected pins retain `NC`.
 Labels are on `F.SilkS`, not just the non-printing fabrication layer.
 See [the authoritative wiring table](../docs/hardware-connections.md).
+RTC front-view order is CLK/INT/SCL/SDA/3V3/GND; only functional net names
+and labels changed, retaining both original copper paths. INMP441 front-view
+left top-to-bottom is L/R(GND), WS39, SCK40; right is GND, 3V3, SD21.
+The lower-row centre reaches approximately58% of the upper-left key width:
+the requested approximate2/3 position would overlap the lower-right screw square
+with18 mm keycaps. The screw exclusion takes priority without moving the hole.
+The joystick's leftmost pad copper is X7.22 mm:1.22 mm from the X6 mm
+copper-pour boundary and2.22 mm from the board edge. The body gap is1.05 mm.
 Octal-memory GPIO35/36/37 are unused, as are USB19/20 and UART43/44.
-GPIO39–41 cannot simultaneously be used for external JTAG.
+GPIO39–42 cannot simultaneously be used for external four-wire JTAG.
 Actual clone RGB firmware remains GPIO48; official v1.1 uses38, requiring
 physical board identification, not an automatic firmware change.
+The requested independent GPIO audit checked all44 J1/J2 pads against the
+[official v1.1 J1/J3 table](https://docs.espressif.com/projects/esp-dev-kits/zh_CN/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.1.html#j3):
+no mapping errors or peripheral conflicts were found. Verify the clone's
+actual pinout/RGB and whether its INMP441 module includes the required SD
+100 kΩ pull-down before production; neither module assumption is proven by DRC.
 
 External Type-C VBUS/GND →J8; independent CC1/CC2 →J9 pads1/2.
 R1/R2 each pull their own CC to GND through **5.1 kΩ, 0402, 1%**.
@@ -83,7 +97,9 @@ B.Cu signals/GND. I2S prefers F.Cu/In1, with limited B.Cu/In2-ground-reference
 branches. The router checks actual filled reference copper every ≤0.1 mm
 outside necessary same-net antipads and requires one connected In1 region.
 Signal vias receive nearby GND stitching. This is not a signal-integrity test.
-Ground stitching was reduced from 62 to **23 vias**: retain return paths within
+Ground stitching was pruned from41 to23 vias after rerouting;18 redundant
+vias were removed, with candidate-by-candidate connectivity/refill checks.
+The current manifest records the final counts: retain return paths within
 3 mm of every signal/power via and connections to separate ground-copper regions.
 Do not add periodic stitching along same-layer I2S traces merely for their length;
 the continuous reference plane carries their return current.
@@ -91,7 +107,7 @@ the continuous reference plane carries their return current.
 Signals/clearance **0.20/0.20 mm**, 3V3 feeders0.65 mm, 5V feeders0.80 mm;
 ordinary vias **0.60/0.30 mm**. Copper-edge0.50 mm; PTH hole spacing0.45 mm;
 Track-to-other-net pad clearance is **0.30 mm**, or **0.50 mm** at 5V pads.
-The four keys moved right by1.60 mm together; rightmost keycap-to-edge gap0.60 mm.
+The upper keys retain their previous positions; rightmost keycap-to-edge gap0.60 mm.
 These tighter mechanical edge margins require an enclosure/cap tolerance check.
 silk ≥1.0 mm with0.15 mm strokes. Header holes1.0/pads1.7 mm;
 terminal holes1.5/pads2.6 mm; switch holes1.5/pads2.1 mm.
@@ -169,6 +185,7 @@ From `C:\gitroot\minibox`, after explicitly backing up the routed board:
 ```powershell
 & 'C:\Program Files\KiCad\10.0\bin\python.exe' .\kicad\generate_board.py --replace-routed
 & 'C:\Program Files\KiCad\10.0\bin\python.exe' .\kicad\route_board.py
+& 'C:\Program Files\KiCad\10.0\bin\python.exe' .\kicad\prune_ground_vias.py
 & 'C:\Program Files\KiCad\10.0\bin\python.exe' .\kicad\export_revision.py
 ```
 
@@ -180,3 +197,11 @@ from the saved PCB, and the legends now correctly identify four copper layers.
 After updating renders or documentation, run `python .\kicad\package_review.py`
 to refresh `assembly\minibox-assembly-review.zip` and all artifact hashes.
 Every PCB/part change requires the full export, not only the coordinate command.
+The full exporter now also renders the saved board's front/back/isometric PNGs
+and regenerates both Chinese dimension/legend images before packaging.
+`render_source_board_sha256` binds that render batch to the exported PCB.
+After partial rerouting, the pruning command removes only redundant GND vias,
+refilling and checking each candidate's connectivity and actual I2S reference
+copper. It preserves a GND return via within3 mm of every signal/power via.
+Its reduction report is in `assembly\ground-stitching-review.json`; run the
+full export afterwards to renew DRC, renders, CAM, placements and hashes.

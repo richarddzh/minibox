@@ -23,6 +23,8 @@ def package_review():
     cam = FABRICATION / "minibox-gerber-review.zip"
     if manifest["board_sha256"] != digest(board):
         raise RuntimeError("PCB changed: run export_revision.py before packaging")
+    if manifest.get("render_source_board_sha256") != digest(board):
+        raise RuntimeError("Render provenance differs: run the full export_revision.py")
     if manifest["drc_violations"] or manifest["unconnected_items"]:
         raise RuntimeError("Cannot package a board with DRC or connectivity failures")
     if manifest["gerber_sha256"] != digest(cam):
@@ -44,7 +46,10 @@ def package_review():
     paths.update([
         board, HERE / "minibox-carrier.kicad_pro", HERE / "fp-lib-table",
         HERE / "README.md", HERE / "carrier-revision.html", HERE / "layout-revision-plan.md",
-        HERE / "generate_board.py", HERE / "export_revision.py",
+        HERE / "generate_board.py", HERE / "route_board.py", HERE / "export_revision.py",
+        HERE / "add_render_legends.py",
+        HERE / "routing_checks.py",
+        HERE / "prune_ground_vias.py",
         HERE / "export_jlc_positions.py", HERE / "package_review.py", cam,
         ROOT / "docs" / "hardware-connections.md",
         ROOT / "docs" / "jlc-pcb-design-spec.md",

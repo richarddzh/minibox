@@ -6,8 +6,8 @@
     5.0,
     120.0
   ],
-  "board_sha256": "53f9e010208fbc778e814d2ab5684cee3e6063a76a5b1c2f632669fa7170c595",
-  "cpl_sha256": "b539e1821c1656106cec5dfc6cac0af165ba7a4507e937c71bbfbd131c30552b",
+  "board_sha256": "e40a87b0d2009916b5e084106307c251a7c6df4715fd0ba02d18fdece75a6b1c",
+  "cpl_sha256": "4c1b4f91e7e63f59468826c9fd520dc34df753a303128ad5458e1c8ffc67fdb5",
   "physical_components": 17,
   "placements": [
     {
@@ -153,11 +153,11 @@
       "lcsc_part": "C54973828",
       "rotation_ccw_deg": 270,
       "library_origin_mm": [
-        45.31,
+        43.265,
         29.75
       ],
       "kicad_pad_center_mm": [
-        45.31,
+        43.265,
         29.75
       ],
       "kicad_rotation_deg": 0.0,
@@ -184,11 +184,11 @@
       "lcsc_part": "C54973828",
       "rotation_ccw_deg": 270,
       "library_origin_mm": [
-        37.69,
+        35.645,
         29.75
       ],
       "kicad_pad_center_mm": [
-        37.69,
+        35.645,
         29.75
       ],
       "kicad_rotation_deg": 0.0,
@@ -375,12 +375,12 @@
       "lcsc_part": "C8465",
       "rotation_ccw_deg": 270,
       "library_origin_mm": [
-        9.0,
-        64.96
+        6.5,
+        68.9
       ],
       "kicad_pad_center_mm": [
-        9.0,
-        64.96
+        6.5,
+        68.9
       ],
       "kicad_rotation_deg": 270.0,
       "origin_correction_mm": [
@@ -404,12 +404,12 @@
       "lcsc_part": "C8465",
       "rotation_ccw_deg": 270,
       "library_origin_mm": [
-        9.0,
-        52.46
+        6.5,
+        56.4
       ],
       "kicad_pad_center_mm": [
-        9.0,
-        52.46
+        6.5,
+        56.4
       ],
       "kicad_rotation_deg": 270.0,
       "origin_correction_mm": [
@@ -433,12 +433,12 @@
       "lcsc_part": "C37323747",
       "rotation_ccw_deg": 270,
       "library_origin_mm": [
-        14.555949,
-        23.260001
+        10.605949,
+        25.260001
       ],
       "kicad_pad_center_mm": [
-        13.879286,
-        22.915
+        9.929286,
+        24.915
       ],
       "kicad_rotation_deg": 270.0,
       "origin_correction_mm": [
@@ -602,11 +602,11 @@
       "lcsc_part": "C49234235",
       "rotation_ccw_deg": 0,
       "library_origin_mm": [
-        55.689999,
+        57.114999,
         15.26
       ],
       "kicad_pad_center_mm": [
-        55.689999,
+        57.114999,
         15.26
       ],
       "kicad_rotation_deg": 0.0,
@@ -631,11 +631,11 @@
       "lcsc_part": "C49234235",
       "rotation_ccw_deg": 0,
       "library_origin_mm": [
-        74.74,
+        76.165,
         15.26
       ],
       "kicad_pad_center_mm": [
-        74.74,
+        76.165,
         15.26
       ],
       "kicad_rotation_deg": 0.0,
@@ -665,7 +665,7 @@
   ],
   "factory_saved_snapshot": {
     "file": "jlc-saved-placement.json",
-    "matches_current_board": true,
-    "verified": true
+    "matches_current_board": false,
+    "verified": false
   }
 }

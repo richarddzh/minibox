@@ -1,0 +1,87 @@
+{
+  "policy": "No periodic same-layer stitching; retain <=3mm via return paths, connected nets and filled I2S references",
+  "baseline_board_sha256": "353fae723735f74d182ecb9694d6f4af1fda87501cc9df9db66e6e4f01985349",
+  "board_sha256": "e40a87b0d2009916b5e084106307c251a7c6df4715fd0ba02d18fdece75a6b1c",
+  "ground_vias_before": 41,
+  "ground_vias_after": 23,
+  "removed_ground_vias": 18,
+  "removed_positions_kicad_mm": [
+    [
+      18.5,
+      55.75
+    ],
+    [
+      24.0,
+      55.25
+    ],
+    [
+      36.25,
+      40.5
+    ],
+    [
+      38.0,
+      70.75
+    ],
+    [
+      39.0,
+      13.5
+    ],
+    [
+      51.75,
+      88.25
+    ],
+    [
+      52.25,
+      61.75
+    ],
+    [
+      52.25,
+      80.5
+    ],
+    [
+      59.25,
+      40.5
+    ],
+    [
+      60.0,
+      79.75
+    ],
+    [
+      62.75,
+      21.0
+    ],
+    [
+      63.5,
+      13.5
+    ],
+    [
+      64.5,
+      93.0
+    ],
+    [
+      68.0,
+      40.5
+    ],
+    [
+      79.0,
+      47.5
+    ],
+    [
+      44.25,
+      51.0
+    ],
+    [
+      45.0,
+      77.25
+    ],
+    [
+      48.5,
+      49.5
+    ]
+  ],
+  "maximum_signal_via_return_distance_mm": 2.850438562747845,
+  "retained_for_copper_connectivity": [],
+  "needs_final_drc": false,
+  "drc_violations": 0,
+  "unconnected_items": 0
+}

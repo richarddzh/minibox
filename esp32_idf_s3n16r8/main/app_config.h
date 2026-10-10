@@ -14,10 +14,10 @@
 #define ONBOARD_LED_PIN 48
 #define AUDIO_BCLK_PIN 40
 #define AUDIO_WS_PIN 39
-#define MIC_SD_PIN 17
+#define MIC_SD_PIN 21
 #define SPEAKER_DIN_PIN 41
 #define SPEAKER_SD_MODE_PIN 47
-#define SPEAKER_GAIN_PIN 21
+#define SPEAKER_GAIN_PIN 42
 #define AUDIO_SAMPLE_RATE 16000
 #define AUDIO_MAX_SECONDS 3
 #define BUTTON_1_PIN 4
@@ -25,8 +25,8 @@
 #define BUTTON_3_PIN 6
 #define BUTTON_4_PIN 7
 #define BUTTON_COUNT 4
-#define RTC_SDA_PIN 16
-#define RTC_SCL_PIN 15
+#define RTC_SDA_PIN 15
+#define RTC_SCL_PIN 16
 
 #define MINIBOX_STRINGIFY_INNER(value) #value
 #define MINIBOX_STRINGIFY(value) MINIBOX_STRINGIFY_INNER(value)
