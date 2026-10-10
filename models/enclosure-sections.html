@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Minibox — 外壳切面与分件确认</title>
+<style>
+:root{--ink:#172b43;--muted:#64748b;--base:#b8d9f2;--base-stroke:#245b86;--lid:#ffc47d;--lid-stroke:#b95b08;--part:#429575;--hole:#ce3848;--line:#bdc9d6;--bg:#f1f5f9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI","Microsoft YaHei",sans-serif}
+header{background:#152d46;color:white;padding:28px max(24px,calc((100vw - 1320px)/2));border-bottom:5px solid #efae61}
+header small{color:#a9c7de;letter-spacing:.15em}h1{font-size:28px;margin:8px 0 12px;font-weight:650}
+header p{max-width:1040px;margin:0;line-height:1.8;color:#deebf5}
+main{max-width:1360px;margin:0 auto;padding:24px}
+.toolbar{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:#fff;padding:16px 20px;border:1px solid #d9e2ed;border-radius:12px;margin-bottom:18px}
+.legend{display:flex;align-items:center;gap:7px;font-size:14px}.swatch{width:20px;height:13px;border:1px solid;border-radius:3px}
+.base-swatch{background:var(--base);border-color:var(--base-stroke)}.lid-swatch{background:var(--lid);border-color:var(--lid-stroke)}
+.part-swatch{background:#d4eee3;border-color:var(--part)}.hole-swatch{background:white;border-color:var(--hole)}
+.toolbar label{font-size:14px;cursor:pointer}.toolbar input{accent-color:#245b86}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.card{min-width:0;background:white;border:1px solid #dce4ed;border-radius:14px;overflow:hidden;box-shadow:0 4px 15px #20385006}
+.wide{grid-column:1/-1}.head{padding:19px 22px 0}.head h2{font-size:19px;margin:0 0 7px}.head p{font-size:13px;line-height:1.65;color:var(--muted);margin:0}
+.letter{display:inline-block;background:#eaf1f8;color:#245b86;border-radius:5px;padding:2px 7px;margin-right:9px;font-size:15px}
+.drawing{padding:8px 14px 4px;overflow:hidden}.drawing svg{display:block;width:100%;height:auto}
+#side svg{max-height:685px}#front svg{max-height:480px}#top svg{max-height:390px}#screen svg{max-height:390px}#exterior svg{max-height:580px}#sideExterior svg{max-height:560px}
+.note{margin:0 20px 20px;padding:11px 14px;background:#f6f9fc;border-left:3px solid #88aac7;font-size:13px;line-height:1.75}
+.warn{background:#fff7e9;border-color:#dda047}.foot{padding:20px 22px;font-size:13px;line-height:1.8;color:var(--muted)}
+.reference{margin:0 20px 16px;padding:10px 12px;border:1px dashed #c8d5e3;border-radius:8px;background:#fafcfe;font-size:13px}
+.reference summary{cursor:pointer;color:#245b86;line-height:1.6}.reference img{display:block;max-width:100%;max-height:470px;margin:12px auto 0;object-fit:contain;background:white}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}th,td{text-align:left;border-bottom:1px solid #e6edf4;padding:9px 12px;vertical-align:top}th{background:#f6f9fc}
+.confirm{padding:18px 22px;display:grid;grid-template-columns:1fr 1fr;gap:8px 22px;font-size:14px;line-height:1.7}
+.confirm div::before{content:"✓";color:#23845b;font-weight:bold;margin-right:8px}
+button{border:1px solid #b9c9d9;border-radius:6px;background:#fff;padding:7px 13px;color:#245b86;cursor:pointer}
+svg{font-family:"Segoe UI","Microsoft YaHei",sans-serif}svg text{fill:var(--ink);font-size:4.3px}svg .small{font-size:3.6px;fill:#64748b}
+svg .micro{font-size:3px}svg .base{fill:var(--base);stroke:var(--base-stroke);stroke-width:.65}
+svg .lid{fill:var(--lid);stroke:var(--lid-stroke);stroke-width:.6}
+svg .component{fill:#d4eee3;stroke:var(--part);stroke-width:.55}
+svg .aperture{fill:white;stroke:var(--hole);stroke-width:.65}
+svg .leader{fill:none;stroke:#64748b;stroke-width:.5;stroke-linejoin:round}
+svg .construction{fill:none;stroke:#93a9be;stroke-width:.45;stroke-dasharray:2 1.6}
+svg .dimension{fill:none;stroke:#6c8195;stroke-width:.45}
+svg .hidden-part{fill:none;stroke:var(--part);stroke-width:.5;stroke-dasharray:1.4 1}
+svg .guide-label{fill:#6d8193;font-size:4px}
+body.hide-guides .guides,body.hide-dimensions .dimensions,body.hide-components .components{display:none}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}main{padding:12px}h1{font-size:23px}.confirm{grid-template-columns:1fr}.toolbar{gap:12px}.head{padding:16px 16px 0}.drawing{padding:8px 4px}.note{margin:0 14px 14px}}
+@media print{body{background:white}header{padding:16px;color:#172b43;background:white;border-color:#efae61}header p,header small{color:#425c75}.toolbar button,.toolbar label{display:none}main{max-width:none;padding:0}.grid{gap:12px}.card{break-inside:avoid;box-shadow:none}.wide{page-break-before:auto}#side svg{max-height:580px}}
+</style>
+</head>
+<body>
+<header>
+  <small>MINIBOX / SECTION REVIEW</small>
+  <h1>外壳切面与分件确认</h1>
+  <p>蓝色底壳／背壳包含<strong>底部、后直壁，以及左右两块完整侧板，一体成形</strong>；
+    橙色是<strong>从前沿、操作台和前脸，一直连续包过短平顶与后上弧的一体盖板</strong>，不包含两侧的大面积侧板。
+    <strong>圆角外轮廓由盖板自身形成，底壳不翻上来围住盖板。</strong>
+    底壳在下方和后方收口，前部向下圆转、像碗。内部辅助圆、矩形只解释构造，不是额外零件。</p>
+</header>
+<main>
+  <div class="toolbar">
+    <span class="legend"><i class="swatch base-swatch"></i>底壳 / 背壳</span>
+    <span class="legend"><i class="swatch lid-swatch"></i>L 形盖子</span>
+    <span class="legend"><i class="swatch part-swatch"></i>已有模块 / 安装包络</span>
+    <span class="legend"><i class="swatch hole-swatch"></i>开孔</span>
+    <label><input id="guides" type="checkbox" checked> 构造线</label>
+    <label><input id="dimensions" type="checkbox" checked> 暂定尺寸</label>
+    <label><input id="components" type="checkbox" checked> 模块示意</label>
+    <button onclick="window.print()">打印 / 保存 PDF</button>
+  </div>
+  <div class="grid">
+    <section class="card wide">
+      <div class="head"><h2><span class="letter">A–A</span>正中纵剖：已剖去朝向观察者的侧板</h2>
+        <p>左为使用者，右为背面；剖面暂取 X=60。<strong>这不是正常侧视外观，完整侧板请看 G 图。</strong>
+          安装柱用虚线投影。前端小段、短平顶和后上圆弧都是盖板；后直壁属于底壳。</p></div>
+      <div class="drawing" id="side"></div>
+      <details class="reference"><summary>对照你的侧面构造图：平顶/前脸直角；前下、后下、后上分别为圆弧</summary><img src="enclosure-references/side-construction-white.png" alt="用户侧面构造图，包含内部辅助圆和 Type-C 位置"></details>
+      <details class="reference" open><summary>对照你的红线修正：前沿＋顶面＋后上圆弧都属于盖板</summary><img src="enclosure-references/cover-extent-reference.png" alt="用户红线标明前端小段、短平顶和后上圆弧属于盖板"></details>
+      <div class="note">圆弧大小的理解：<strong>前下方较小 → 后下方较大 → 后上方最大</strong>。
+        下面标注的 R38 / R54 / R68 只是可调整的初始值，不把手绘的 1R / 1.5R / 2R 当作精确约束。
+        顶部中间、竖直前脸、操作台和后壁指定直段保留为直线。</div>
+    </section>
+    <section class="card">
+      <div class="head"><h2><span class="letter">B</span>正视：竖直屏幕、扬声器和开关区域</h2>
+        <p>橙色盖板自身的上方两角大圆转，没有蓝色上翻框包围它；屏幕窗口保持直角矩形。绿色虚线是背面的安装柱投影。</p></div>
+      <div class="drawing" id="front"></div>
+      <details class="reference"><summary>对照你的正视图：仅外轮廓上方两角圆；屏幕窗四角直</summary><img src="enclosure-references/front-construction-white.png" alt="用户正视构造图，屏幕为矩形，喇叭与开关为圆"></details>
+      <div class="note">屏幕只留<strong>左上、左下、右下三个柱子</strong>；每个柱下都有支撑。
+        右上无柱，给排针和插头让位。扬声器四柱在盖板后，M2.5 螺丝穿过喇叭原有 Ø3 孔。</div>
+    </section>
+    <section class="card">
+      <div class="head"><h2><span class="letter">C</span>操作台俯视：圆孔与四个独立方孔</h2>
+        <p>俯视看到的圆角边缘属于橙色盖板，底壳在它下面，不形成上翻包边。下排四键按 PCB 错位，不合成一个大窗口。</p></div>
+      <div class="drawing" id="top"></div>
+      <details class="reference"><summary>对照你的操作台俯视图：靠用户的两角圆，靠屏幕一侧保持直线/直角</summary><img src="enclosure-references/controls-layout-white.png" alt="用户俯视构造图，左右圆角与四个独立方形键位"></details>
+      <div class="note">摇杆圆孔、麦克风声孔、四个独立方孔。麦克风的虚线大圆是<strong>盖板下面的模块包络</strong>，
+        实线小圆才是声孔；模块不能穿出盖板。图中不设计键帽、摇杆杆球或延长件。</div>
+    </section>
+    <section class="card">
+      <div class="head"><h2><span class="letter">D–D</span>穿过屏幕的水平剖面，从上向下观察</h2>
+        <p>剖切位置在 A 图用紫色虚线标出，暂取 Z=108：穿过屏幕下部，低于后上弧收口 Z=112。
+          去掉剖面以上材料后，才看见屏幕截面及蓝色后直壁；不是普通俯视外观。</p></div>
+      <div class="drawing" id="screen"></div>
+      <details class="reference"><summary>对照你的屏幕俯剖：后方两角圆，前盖与两侧交接处直角；背壳属于底壳</summary><img src="enclosure-references/screen-plan-white.png" alt="用户屏幕俯剖，U 形背壳属于底壳，前面是盖子"></details>
+      <div class="note"><strong>这是剖开以后看到的内部。</strong> D–D 切到屏幕、前面盖板以及底壳的侧壁/后直壁。
+        它上方还有同一盖板的顶面与后上弧，已随剖面以上材料去掉。正常俯视请看 F 图。</div>
+    </section>
+    <section class="card">
+      <div class="head"><h2><span class="letter">E</span>内部高度关系：包住模块，不制作外露配件</h2>
+        <p>不同器件的高度并排示意，不是强行放在同一个实际剖面上。裸器件尺寸与完整插装高度分开。</p></div>
+      <div class="drawing" id="stack"></div>
+      <details class="reference"><summary>对照你的操作区横剖：碗形底壳向下圆转，盖面平直，外露件不在本次设计范围</summary><img src="enclosure-references/control-stack-white.png" alt="用户操作区横剖，盖子平直，底壳碗形，键帽与操纵件在外"></details>
+      <div class="note warn"><strong>高度还不能当成已确认的实物配合。</strong>
+        排母 8.5±0.2 mm 已查到；圆形麦克风模块的公针塑座、PCB 与插入间隙没有精确资料。
+        “排母顶以上最多 8 mm”是当前预留上限，不是实测值。
+        键帽/操纵件应外露，但其安装后高度须由用户现有配件确认；本图不假定已经存在延长杆。</div>
+    </section>
+    <section class="card wide">
+      <div class="head"><h2><span class="letter">F</span>正常俯视外观：不剖切</h2>
+        <p>与 D–D 区分：完整装配后从上方看，只看到橙色盖板及操作台开孔，不展示蓝色内部背壳或整块屏幕正面。</p></div>
+      <div class="drawing" id="exterior"></div>
+      <div class="note">屏幕安装面竖直，普通俯视只能对应到它的窄边/投影线，不能在顶面上再画一个横向显示窗口。
+        上部平顶、后上圆弧与下部操作台属于<strong>同一件曲面盖板</strong>。</div>
+    </section>
+    <section class="card wide">
+      <div class="head"><h2><span class="letter">G</span>正常侧视外观：整块侧板属于底壳／背壳</h2>
+        <p>没有剖切、没有拆侧板。侧面轮廓以内全部填蓝色，不显示内部模块。
+          橙色细虚线只提示上/前盖板在边缘的接合位置，不代表橙色侧盖。</p></div>
+      <div class="drawing" id="sideExterior"></div>
+      <div class="note"><strong>左右侧板都是底壳的一部分，不能分给盖板。</strong>
+        A–A 之所以能看见橙色盖板厚度和内部，是因为朝向观察者的整块蓝色侧板已被剖去。
+        正常从侧面看，应当是这里这块完整的蓝色侧板。</div>
+    </section>
+    <section class="card wide">
+      <div class="head"><h2>逐张对照：哪里圆，哪里直</h2><p>不是“把所有边加大倒圆”。同一个物体从不同方向看到的圆角位置必须分别满足下面的关系。</p></div>
+      <div class="foot">
+        <table>
+          <thead><tr><th>你的示意图</th><th>保留直线 / 直角</th><th>使用圆弧 / 圆角</th><th>对应图</th></tr></thead>
+          <tbody>
+            <tr><td>侧面构造</td><td>操作台、竖直前脸、短平顶、后壁中段；前脸与平顶交点</td><td>前下弧、操作台内凹过渡、后下弧、后上弧</td><td>A</td></tr>
+            <tr><td>1R / 1.5R / 2R</td><td>不把辅助圆的交线变成实体棱</td><td>前下较小，后下更大，后上最大；比例不是精确值</td><td>A 构造线</td></tr>
+            <tr><td>盖板红线修正</td><td>前端小段、短平顶属于同一盖板</td><td>盖板连续包过后上弧；底壳不翻上来代替这一段</td><td>A 橙色区域</td></tr>
+            <tr><td>操作台俯视</td><td>靠屏幕一边和两上角；四个键孔全部是直角矩形</td><td>靠用户一侧的两个外角；摇杆孔、麦克风声孔</td><td>C</td></tr>
+            <tr><td>屏幕区域正视</td><td>两侧、顶部中段、下沿；屏幕窗的四个角</td><td>外轮廓上方两角；扬声器圆形声区、开关圆孔</td><td>B</td></tr>
+            <tr><td>屏幕水平剖面</td><td>剖开后才看见平直屏幕、前盖及后直壁截面</td><td>该高度的后壳两角，中间保留直段；不是正常外观俯视</td><td>D–D，剖切线见 A</td></tr>
+            <tr><td>正常从上向下看</td><td>竖直屏幕不摊平到顶面</td><td>完整顶面和后上弧由盖板盖住，不暴露蓝色内部</td><td>F</td></tr>
+            <tr><td>正常从侧面看</td><td>左右完整侧板均属于底壳／背壳</td><td>侧面整块蓝色轮廓按构造圆弧收边；盖板只在边缘相接</td><td>G，不是 A–A</td></tr>
+            <tr><td>操作区横剖</td><td>盖面平直；没有内翻的宽托边</td><td>碗形底壳两侧向下圆转，下面留平直承载区</td><td>E（高度示意）</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="head"><h2>两件分工与安装要求</h2><p>用于确认理解与分件，不是制造放行图；三维模型和导出文件尚未据此最终定稿。</p></div>
+      <div class="confirm">
+        <div>底壳含后直壁；曲面盖板含顶面和后上弧，仍是两件</div>
+        <div>左右完整侧板都归底壳／背壳，不归盖板</div>
+        <div>没有独立后盖、屏幕支架板或模块托盘</div>
+        <div>盖板自己有圆角；底壳不翻上来围住它</div>
+        <div>圆弧与直线按三个视图分别构造</div>
+        <div>只用一块 KiCad 载板，四个安装孔柱</div>
+        <div>后侧直壁两个圆形 Type-C 母座孔</div>
+        <div>屏幕三柱，右上去掉，柱下有支撑</div>
+        <div>喇叭四个 M2.5 螺母柱，兼容原 Ø3 孔</div>
+        <div>四键位、摇杆与麦克风位置不改 PCB</div>
+        <div>盖子与底壳单边约 0.4 mm 装配间隙</div>
+      </div>
+      <div class="foot">
+        <strong>收紧宽度：</strong>图稿外宽约 <strong>120 mm</strong>，由最宽屏幕 PCB 108.04 mm 决定，
+        不再为造型扩至 148 mm。扣除两侧各 2.4 mm 壳壁后，屏幕两侧平均各余 3.58 mm，
+        用于安装与配合；圆角不得侵入这个必要包络。<br>
+        <strong>暂定机械基准：</strong>外包络 120 × 192 × 180 mm；操作台 Z=38；
+        PCB 柱顶 Z=14、板厚 1.6；屏幕面 Y=96。位置变换为 X<sub>壳</sub>=X<sub>KiCad</sub>+7.75，
+        Y<sub>壳</sub>=148−Y<sub>KiCad</sub>。所有数值服务于形状与空间检查，仍可在确认后调整。<br>
+        <strong>尚需闭环：</strong>完整插装麦克风高度、现有键帽/杆球的安装高度与活动范围、
+        喇叭横向孔距及耳厚；盖板四键之间的细筋也要在打印方案中处理。
+        不会据这份确认稿直接提交“可打印成品”或推送 main。
+      </div>
+    </section>
+  </div>
+</main>
+<script>
+"use strict";
+const P={w:120,d:192,h:180,deck:38,face:96,frontR:38,lowR:54,backR:68};
+const keys=[[78.6,58.5],[97.65,58.5],[70.5,39.45],[89.55,39.45]];
+const screenHoles=[[9.05,103.55],[9.05,158.45],[110.95,103.55]];
+const speakerHoles=[[20.5,66.5],[43.5,66.5],[20.5,89.5],[43.5,89.5]];
+const T=(x,y,s,c="",extra="")=>`<text x="${x}" y="${y}" class="${c}" ${extra}>${s}</text>`;
+const L=(d,c="leader")=>`<path d="${d}" class="${c}"/>`;
+const R=(x,y,w,h,c,rx=0)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" class="${c}"/>`;
+const C=(x,y,r,c)=>`<circle cx="${x}" cy="${y}" r="${r}" class="${c}"/>`;
+const svg=(box,label,body)=>`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box}" role="img" aria-label="${label}">
+<defs><marker id="arrow-${label}" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto-start-reverse"><path d="M0,0 L5,2.5 L0,5" fill="#6c8195"/></marker></defs>${body}</svg>`;
+
+function drawSide(){
+  const fx=38-Math.sqrt(38**2-3.4**2),fi=38-Math.sqrt(35.6**2-3.4**2),ff=38-Math.sqrt(35.6**2-34**2);
+  const rf=138+Math.sqrt(51.6**2-50**2);
+  const base=`M${fx} 145.4 A38 38 0 0 0 38 180 L138 180 A54 54 0 0 0 192 126
+    L192 68.4 L189.6 68.4 L189.6 126 A51.6 51.6 0 0 1 ${rf} 176
+    L${ff} 176 A35.6 35.6 0 0 1 ${fi} 145.4 Z`;
+  const lid="M0 142 L72 142 A24 24 0 0 0 96 118 L96 0 L124 0 A68 68 0 0 1 192 68 L189 68 A65 65 0 0 0 124 3 L99 3 L99 118 A27 27 0 0 1 72 145 L0 145 Z";
+  let s=`<path d="${base}" class="base"/>`;
+  s+=`<g class="guides">${C(38,142,38,"construction")}${C(138,126,54,"construction")}${C(124,68,68,"construction")}${C(72,118,24,"construction")}
+    ${L("M38 142 L0 142 M38 142 L38 180 M138 126 L192 126 M138 126 L138 180 M124 68 L192 68 M124 68 L124 0","construction")}
+    ${T(9,161,"前下 ≈ 1R","guide-label")}${T(144,159,"后下 ≈ 1.5R","guide-label")}${T(143,33,"后上 ≈ 2R","guide-label")}
+    ${T(46,126,"内凹圆弧","guide-label")}</g>`;
+  s+=`<path d="${lid}" class="lid"/>`;
+  s+=`<g class="components">${R(28,164.4,117,1.6,"component")}
+    ${R(29.5,166,7,10,"hidden-part")}${R(136.5,166,7,10,"hidden-part")}
+    ${R(103,18.13,2,61.74,"component")}${R(100,21.16,3,55.68,"component")}
+    ${R(177.5,90,14.5,12,"hidden-part")}${R(189.6,87.92,3,16.16,"hidden-part")}
+    ${R(192,89.1,2,13.8,"component")}</g>`;
+  s+=L("M149 5 L198 5 L203 9")+T(205,10,"短平顶＋后上弧")+T(205,16,"都属于橙色盖板");
+  s+=L("M104 43 L198 43 L203 37")+T(205,36,"平直屏幕模块")+T(205,42,"在盖板后安装","small");
+  s+=L("M193 96 L201 96 L203 90")+T(205,87,"两个 Type-C 孔")+T(205,94,"开在竖直后壁")+T(205,101,"侧剖重叠，只画一个","small");
+  s+=L("M164 176 L198 176 L203 165")+T(205,164,"前下弧、底面、后下弧")+T(205,170,"与后直壁：一体底壳");
+  s+=L("M56 164.4 L56 156 L10 156")+T(9,154,"一块载板；四柱投影","small");
+  s+=L("M94.5 104 L80 102 L52 102")+T(22,100,"橙色一体曲面盖板")+T(22,106,"连续包过前脸、顶面及后上弧","small");
+  s+=T(-1,134,"← 使用者","small")+T(132,115,"壳内空间","small");
+  s+=`<g><path d="M90 72 H199" fill="none" stroke="#8650ac" stroke-width=".7" stroke-dasharray="3 1.6"/>
+    <path d="M92 65 V71 M197 65 V71" fill="none" stroke="#8650ac" stroke-width=".6"/>
+    <path d="M90.8 69.4 L92 71.5 L93.2 69.4 M195.8 69.4 L197 71.5 L198.2 69.4" fill="#8650ac"/>
+    <text x="84" y="74" style="fill:#8650ac;font-size:4.5px">D</text>
+    <text x="199.5" y="74" style="fill:#8650ac;font-size:4.5px">D</text>
+    <text x="120" y="79" style="fill:#8650ac;font-size:3.8px">水平剖切 Z=108，向下看</text></g>`;
+  s+=L("M96 4 H100 V0","dimension")+T(80,-6,"此角保持直角","small");
+  s+=`<g class="dimensions">${L("M0 185 L0 195 M192 185 L192 195 M0 191 L192 191","dimension")}
+    ${T(78,198,"深 192（暂定）","small")}${L("M-8 0 L-15 0 M-8 180 L-15 180 M-12 0 L-12 180","dimension")}
+    ${T(-15,116,"高 180","small",'transform="rotate(-90 -15 116)"')}
+    ${T(67,139,"操作台 Z=38","small")}${T(111,-5,"短平顶","small")}
+    ${T(133,61,"R68","small")}${T(148,174,"R54","small")}${T(1,174,"R38","small")}</g>`;
+  return svg("-22 -15 286 223","side-section",s);
+}
+function drawFront(){
+  const outline="M0 118 L0 22 A22 22 0 0 1 22 0 L98 0 A22 22 0 0 1 120 22 L120 118 Z";
+  let s=`<path d="${outline}" class="lid"/>`;
+  s+=`<g class="guides">${C(22,22,22,"construction")}${C(98,22,22,"construction")}
+    ${L("M22 0 L22 22 L98 22 L98 0 M0 22 L120 22","construction")}</g>`;
+  s+=R(14.98,20.16,85.52,57.68,"aperture")+T(31,50,"屏幕直角矩形窗口");
+  s+=C(32,102,11.5,"aperture")+C(92,102,10.5,"aperture");
+  for(const ring of [[0,1,0],[4.5,8,22.5],[9,12,15]]){
+    for(let i=0;i<ring[1];i++){const a=(ring[2]+360*i/ring[1])*Math.PI/180;
+      s+=`<circle cx="${32+ring[0]*Math.cos(a)}" cy="${102+ring[0]*Math.sin(a)}" r="1" fill="#7c8794"/>`;}
+  }
+  s+=T(86,103.5,"开关","small");
+  s+=`<g class="components">`;
+  for(const [x,z] of screenHoles)s+=C(x,180-z,3.4,"hidden-part");
+  for(const [x,z] of speakerHoles)s+=C(x,180-z,2.2,"hidden-part");
+  s+=`<path d="M108 19 L114 25 M114 19 L108 25" stroke="#a5adb7" stroke-width=".65" fill="none"/></g>`;
+  s+=L("M113 21.6 L132 21.6 L140 15")+T(142,14,"右上无柱")+T(142,21,"排针 / 插头空间","small");
+  s+=L("M9.05 76.45 L-3 82 L-13 82")+T(-14,90,"三柱","small");
+  s+=L("M43.5 113.5 L133 113.5 L140 104")+T(142,99,"喇叭四柱")+T(142,106,"M2.5 螺丝","small")+T(142,113,"原孔 Ø3","small");
+  s+=`<g class="dimensions">${L("M0 -4 L0 -11 M120 -4 L120 -11 M0 -8 L120 -8","dimension")}
+    ${T(32,-10,"总宽约 120","small")}${T(3,18,"R22","small")}</g>`;
+  s+=T(14,129,"下方接操作台圆弧；不是第三个零件","small");
+  return svg("-20 -16 222 150","front-view",s);
+}
+function drawControls(){
+  let s=`<path d="M0 0 H120 V52 A20 20 0 0 1 100 72 H20 A20 20 0 0 1 0 52 Z" class="lid"/>`;
+  s+=`<g class="guides">${C(20,52,20,"construction")}${C(100,52,20,"construction")}
+    ${L("M0 52 H120 M20 52 V72 M100 52 V72","construction")}</g>`;
+  s+=C(24.55,19.5,15.5,"aperture")+T(18,21,"摇杆","small");
+  s+=`<g class="components">${C(52.205,14.25,9.75,"hidden-part")}</g>`;
+  s+=C(52.205,14.25,2.5,"aperture")+T(44,29,"麦克风","small");
+  keys.forEach(([x,y],i)=>{s+=R(x-9.225,72-y-9.225,18.45,18.45,"aperture")+T(x-3.7,72-y+1.2,`SW${i+1}`,"micro");});
+  s+=L("M109 13.5 L136 13.5 L142 7")+T(144,6,"四个独立方孔")+T(144,13,"不合并、不下沉","small");
+  s+=L("M89.55 41.8 L136 41.8 L142 33")+T(144,32,"下排按 PCB 错位")+T(144,39,"中心距 19.05","small");
+  s+=L("M4 61 L-10 61")+T(-12,67,"盖板自身圆角","small");
+  s+=T(41,-8,"↑ 屏幕方向","small");
+  s+=L("M0 4 H4 V0 M116 0 V4 H120","dimension");
+  s+=`<g class="dimensions">${T(12,76,"外沿 R20；外宽约 120","small")}${T(144,49,"方孔 18.45","small")}
+    ${T(144,56,"细筋 0.60，需核对打印","small")}</g>`;
+  return svg("-18 -15 237 100","control-top",s);
+}
+function drawScreen(){
+  const depth=92.6;
+  let s=`<path d="M0 ${depth} V28 A28 28 0 0 1 28 0 H92 A28 28 0 0 1 120 28 V${depth}
+    H117.6 V28 A25.6 25.6 0 0 0 92 2.4 H28 A25.6 25.6 0 0 0 2.4 28 V${depth} Z" class="base"/>`;
+  s+=R(0,93,120,3,"lid");
+  s+=`<g class="components">${R(5.98,87,108.04,2,"component")}${R(15.98,89,83.52,3,"component")}</g>`;
+  s+=T(18,36,"剖面上的后直壁 / 侧壁")+T(23,45,"剖面以上材料已去掉","small");
+  s+=L("M89 87 L138 75")+T(140,73,"屏幕截面 108.04")+T(140,80,"不是屏幕正视图","small");
+  s+=L("M76 96 L137 106")+T(140,106,"前面盖板截面");
+  s+=T(44,113,"↓ 使用者 / 前方","small");
+  s+=L("M0 85.6 H7 V92.6 M113 92.6 V85.6 H120","dimension");
+  s+=T(8,103,"背壳端面直切收口，不翻包盖板","small");
+  s+=`<g class="guides">${C(28,28,28,"construction")}${C(92,28,28,"construction")}</g>`;
+  return svg("-12 -8 226 133","screen-cut",s);
+}
+function drawExterior(){
+  const outline="M0 28 A28 28 0 0 1 28 0 H92 A28 28 0 0 1 120 28 V172 A20 20 0 0 1 100 192 H20 A20 20 0 0 1 0 172 Z";
+  let s=`<defs><clipPath id="exterior-clip"><path d="${outline}"/></clipPath></defs><path d="${outline}" class="lid"/>
+    <g clip-path="url(#exterior-clip)"><rect x="0" y="96" width="120" height="24" fill="#ffe1b8" opacity=".6"/></g>`;
+  s+=T(26,39,"完整顶部 / 后上弧盖板")+T(35,49,"不显示内部背壳","small");
+  s+=`<path d="M6 96 H114" stroke="#b95b08" stroke-width=".65" stroke-dasharray="2 1.6"/>`;
+  s+=L("M115 96 L137 90")+T(140,86,"竖直屏幕面")+T(140,93,"俯视为窄边 / 投影","small");
+  s+=C(24.55,192-52.5,15.5,"aperture")+C(52.205,192-57.75,2.5,"aperture");
+  keys.forEach(([x,y])=>{s+=R(x-9.225,192-y-9.225,18.45,18.45,"aperture");});
+  s+=T(48,177,"操作台","small");
+  s+=L("M95 25 L137 17")+T(140,15,"橙色是同一块盖板");
+  s+=`<g class="dimensions">${L("M0 -4 V-12 M120 -4 V-12 M0 -8 H120","dimension")}${T(39,-11,"外宽约 120","small")}</g>`;
+  s+=T(39,205,"↓ 使用者 / 前方","small");
+  return svg("-12 -18 230 232","ordinary-top-view",s);
+}
+function drawSideExterior(){
+  const outline="M0 142 A38 38 0 0 0 38 180 L138 180 A54 54 0 0 0 192 126 L192 68 A68 68 0 0 0 124 0 L96 0 L96 118 A24 24 0 0 1 72 142 Z";
+  let s=`<path d="${outline}" class="base"/>
+    <path d="M0 142 H72 A24 24 0 0 0 96 118 V0 H124 A68 68 0 0 1 192 68"
+      fill="none" stroke="#b95b08" stroke-width=".85" stroke-dasharray="2.4 1.7"/>`;
+  s+=T(109,74,"整块侧板")+T(108,82,"属于底壳／背壳")+T(105,91,"左右两侧相同","small");
+  s+=L("M97 54 L65 42 L25 42")+T(0,36,"橙色仅标盖板边缘接合线")+T(0,43,"不是橙色侧板","small");
+  s+=L("M192 96 L210 96 L215 105")+T(217,107,"Type-C 开在后直壁")+T(217,114,"不是开在这块侧板","small");
+  s+=T(10,165,"侧板连到碗形底部","small");
+  s+=`<g class="guides">${L("M0 142 H38 V180 M138 180 V126 H192 M124 0 V68 H192","construction")}</g>`;
+  s+=`<g class="dimensions">${L("M0 185 V195 M192 185 V195 M0 191 H192","dimension")}${T(70,200,"侧面外形与 A–A 对应","small")}</g>`;
+  return svg("-12 -10 296 220","ordinary-side-view",s);
+}
+function drawStack(){
+  let s=`<path d="M25.61 81.6 A152 152 0 0 0 177 220 H348 A152 152 0 0 0 499.39 81.6
+    L489.35 81.6 A142 142 0 0 1 388.84 204 H136.16 A142 142 0 0 1 35.65 81.6 Z"
+    fill="#b8d9f2" stroke="#245b86" stroke-width="2"/>`;
+  s+=`<rect x="25" y="68" width="475" height="12" rx="2" fill="#ffc47d" stroke="#b95b08" stroke-width="1.5"/>`;
+  s+=`<g class="components">
+    <rect x="70" y="157.6" width="375" height="6.4" fill="#d4eee3" stroke="#429575" stroke-width="1.5"/>
+    <rect x="85" y="164" width="22" height="40" fill="#d4eee3" stroke="#429575" stroke-dasharray="4 3"/>
+    <rect x="410" y="164" width="22" height="40" fill="#d4eee3" stroke="#429575" stroke-dasharray="4 3"/>
+    <rect x="110" y="113" width="61" height="44.6" fill="#d4eee3" stroke="#429575"/>
+    <rect x="135" y="96.6" width="12" height="16.4" fill="#d4eee3" stroke="#429575"/>
+    <rect x="256" y="122.8" width="20" height="34.8" fill="#c4d6ce" stroke="#429575"/>
+    <rect x="234" y="90.8" width="64" height="32" fill="#edf7f2" stroke="#429575" stroke-dasharray="4 3"/>
+    <rect x="350" y="106" width="70" height="51.6" fill="#d4eee3" stroke="#429575"/>
+    <rect x="378" y="77.8" width="14" height="28.2" fill="#d4eee3" stroke="#429575"/>
+  </g>`;
+  s+=`<rect x="128" y="66" width="27" height="16" fill="white"/>
+    <rect x="371" y="66" width="28" height="16" fill="white"/>
+    <rect x="260" y="66" width="10" height="16" fill="white"/>
+    <g fill="#172b43" font-size="12">
+      <text x="55" y="53" style="font-size:12px">盖外：用户自备键帽 / 操纵件，本图不设计</text>
+      <text x="62" y="151" style="font-size:11px">PCB</text>
+      <text x="112" y="183" style="font-size:12px">键轴本体</text>
+      <text x="231" y="183" style="font-size:12px">排母＋麦克风</text>
+      <text x="359" y="183" style="font-size:12px">裸摇杆模块</text>
+      <text x="314" y="99" style="font-size:11px;fill:#a05b08">2.7 预留</text>
+      <text x="15" y="244" style="font-size:12px">数值是高度包络；不表示已验证外购操纵件的装配高度。</text>
+    </g>`;
+  s+=`<path d="M304 80 V90.8 M300 80 H308 M300 90.8 H308" fill="none" stroke="#a05b08" stroke-width="1.2"/>
+    <g class="dimensions"><text x="47" y="95" style="font-size:11px">外面 Z38 / 内面 Z35</text>
+    <text x="143" y="214" style="font-size:11px">柱顶 Z14；PCB 上表面 Z15.6</text>
+    <text x="227" y="117" style="font-size:10px">上方 ≤8</text>
+    <text x="229" y="146" style="font-size:10px">8.5±0.2</text></g>`;
+  return svg("0 24 530 232","height-stack",s);
+}
+document.getElementById("side").innerHTML=drawSide();
+document.getElementById("front").innerHTML=drawFront();
+document.getElementById("top").innerHTML=drawControls();
+document.getElementById("screen").innerHTML=drawScreen();
+document.getElementById("stack").innerHTML=drawStack();
+document.getElementById("exterior").innerHTML=drawExterior();
+document.getElementById("sideExterior").innerHTML=drawSideExterior();
+for(const id of ["guides","dimensions","components"]){
+  document.getElementById(id).addEventListener("change",e=>document.body.classList.toggle("hide-"+id,!e.target.checked));
+}
+</script>
+</body>
+</html>
