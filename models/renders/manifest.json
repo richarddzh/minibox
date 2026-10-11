@@ -1,21 +1,21 @@
 {
   "description": "Exact exported enclosure meshes; purchased caps and unverified hardware are not rendered.",
   "source_sha256": {
-    "bottom.stl": "fa7518f7fd23b447451c52d07fc73ebce6cf68eaabeb2bb4cb3eba56cee3a5fd",
-    "lid.stl": "8382a95b7ab5a49b2e66c06793dc676cb8212c74816dd6c7b9acd6aa79ddccbc",
-    "minibox-enclosure.scad": "80d4cedb66a6e266c333cd69eefb696bdf9606c27240c990fbe70d14443cd0e3"
+    "bottom.stl": "327e0ba5f66aecdd86b110fc3f4b5dc277882bd8139580bef1714e523b5aef7a",
+    "lid.stl": "5b7401a970a2803c966f6ab2f77478fda5caf16507528a1915295ea23165863c",
+    "minibox-enclosure.scad": "3355bbd485c28b1f8017fc9a7752afbe6683688e6d0f841271108d3b1a32b448"
   },
   "images": {
-    "bottom-isometric.png": "21f20e24c5f4557f308628b7f74d3cd093fa2504f14cbb9be260f399a18b75f0",
-    "bottom-top.png": "d8cfa723964d6c1a9468d6df8e48d477787c801aa2c34a7ed0481734a4c6c2df",
-    "bottom-rear.png": "5949eff5f470bd5b32c416ed547b720c865054d87f4d0f9f58f0cf1f6b229866",
-    "bottom-side.png": "4f73cde7625b4e3c3f9a0f9f151a04b2d8003f21ff89247b73a020515c07d180",
-    "lid-isometric.png": "2a985752be8baa651f49a33adf9468f61e2a6f5c4425ea9220bed063a6830761",
-    "lid-front.png": "e34fd3ccc94aa2fbc07f37ff00c8c42e2899fc0c075ead5576ef66d82169841f",
-    "lid-inside.png": "124a6e50ecf379f5cc4d52d021115f04c276dcd0bf36dc876e55ae1db7540ab1",
+    "bottom-isometric.png": "5887b29fb0c47d50f36bfcfb3124db7fa36fab6e8f79d1b44bb531c2db894240",
+    "bottom-top.png": "a00f3318e2b7e3c6226211d4fd7ff52ff52acfd866bef3f73607e1773c3790dd",
+    "bottom-rear.png": "5e67fefd538c3d789cf926d950bbfdec92d05e364ded8c07b185182c617b91d6",
+    "bottom-side.png": "582fe55f21505770f48a840c57b6cb892b8f70cf9d0c893bae0ebf8b9bf2f56a",
+    "lid-isometric.png": "0144469f5e5a955834ab3f167584337a3e245496749601515555c3fe6619a194",
+    "lid-front.png": "d55db3e21911226c4ead1b5009e8ee638e262cf4fc370f233ec894692ad936fb",
+    "lid-inside.png": "eeeb7897e65ce5660cdb834f343e0802c6b8f8ea5d2a0cd867b52f08db941b4c",
     "lid-side.png": "1c23baba75ce4a65b9a89b27c2347dc20b03ed5ea23fc451cb916675ec21b690",
-    "assembly-isometric.png": "77e1d62b1bef758b33026a0e58998ef5aa7ea1d1738c66439fc02888aa62c250",
-    "assembly-front.png": "0945393641a433c00538c14a3d8fb10573fd6dd12178849ec00571ca993c6a67",
-    "assembly-side.png": "4f73cde7625b4e3c3f9a0f9f151a04b2d8003f21ff89247b73a020515c07d180"
+    "assembly-isometric.png": "bc1bc044299169769fc9845b465cba5867712d6f883af71e7a395739b343237f",
+    "assembly-front.png": "5a86aaeab8ccb7355484aadbb9e9a4a9596edb08f6ae5f0c53c937782bb0a210",
+    "assembly-side.png": "f749182d9b48a6cd097186e84175dedc8edec058cfb7eea21df6656bdb0c7797"
   }
 }

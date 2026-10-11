@@ -2,7 +2,7 @@
 
 | 目录 | 内容 |
 |---|---|
-| [`models`](models/module-dimensions.md) | 载板两件式外壳、完整键盘开孔、打印文件、尺寸与避让说明 |
+| [`models`](models/module-dimensions.md) | 载板两件式外壳、错位连通键盘开孔、打印文件、尺寸与避让说明 |
 | [`assets`](assets) | 开发板[尺寸与天线图](assets/esp32s3_devkit_01.jpg)、[5.08 mm 接线端子](assets/crimp_terminal.jpg)、麦克风、功放、RTC、[TFT SPI](assets/tft_spi.jpg)、[摇杆](assets/joystick.jpg)与[三键键盘](assets/keypad.jpg)参考图片（TFT 型号与当前固件配置未核对） |
 | [`docs`](docs/hardware-connections.md) | 主控、屏幕和摇杆的模块参数、GPIO 接线及供电注意事项 |
 | [`kicad`](kicad/README.md) | KiCad 10 双层模块载板：[正面图例](kicad/renders/minibox-carrier-front-legend.png)、[背面图例](kicad/renders/minibox-carrier-back-legend.png)、GPIO 丝印与 Gerber；实物核对后方可制板 |

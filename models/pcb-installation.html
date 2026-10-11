@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PCB 为什么直落会卡住：原因与装配路线</title>
+<style>
+body{font:16px system-ui,sans-serif;background:#f4f6fa;color:#172334;margin:24px auto;padding:0 18px;max-width:1250px}
+h1{font-size:27px}h2{font-size:20px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:18px}
+section{background:white;padding:20px;border:1px solid #dce3ec;border-radius:12px}
+svg{width:100%;height:420px;background:#fbfcfe}svg text{font:5px system-ui,sans-serif;fill:#172334;paint-order:stroke;stroke:#fbfcfe;stroke-width:.7px}
+#front text{font-size:2.2px;stroke-width:.35px}
+.note{padding:14px 18px;border-left:4px solid #df9831;background:#fff4dc}
+.good{border-left-color:#22845c;background:#e9f6ef}table{border-collapse:collapse;width:100%}td,th{padding:8px;text-align:left;border-bottom:1px solid #ddd}
+button{padding:8px 12px;margin:4px;cursor:pointer}input{width:100%}output{display:block;min-height:55px;font-weight:600;padding:10px 0}
+a{color:#17649b}.legend{font-size:14px;color:#506079}.route{margin-top:18px}
+</style>
+<h1>为什么“装好不碰”，但“水平直落会卡住”？</h1>
+<p>板子最终在低处；装入时必须先经过高处的窄口。<strong>终点无干涉，不代表中途路径无干涉。</strong></p>
+<p><a href="fit-review.html">返回外壳尺寸与渲染图</a> · <a href="module-dimensions.md">完整尺寸与装配说明</a></p>
+<div class="grid">
+<section>
+<h2>① 高处的入口比 PCB 窄</h2>
+<svg id="blocked" viewBox="-8 -10 136 185" aria-label="后排安装座之间93毫米通道小于94.5毫米PCB宽度"></svg>
+<p>后排两座向内伸到 X=13.5 / 106.5，最窄间距 <strong>93 mm</strong>。
+PCB 的 X 范围是12.75–107.25，宽<strong>94.5 mm</strong>，水平经过时左右各多出0.75。</p>
+<p class="legend">此图只画后座的前视剖面。屏幕支撑之间也只有约93.9 mm；
+后壁承托边另占据板后沿的直落通道。真实检查包含这些三维结构。</p>
+</section>
+<section>
+<h2>② 前角座：原退让只留在“终点高度”</h2>
+<svg id="front" viewBox="-2 -4 64 47" aria-label="前角座原来的低位退让与修改后向上贯通的退让对比"></svg>
+<p>原前柱只在 Z=4.5–11.6 做了PCB退让。板子摆平以后继续下降，
+会在到达这个槽之前先撞到上方的内角。</p>
+<p><strong>修改：</strong>只把前角座内侧的这条退让向上贯通，
+不移动螺孔，不削薄屏幕柱/后柱，不删除载板自己的四个安装柱。</p>
+<p class="legend">上图为前左角俯视，虚线是PCB外扩1 mm的退让边界。螺母孔中心仍为(9,11)，
+与退让区相隔，孔周围及盲孔下方的材料由独立实体探针检查。</p>
+</section>
+</div>
+<section class="route">
+<h2>③ 解决路线：倾斜进窄口，低处摆平，再落座</h2>
+<p class="note"><strong>装配前提：</strong>上盖、TFT屏幕、RTC模块和摇杆帽先不安装，外部线缆先断开。
+RTC排母留在PCB上。其余元件按已记录的完整包络参与检查；不靠省略焊脚或功放端子来通过。</p>
+<div id="buttons"></div>
+<input id="progress" type="range" min="0" max="6" step="0.01" value="0" aria-label="装配步骤演示">
+<output id="description"></output>
+<div class="grid">
+<div><svg id="route-front" viewBox="-12 -20 144 225" aria-label="PCB左侧抬起25度下降和摆平的动态前视示意"></svg>
+<p class="legend">前视只画PCB和后座，未画全部元件，避免不同Y截面的投影误导。
+验证计算包含模块包络、焊脚和全部支撑。</p></div>
+<div><svg id="route-side" viewBox="-30 -15 180 220" aria-label="PCB前移和回正以及RTC从前方装入的动态侧视示意"></svg>
+<p class="legend">侧视显示PCB投影及RTC保守包络。Z从外壳底面算，PCB最终底面Z=9。
+摆平时说的Z=35，是PCB中心处的底面高度，不是倾斜低边的高度。
+RTC画的是含排母空间的整体包络，不是实物模块应插到的底面。</p></div>
+</div>
+</section>
+<section class="route">
+<h2>④ 验证范围与不能省略的条件</h2>
+<table>
+<tr><th>项目</th><th>处理</th></tr>
+<tr><td>PCB含焊脚通过窄口</td><td>左侧抬高25°，向前偏1 mm，中心底面下降到Z=35。</td></tr>
+<tr><td>摆平、回正、落座</td><td>保持Z=35摆平；再向后移1 mm；垂直落到Z=9，固定四个载板螺丝。</td></tr>
+<tr><td>RTC后装</td><td>从尚未安装屏幕的前方送入腔内，再向下插入排母；不要从后顶板上方直落。</td></tr>
+<tr><td>旋转过程，不只测几个姿态</td><td>逐元件计算连续平移扫掠；旋转以2.5°分段凸包并外扩0.1 mm覆盖弧线偏差。</td></tr>
+<tr><td>螺母柱</td><td>验证前孔周围实体环、螺钉尾孔下方实体；屏幕和后座不动。</td></tr>
+<tr><td>适用限制</td><td>仅对所列PCB和模块接受包络成立；实际线束、夹持工具、插拔力及打印公差仍需首件试装。</td></tr>
+</table>
+<p class="note good">这不是“PCB现在可以完全水平直落”。窄口仍保留，解决方法是经过验证的倾斜装配路线，
+配合前角座的小范围修正。不得用此路线装入尚未核对尺寸的更高、更宽模块。</p>
+</section>
+<script>
+const NS="http://www.w3.org/2000/svg",height=31+122*Math.sin(80*Math.PI/180),root=height-13-1.5*11.1*Math.tan(75*Math.PI/180);
+const blue="#297ac4",red="#bd4f50",green="#238b65",grey="#8395a7";
+function el(s,tag,attrs,text){const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);if(text)n.textContent=text;s.append(n);return n}
+function label(s,x,y,text){return el(s,"text",{x,y},text)}
+function rect(s,x,y,w,h,fill,opacity=1){return el(s,"rect",{x,y,width:w,height:h,fill,"fill-opacity":opacity})}
+function poly(s,pts,fill,opacity=1){return el(s,"polygon",{points:pts.map(p=>p.join(",")).join(" "),fill,"fill-opacity":opacity})}
+function line(s,x1,y1,x2,y2,color=grey,dash=""){return el(s,"line",{x1,y1,x2,y2,stroke:color,"stroke-width":.6,"stroke-dasharray":dash})}
+function supports(s,H){
+ rect(s,0,H-4,120,4,grey);rect(s,0,H-height,2.4,height,grey);rect(s,117.6,H-height,2.4,height,grey);
+ const left=[[0,H-root],[2.4,H-root]];
+ for(let i=1;i<=20;i++){const t=i/20;left.push([2.4+11.1*t*t*(3-2*t),H-(root+(height-13-root)*t)])}
+ left.push([13.5,H-(height-3)],[0,H-(height-3)]);
+ poly(s,left,red,.8);poly(s,left.map(([x,y])=>[120-x,y]),red,.8);
+}
+const b=document.querySelector("#blocked");supports(b,165);
+rect(b,12.75,165-144.6,94.5,1.6,blue);
+rect(b,12.75,165-144.6,.75,1.6,"#ff1f24");rect(b,106.5,165-144.6,.75,1.6,"#ff1f24");
+label(b,24,10,"水平PCB：94.5 mm");label(b,20,31,"左右各挡0.75 mm");
+line(b,13.5,45,106.5,45,red);line(b,13.5,42,13.5,48,red);line(b,106.5,42,106.5,48,red);
+label(b,43,42,"窄口93 mm");
+rect(b,12.75,165-10.6,94.5,1.6,green);
+label(b,25,149,"最终位置Z=9：在支撑下面");
+label(b,17,67,"高处能否通过 ≠ 低处能否放下");
+const f=document.querySelector("#front");
+const boundary="M 11.75 27 L 11.75 17 A 6 6 0 0 1 17.75 11 L 27 11 L 27 27 Z";
+const board="M 12.75 27 L 12.75 17 A 5 5 0 0 1 17.75 12 L 27 12 L 27 27 Z";
+const defs=el(f,"defs",{}),mask=el(defs,"mask",{id:"relief"});
+rect(mask,-1,-1,30,30,"white");el(mask,"path",{d:boundary,fill:"black"});
+label(f,1,-1,"旧：槽仅在低处");label(f,32,-1,"新：退让向上贯通");
+for(const [offset,modified]of [[0,false],[31,true]]){
+ const g=el(f,"g",{transform:`translate(${offset},4)`});
+ const seat=rect(g,0,0,13.5,14.5,grey);if(modified)seat.setAttribute("mask","url(#relief)");
+ el(g,"circle",{cx:9,cy:11,r:2.35,fill:"white",stroke:"#172334","stroke-width":.3});
+ el(g,"path",{d:board,fill:blue,"fill-opacity":.25,stroke:blue,"stroke-width":.3});
+ el(g,"path",{d:boundary,fill:"none",stroke:modified?green:red,"stroke-dasharray":"1 .5","stroke-width":.3});
+ label(g,1,32,"孔位、PCB位置不变");
+}
+const steps=["准备","倾斜下降","低处摆平","回正1 mm","落座固定","RTC从前方进入","RTC向下插入"];
+const texts=[
+ "先不装TFT、上盖、RTC及摇杆帽。PCB左侧抬高约25°，比最终位置向前偏1 mm。",
+ "保持25°，沿竖直方向下降。中心处PCB底面停在Z=35 mm。",
+ "在Z=35 mm摆平。此时板子已越过高处的窄口。",
+ "保持水平，向后移1 mm，对正四个载板安装柱。",
+ "沿前角座贯通退让下落到Z=9 mm，固定四颗载板螺丝。",
+ "RTC从未安装屏幕的前方进入腔内，在后顶板下面移到排母上方。",
+ "RTC向下插入自己的排母。最后连接线缆、安装屏幕、摇杆帽和上盖。"
+];
+steps.forEach((name,i)=>{const n=document.createElement("button");n.textContent=`${i+1}. ${name}`;n.onclick=()=>{document.querySelector("#progress").value=i;draw()};document.querySelector("#buttons").append(n)});
+function draw(){
+ const t=+document.querySelector("#progress").value;
+ let z,roll,dy;
+ if(t<=1){z=(height+30)*(1-t)+35*t;roll=25;dy=-1}
+ else if(t<=2){z=35;roll=25*(2-t);dy=-1}
+ else if(t<=3){z=35;roll=0;dy=t-3}
+ else{z=t<4?35+(9-35)*(t-3):9;roll=0;dy=0}
+ const a=roll*Math.PI/180,s=document.querySelector("#route-front");s.replaceChildren();supports(s,190);
+ const points=[[-47.25,0],[47.25,0],[47.25,1.6],[-47.25,1.6]].map(([x,h])=>[60+x*Math.cos(a)+h*Math.sin(a),190-(z-x*Math.sin(a)+h*Math.cos(a))]);
+ poly(s,points,t>=4?green:blue);label(s,14,5,`倾角 ${roll.toFixed(1)}° / 中心底面 Z=${z.toFixed(1)}`);
+ label(s,16,200,"从前方看：左侧抬高，右侧先下");
+ const v=document.querySelector("#route-side");v.replaceChildren();
+ poly(v,[[0,190],[136,190],[136,190-height],[52+122*Math.cos(80*Math.PI/180),190-height],[52,159],[0,159]],grey,.2);
+ line(v,136,190,136,190-height);line(v,0,186,136,186);
+ const half=47.25*Math.sin(a);
+ rect(v,12+dy,190-z-half-1.6*Math.cos(a),117,2*half+1.6*Math.cos(a),t>=4?green:blue,.8);
+ if(t>=4){
+   const y=t<5?-23+140*(t-4):117,base=t<5?55:55+(10.6-55)*(t-5);
+   rect(v,y,190-base-40,12,40,"#d59928",.7);label(v,70,100,"RTC整体包络");
+ }
+ label(v,5,200,`板前缘 Y=${(12+dy).toFixed(1)}；最终 Y=12`);
+ document.querySelector("#description").textContent=texts[Math.min(6,Math.ceil(t))];
+}
+document.querySelector("#progress").oninput=draw;draw();
+</script>
+</html>

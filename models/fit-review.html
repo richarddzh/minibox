@@ -19,10 +19,14 @@ output{display:block;min-height:24px;font-family:monospace;margin-top:8px}
 button{padding:6px 12px}a{color:#1265a8}
 </style>
 <h1>Minibox：80° 直立屏幕，无局部凸起</h1>
-<p>尺寸单位 mm。外壳 120 × 136 × 148.147；比前版浅34、矮14.95。PCB 正面向盖板，孔位不动。点击任一视图的两个点可量取该投影平面距离。</p>
-<nav><a href="#top">位置图</a><a href="#side">叠高与开关外侧</a><a href="#gallery">11 张多视角渲染</a><a href="../hardware_references/enclosure-hardware-specs.md">归档硬件规格</a></nav>
+<p>尺寸单位 mm。外壳 120 × 136 × 151.147；操作区外高31、盖板内面Z=28，以容纳新的麦克风叠层。PCB 孔位不动。点击任一视图的两个点可量取该投影平面距离。</p>
+<nav><a href="#top">位置图</a><a href="#side">叠高与开关外侧</a><a href="pcb-installation.html">PCB装入路径示意</a><a href="#gallery">11 张多视角渲染</a><a href="../hardware_references/enclosure-hardware-specs.md">归档硬件规格</a></nav>
 <p class="note">这是包络复核图，不是精确元件 CAD。侧视图叠加了不同 X 截面的投影，投影重叠不一定代表三维碰撞。
 最终数字结论以 <code>tests\carrier-clearance.scad</code> 为准。开关、插接模块和功放上层端子仍需实物复核。</p>
+<p class="note"><strong>PCB装配路径已补充验证：</strong>水平直落仍会被上方窄口挡住。
+前角座内侧退让已向上贯通，采用左侧抬高25°、前偏1 mm下降至中心底面Z=35，
+再摆平、后移1 mm并落座的路线；RTC和摇杆帽后装。
+<a href="pcb-installation.html">查看挡点、改动和可拖动的步骤示意</a>。验证基于记录的模块包络，首件仍需试装。</p>
 <div class="views">
 <section><h2>顶视：使用者在下方，后置 Type-C 左偏</h2><svg id="top" viewBox="-8 -6 136 186" aria-label="外壳顶视装配图"></svg><output id="top-read">X / Y</output></section>
 <section><h2>侧视：排母 + 功放板 + 端子 + 接线叠高</h2><svg id="side" viewBox="-8 -8 188 181" aria-label="完整模块叠高和斜面内伸投影"></svg><output id="side-read">Y / Z</output></section>
@@ -31,18 +35,23 @@ button{padding:6px 12px}a{color:#1265a8}
 <table><tr><th>部件</th><th>最高 Z</th><th>状态</th></tr>
 <tr><td>载板下面 / 顶面</td><td>9 / 10.6</td><td>1.6 板厚；四个 5 高柱</td></tr>
 <tr><td>摇杆静止本体</td><td>23.0</td><td>图纸高度 12.4</td></tr>
-<tr><td>排母叠加麦克风</td><td>23.6</td><td>13 高接受包络</td></tr>
-<tr><td>功放：排母+插接座+板+端子</td><td>38.6</td><td>28 高接受包络</td></tr>
-<tr><td>功放顶部接线空间</td><td>48.6</td><td>再加 10；全平面保守覆盖</td></tr>
+<tr><td>排母叠加麦克风</td><td>26.8</td><td>排母8.7 + 上方模块7.5；至盖板内面留1.2</td></tr>
+<tr><td>功放：排母+模块和自带端子</td><td>34.3</td><td>排母8.7 + 上方15（用户预设，含模块板）</td></tr>
+<tr><td>功放顶部接线空间</td><td>44.3</td><td>再加10；全平面保守覆盖</td></tr>
 <tr><td>ESP32 / 竖装 RTC</td><td>30.6 / 50.6</td><td>20 / 40 高接受包络</td></tr>
 <tr><td>未按下的轴体 + 键帽</td><td>36.05</td><td>轴高上限15.45 + 帽高12 − 插入2</td></tr>
-<tr><td>开关外部全活动包络</td><td>最低47.70</td><td>Ø28 × 突出12（未获尺寸图，暂定）</td></tr>
+<tr><td>开关外部全活动包络</td><td>最低50.70</td><td>Ø28 × 突出12（未获尺寸图，暂定）</td></tr>
 <tr><td>现成摇杆帽完整扫掠包络</td><td>≤40.6</td><td>轴心周围Ø34、载板顶以上30；需核对实购物料</td></tr>
 </table>
 <p>蓝色：PCB/模块；橙色：功放端子和接线；红色：开关内伸；紫色：扬声器和固定柱；绿色：操作件；灰色：外壳轮廓。</p>
-<p><strong>开关外部与键帽竖直分隔约11.65 mm</strong>，仅对表列包络成立。开关法兰与拨动头尺寸仍待实物图核对。
+<p><strong>麦克风叠层：</strong>底板4、安装柱5、PCB 1.6、排母8.7、模块7.5，
+最高点26.8。原操作区高28时内面只有25，会干涉1.8；现改为高31、内面28，留1.2。
+模块7.5和功放含端子15均从排母顶面起算，不重复添加模块PCB厚度。</p>
+<p><strong>开关外部与键帽竖直分隔约14.65 mm</strong>，仅对表列包络成立。开关法兰与拨动头尺寸仍待实物图核对。
 后排按键孔和摇杆孔部分进入 R6 圆弧，切削已贯穿完整活动高度。盖板全宽共用同一轮廓，功放空间没有缩减。</p>
-<p><strong>键盘只开一个46.35×38.25矩形孔</strong>，内部细梁全部去掉；键帽每侧留0.6，
+<p><strong>键盘是上下两排错位的阶梯形连通孔，不是外包矩形</strong>。
+两排各38.25×19.20，下排左移8.10；只去掉内部细梁，保留两侧阶梯肩部。
+46.35×38.25仅为包围尺寸。键帽每侧留0.6，
 按4.3行程检查全扫掠体并上下各留1 mm，不只检查静止位置。
 合盖共四颗螺丝：顶部后排两颗、前部两颗；顶部原Y=110的两孔及底壳座已移除。</p>
 <p>喇叭藏在盖板背后，正面为31个对边2.4的蜂窝网眼，孔距3.6、孔间实体1.2，不开整圆通孔。</p>
@@ -57,7 +66,7 @@ button{padding:6px 12px}a{color:#1265a8}
 <div class="gallery" id="render-gallery"></div>
 <script>
 const ns="http://www.w3.org/2000/svg", angle=80*Math.PI/180,sin=Math.sin(angle),cos=Math.cos(angle);
-const D=136,H=28+122*sin,L=122,deck=52,heights={top:D,side:H,slope:L};
+const D=136,deckZ=31,H=deckZ+122*sin,L=122,deck=52,heights={top:D,side:H,slope:L};
 function node(svg,tag,attrs,text){
   const n=document.createElementNS(ns,tag);
   for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);
@@ -74,7 +83,7 @@ function circle(svg,x,y,r,color,fill="none"){
 function polygon(svg,points,color){
   node(svg,"polygon",{points:points.map(p=>p.join(",")).join(" "),fill:color,stroke:color,class:"shape"});
 }
-function atSlope(s,n){return[deck+cos*s-sin*n,H-(28+sin*s+cos*n)]}
+function atSlope(s,n){return[deck+cos*s-sin*n,H-(deckZ+sin*s+cos*n)]}
 function slopedBox(svg,s0,s1,n0,n1,color){
   polygon(svg,[atSlope(s0,n0),atSlope(s1,n0),atSlope(s1,n1),atSlope(s0,n1)],color);
 }
@@ -95,7 +104,8 @@ pcbRect([84.16,51.55,95.16,67.99],"#287dce","J7");
 for(const p of [[10,8],[94.5,8],[10,115],[94.5,115]]){
   const [x,y]=map(p);circle(topSvg,x,y,3.5,"#263442");circle(topSvg,x,y,1.5,"#263442");
 }
-rect(topSvg,60.9,D-52.1,46.35,38.25,"#22956a");
+polygon(topSvg,[[60.9,13.85],[99.15,13.85],[99.15,32.9],[107.25,32.9],
+                [107.25,52.1],[69,52.1],[69,33.05],[60.9,33.05]].map(([x,y])=>[x,D-y]),"#22956a");
 for(const [i,p] of [[70.85,89.5],[89.9,89.5],[62.75,108.55],[81.8,108.55]].entries()){
   const [x,y]=map(p);label(topSvg,x-3,y,`SW${i+1}`);
 }
@@ -109,24 +119,24 @@ label(topSvg,26,D+7,"正面 / 使用者；X →；Y 朝上");
 node(topSvg,"line",{x1:0,y1:D-deck,x2:120,y2:D-deck,stroke:"#667788","stroke-width":.4,"stroke-dasharray":"2 1"});
 label(topSvg,45,D-54,"全宽转折 Y=52，无凸起");
 rect(side,0,H-4,D,4,"#8a95a5");
-const tangent=6*Math.tan(angle/2),roof=[[0,H-28]];
-for(let i=0;i<=32;i++){const a=-Math.PI/2+angle*i/32;roof.push([deck-tangent+6*Math.cos(a),H-(34+6*Math.sin(a))]);}
+const tangent=6*Math.tan(angle/2),roof=[[0,H-deckZ]];
+for(let i=0;i<=32;i++){const a=-Math.PI/2+angle*i/32;roof.push([deck-tangent+6*Math.cos(a),H-(deckZ+6+6*Math.sin(a))]);}
 for(let i=0;i<=32;i++){const a=Math.PI/2+angle*(1-i/32);roof.push([deck+cos*L+tangent+6*Math.cos(a),6-6*Math.sin(a)]);}
 roof.push([D,0]);
 polygon(side,[[0,H],...roof,[D,H]],"#8a95a5");
 label(side,67,H-106,"80° 连续斜面");
 rect(side,12,H-10.6,117,1.6,"#287dce","PCB Z=9..10.6");
-rect(side,60,H-38.6,24,28,"#e8a12e","功放+端子 28");
-rect(side,60,H-48.6,24,10,"#e8a12e","线 10");
+rect(side,60,H-34.3,24,23.7,"#e8a12e","排母+功放端子23.7");
+rect(side,60,H-44.3,24,10,"#e8a12e","线10");
 rect(side,86.03,H-30.6,27.94,20,"#287dce","ESP32");
 rect(side,117,H-50.6,12,40,"#287dce","RTC");
-rect(side,32,H-23.6,19.5,13,"#287dce","MIC");
+rect(side,32,H-26.8,19.5,16.2,"#287dce","MIC+排母16.2");
 rect(side,33.5,H-36.05,18,25.45,"#22956a","未按下键帽");
 slopedBox(side,22,46,-43,-3,"#d34c4c");
 label(side,78,H-58,"开关内部 30 + 10");
 slopedBox(side,20,48,0,12,"#d34c4c");
 label(side,17,H-69,"开关外部 Ø28 / 深12");
-const switchMin=28+20*sin;
+const switchMin=deckZ+20*sin;
 node(side,"line",{x1:40,y1:H-switchMin,x2:40,y2:H-36.05,stroke:"#bf2121","stroke-width":.6});
 label(side,17,H-41,`竖直间隔 ${(switchMin-36.05).toFixed(2)}`);
 slopedBox(side,16.05,43.95,-26.2,-13,"#8e5dbb");

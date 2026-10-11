@@ -3,6 +3,7 @@
 import argparse
 from collections import Counter, defaultdict
 import hashlib
+import json
 from math import ceil, dist
 from pathlib import Path
 import re
@@ -16,6 +17,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 SOURCE = Path(__file__).resolve().parents[1] / "minibox-enclosure.scad"
 CHECKS = Path(__file__).with_name("carrier-clearance.scad")
+INSTALLATION_CHECKS = Path(__file__).with_name("installation-clearance.scad")
 BOARD = SOURCE.parents[1] / "kicad" / "minibox-carrier.kicad_pcb"
 EULER = {"bottom": -2, "lid": -78, "lid-print": -78}
 
@@ -267,6 +269,13 @@ def check_clearances(executable, output):
     print("PASS: all enclosure clearances and positive material probes.", flush=True)
 
 
+def check_installation(executable, output, bottom_mesh):
+    print("Checking continuous PCB insertion, RTC insertion and front-seat walls...", flush=True)
+    render(executable, INSTALLATION_CHECKS, output / "errors-installation.stl",
+           ['part="none"', f"mesh_path={json.dumps(str(bottom_mesh))}"], empty=True)
+    print("PASS: continuous insertion route and retained front-seat material.", flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--openscad", default=shutil.which("openscad"))
@@ -276,7 +285,7 @@ def main():
     args = parser.parse_args()
     assert args.openscad, "Pass --openscad with the path to openscad.com."
     args.output.mkdir(parents=True, exist_ok=True)
-    sources = (SOURCE, CHECKS, BOARD)
+    sources = (SOURCE, CHECKS, INSTALLATION_CHECKS, BOARD)
     source_hashes = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}
     check_board()
     with TemporaryDirectory(prefix="minibox-models-") as temporary:
@@ -284,6 +293,10 @@ def main():
         if not args.three_mf_only:
             check_clearances(args.openscad, work)
         if args.checks_only:
+            bottom = work / "bottom.stl"
+            render(args.openscad, SOURCE, bottom, ['part="bottom"'])
+            mesh_info(bottom, EULER["bottom"])
+            check_installation(args.openscad, work, bottom)
             return
         measurements = {}
         for part, euler in EULER.items():
@@ -294,13 +307,15 @@ def main():
             else:
                 render(args.openscad, SOURCE, path, definitions)
             measurements[part] = mesh_info(path, euler)
+            if part == "bottom" and not args.three_mf_only:
+                check_installation(args.openscad, work, path)
             if part != "lid-print":
                 dest = work / f"{part}.3mf"
                 write_3mf(path, dest)
                 mesh_info(dest, euler)
                 assert read_triangles(dest) == read_triangles(path), "3MF altered the mesh."
         bounds = measurements["bottom"][0]
-        for maximum, size in zip((b[1] for b in bounds), (120, 136, 148.147)):
+        for maximum, size in zip((b[1] for b in bounds), (120, 136, 151.147)):
             assert abs(maximum - size) < 0.01, f"Unexpected case dimensions: {bounds}"
         assert abs(bounds[2][0]) < 0.001
         assert abs(measurements["lid-print"][0][2][0]) < 0.001

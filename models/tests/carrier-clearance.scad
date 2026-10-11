@@ -13,7 +13,11 @@ assert(typec_center_x == 38 && typec_hole_spacing == 20 && typec_hole_diameter =
 assert(speaker_size == [27.5, 27.5, 13] && speaker_hole_spacing == [23, 23]);
 assert(speaker_grille_diameter == 23.5 && speaker_grille_hole_diameter == 2.4);
 assert(speaker_grille_pitch == 3.6 && len(speaker_grille_centers) == 31);
-assert(amplifier_stack_height >= 8.7 + 2.5 + 1.6 + 14.07);
+assert(socket_height == 8.7 && amplifier_above_socket == 15 && microphone_above_socket == 7.5);
+assert(abs(amplifier_stack_height - 23.7) < 0.001);
+assert(abs(microphone_stack_height - 16.2) < 0.001);
+assert(deck_height == 31 && abs(deck_height - panel_thickness - carrier_top_z -
+       microphone_stack_height - 1.2) < 0.001);
 assert(amplifier_wire_clearance >= 10);
 assert(carrier_top_z + joystick_body_height + 1 <= deck_height - panel_thickness);
 assert(carrier_top_z + microphone_stack_height + 1 <= deck_height - panel_thickness);
@@ -24,6 +28,8 @@ assert(tft_center == [60,83]);
 assert(shell_hole_x == [9,111] && shell_hole_y == [11,125]);
 assert(norm(keyboard_window_min - [60.9,13.85]) < 0.001);
 assert(norm(keyboard_window_size - [46.35,38.25]) < 0.001);
+assert(norm(keyboard_row_bounds[0] - [69,32.9,38.25,19.2]) < 0.001);
+assert(norm(keyboard_row_bounds[1] - [60.9,13.85,38.25,19.2]) < 0.001);
 assert(keycap_lateral_clearance == 0.6 && keycap_vertical_clearance == 1 && key_travel == 4.3);
 assert(abs(keycap_top_height - 25.45) < 0.001);
 assert(keycap_height == 12 && keycap_size == 18 && keycap_stem_engagement == 2);
@@ -32,21 +38,27 @@ assert(switch_outer_diameter == 28 && switch_outer_height == 12);
 // CHECK_GROUP openings
 intersection() {
     lid();
-    translate([60.91,13.86,24.9]) cube([46.33,38.23,12.15]);
+    union() {
+        translate([69.01,32.91,27.9]) cube([38.23,19.18,9.15]);
+        translate([60.91,13.86,27.9]) cube([38.23,19.18,9.15]);
+        translate([70,32.7,27.9]) cube([28,0.55,9.15]);
+    }
 }
 intersection() {
     lid();
-    translate([24.55, 36.5, 24.9]) cylinder(d = 34.98, h = 15.7);
+    translate([24.55, 36.5, 27.9]) cylinder(d = 34.98, h = rear_height);
 }
 intersection() {
     lid();
-    translate([52.205, 41.75, 24.9]) cylinder(d = 4.98, h = 3.2);
+    translate([52.205, 41.75, 27.9]) cylinder(d = 4.98, h = 3.2);
 }
-// Retain the keyboard perimeter while rejecting any surviving interior ribs.
+// Keep both staggered shoulders: an enclosing rectangle must fail these positive probes.
 difference() {
     union() {
+        for (p = [[62,35], [67,44], [101,16], [106,30]])
+            translate([p[0],p[1],28.1]) cube([0.4,0.4,2.8]);
         for (p = [[60.7,30], [107.45,30], [84,13.65]])
-            translate([p[0] - 0.1, p[1] - 0.1, 25.1]) cube([0.2, 0.2, 2.8]);
+            translate([p[0] - 0.1, p[1] - 0.1, 28.1]) cube([0.2, 0.2, 2.8]);
         on_slope(60, 22, -2.9) cylinder(d = 4.8, h = 2.8);
     }
     lid();
