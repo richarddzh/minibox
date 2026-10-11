@@ -4,6 +4,12 @@
 PDF 保留原版权声明；TXT 和 PNG 为查阅用提取，不替代原 PDF。
 `manifest.json` 记录 SHA-256、大小及 PDF 页数，以便核对迁移完整性。
 
+载板外壳配合规格见 [enclosure-hardware-specs.md](enclosure-hardware-specs.md)，
+包括摇杆异形轴、扬声器、键帽/轴体叠高、功放二次接线端子及船型开关的待确认项。
+新增扬声器原始手册 `datasheets/xhxdz-2828box-4ohm3w.pdf`、
+机械图 `drawings/xhxdz-2828box-dimensions.png` 和摇杆轴端实物近照
+`drawings/yv13s-shaft-front.jpg` / `drawings/yv13s-shaft-rear.jpg`。
+
 | 归档文件 | 来源/用途 |
 |---|---|
 | esp32-s3-wroom.pdf | [Espressif](https://www.espressif.com/sites/default/files/documentation/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf)，N16R8 模块 |

@@ -1,5 +1,6 @@
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import check_enclosure
@@ -67,6 +68,51 @@ class MeshChecksTest(unittest.TestCase):
         with patch.object(check_enclosure, "read_triangles", return_value=nearly_flat):
             with self.assertRaisesRegex(AssertionError, "Zero-area triangle"):
                 check_enclosure.mesh_info(Path("nearly-flat.3mf"), 2)
+
+    def test_current_carrier_alignment(self):
+        check_enclosure.check_board()
+
+    def test_moved_carrier_hole_is_rejected(self):
+        original = check_enclosure.BOARD.read_text(encoding="utf-8")
+        changed = original.replace("(at 10 8)", "(at 11 8)", 1)
+        self.assertNotEqual(original, changed)
+        with patch.object(Path, "read_text", return_value=changed):
+            with self.assertRaisesRegex(AssertionError, "PCB H1 moved"):
+                check_enclosure.check_board()
+
+    def test_changed_pcb_corner_is_rejected(self):
+        original = check_enclosure.BOARD.read_text(encoding="utf-8")
+        changed = original.replace("(mid 6.464466 4.464466)", "(mid 6 4)", 1)
+        self.assertNotEqual(original, changed)
+        with patch.object(Path, "read_text", return_value=changed):
+            with self.assertRaisesRegex(AssertionError, "corner radius"):
+                check_enclosure.check_board()
+
+    def test_y_up_preserves_faces_and_volume(self):
+        with TemporaryDirectory() as temporary:
+            path = Path(temporary) / "rotated.stl"
+            with patch.object(check_enclosure, "read_triangles", return_value=self.closed):
+                check_enclosure.write_y_up(Path("source.stl"), path, 1)
+            result = check_enclosure.read_triangles(path)
+            expected = [[(x, z, 1 - y) for x, y, z in t] for t in self.closed]
+            self.assertEqual(result, expected)
+            _, volume = check_enclosure.mesh_info(path, 2)
+            self.assertAlmostEqual(volume, 1 / 6)
+
+    def test_lid_print_preserves_faces_and_volume(self):
+        with TemporaryDirectory() as temporary:
+            path = Path(temporary) / "lid-print.stl"
+            with patch.object(check_enclosure, "read_triangles", return_value=self.closed):
+                check_enclosure.write_lid_print(Path("source.stl"), path, 1.2)
+            result = check_enclosure.read_triangles(path)
+            expected = [[(2 - z, y - 6.5, x - 2.9) for x, y, z in t] for t in self.closed]
+            self.assertEqual(len(result), len(expected))
+            for actual, wanted in zip(result, expected):
+                for a, b in zip(actual, wanted):
+                    for x, y in zip(a, b):
+                        self.assertAlmostEqual(x, y, places=6)
+            _, volume = check_enclosure.mesh_info(path, 2)
+            self.assertAlmostEqual(volume, 1 / 6)
 
 
 if __name__ == "__main__":

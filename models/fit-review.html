@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>Minibox 载板外壳空间复核</title>
+<style>
+body{font:15px system-ui,sans-serif;background:#f4f6fa;color:#172334;margin:24px;max-width:1400px}
+h1{font-size:25px;margin-bottom:8px}h2{font-size:18px}
+.note{border-left:4px solid #e6a32e;padding:10px 16px;background:#fff5dc}
+.views{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:18px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px}
+figure{margin:0;background:white;border:1px solid #dbe1ec;border-radius:10px;overflow:hidden}
+figure img{width:100%;display:block}figcaption{padding:12px}nav{display:flex;gap:16px;margin:16px 0;flex-wrap:wrap}
+section{background:white;border-radius:12px;padding:18px;border:1px solid #dbe1ec}
+svg{width:100%;height:500px;border:1px solid #dbe1ec;cursor:crosshair}
+text{font:3.3px system-ui,sans-serif;fill:#172334;paint-order:stroke;stroke:white;stroke-width:.65px;stroke-linejoin:round}
+.shape{stroke-width:.4;fill-opacity:.3}table{border-collapse:collapse;width:100%;font-size:14px}
+td,th{text-align:left;padding:8px;border-bottom:1px solid #ddd}
+output{display:block;min-height:24px;font-family:monospace;margin-top:8px}
+button{padding:6px 12px}a{color:#1265a8}
+</style>
+<h1>Minibox：80° 直立屏幕，无局部凸起</h1>
+<p>尺寸单位 mm。外壳 120 × 136 × 148.147；比前版浅34、矮14.95。PCB 正面向盖板，孔位不动。点击任一视图的两个点可量取该投影平面距离。</p>
+<nav><a href="#top">位置图</a><a href="#side">叠高与开关外侧</a><a href="#gallery">11 张多视角渲染</a><a href="../hardware_references/enclosure-hardware-specs.md">归档硬件规格</a></nav>
+<p class="note">这是包络复核图，不是精确元件 CAD。侧视图叠加了不同 X 截面的投影，投影重叠不一定代表三维碰撞。
+最终数字结论以 <code>tests\carrier-clearance.scad</code> 为准。开关、插接模块和功放上层端子仍需实物复核。</p>
+<div class="views">
+<section><h2>顶视：使用者在下方，后置 Type-C 左偏</h2><svg id="top" viewBox="-8 -6 136 186" aria-label="外壳顶视装配图"></svg><output id="top-read">X / Y</output></section>
+<section><h2>侧视：排母 + 功放板 + 端子 + 接线叠高</h2><svg id="side" viewBox="-8 -8 188 181" aria-label="完整模块叠高和斜面内伸投影"></svg><output id="side-read">Y / Z</output></section>
+<section><h2>斜面展开：三个屏幕耳与四个喇叭柱</h2><svg id="slope" viewBox="-6 -6 132 169" aria-label="屏幕三点安装及扬声器四点安装"></svg><output id="slope-read">X / 沿斜面距离</output></section>
+<section><h2>叠高接受上限与来源</h2>
+<table><tr><th>部件</th><th>最高 Z</th><th>状态</th></tr>
+<tr><td>载板下面 / 顶面</td><td>9 / 10.6</td><td>1.6 板厚；四个 5 高柱</td></tr>
+<tr><td>摇杆静止本体</td><td>23.0</td><td>图纸高度 12.4</td></tr>
+<tr><td>排母叠加麦克风</td><td>23.6</td><td>13 高接受包络</td></tr>
+<tr><td>功放：排母+插接座+板+端子</td><td>38.6</td><td>28 高接受包络</td></tr>
+<tr><td>功放顶部接线空间</td><td>48.6</td><td>再加 10；全平面保守覆盖</td></tr>
+<tr><td>ESP32 / 竖装 RTC</td><td>30.6 / 50.6</td><td>20 / 40 高接受包络</td></tr>
+<tr><td>未按下的轴体 + 键帽</td><td>36.05</td><td>轴高上限15.45 + 帽高12 − 插入2</td></tr>
+<tr><td>开关外部全活动包络</td><td>最低47.70</td><td>Ø28 × 突出12（未获尺寸图，暂定）</td></tr>
+<tr><td>现成摇杆帽完整扫掠包络</td><td>≤40.6</td><td>轴心周围Ø34、载板顶以上30；需核对实购物料</td></tr>
+</table>
+<p>蓝色：PCB/模块；橙色：功放端子和接线；红色：开关内伸；紫色：扬声器和固定柱；绿色：操作件；灰色：外壳轮廓。</p>
+<p><strong>开关外部与键帽竖直分隔约11.65 mm</strong>，仅对表列包络成立。开关法兰与拨动头尺寸仍待实物图核对。
+后排按键孔和摇杆孔部分进入 R6 圆弧，切削已贯穿完整活动高度。盖板全宽共用同一轮廓，功放空间没有缩减。</p>
+<p><strong>键盘只开一个46.35×38.25矩形孔</strong>，内部细梁全部去掉；键帽每侧留0.6，
+按4.3行程检查全扫掠体并上下各留1 mm，不只检查静止位置。
+合盖共四颗螺丝：顶部后排两颗、前部两颗；顶部原Y=110的两孔及底壳座已移除。</p>
+<p>喇叭藏在盖板背后，正面为31个对边2.4的蜂窝网眼，孔距3.6、孔间实体1.2，不开整圆通孔。</p>
+<p>摇杆帽购买现成件，不再提供自制帽模型。完整±30°扫掠须落在Ø34×高30保留包络内，
+面板孔Ø35；静态帽直径不能代替运动范围检查。</p>
+<p><a href="module-dimensions.md">完整尺寸、来源及待实物复核项</a></p>
+<button id="clear">清除测量</button></section>
+</div>
+<h2 id="gallery">打印件多视角渲染</h2>
+<p>图片来自配套 STL 实体；整机图仅展示外壳，不把未确认的模块、开关或现成摇杆帽占位冒充精确器件模型。
+点击可打开原图。</p>
+<div class="gallery" id="render-gallery"></div>
+<script>
+const ns="http://www.w3.org/2000/svg", angle=80*Math.PI/180,sin=Math.sin(angle),cos=Math.cos(angle);
+const D=136,H=28+122*sin,L=122,deck=52,heights={top:D,side:H,slope:L};
+function node(svg,tag,attrs,text){
+  const n=document.createElementNS(ns,tag);
+  for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);
+  if(text)n.textContent=text;svg.append(n);return n;
+}
+function label(svg,x,y,text){node(svg,"text",{x,y},text)}
+function rect(svg,x,y,w,h,color,labelText){
+  node(svg,"rect",{x,y,width:w,height:h,fill:color,stroke:color,class:"shape"});
+  if(labelText)label(svg,x+1,y+h/2,labelText);
+}
+function circle(svg,x,y,r,color,fill="none"){
+  node(svg,"circle",{cx:x,cy:y,r,stroke:color,fill,"stroke-width":.5});
+}
+function polygon(svg,points,color){
+  node(svg,"polygon",{points:points.map(p=>p.join(",")).join(" "),fill:color,stroke:color,class:"shape"});
+}
+function atSlope(s,n){return[deck+cos*s-sin*n,H-(28+sin*s+cos*n)]}
+function slopedBox(svg,s0,s1,n0,n1,color){
+  polygon(svg,[atSlope(s0,n0),atSlope(s1,n0),atSlope(s1,n1),atSlope(s0,n1)],color);
+}
+const topSvg=document.querySelector("#top"),side=document.querySelector("#side"),slope=document.querySelector("#slope");
+rect(topSvg,0,0,120,D,"#8a95a5");
+rect(topSvg,12.75,D-129,94.5,117,"#287dce","PCB 94.5 × 117 / R5");
+const map=([x,y])=>[x+7.75,D-(132-y)];
+function pcbRect(bounds,color,text){
+  const [x,y]=map([bounds[0],bounds[1]]);
+  rect(topSvg,x,y,bounds[2]-bounds[0],bounds[3]-bounds[1],color,text);
+}
+pcbRect([20,18.03,88.5,45.97],"#287dce","ESP32 / USB ←");
+pcbRect([60.5,3,88,15],"#287dce","RTC");
+pcbRect([35,48,62,72],"#e8a12e","MAX98357A + 端子");
+pcbRect([5.08,45.47,16.08,56.83],"#287dce","J8");
+pcbRect([5.08,57.97,16.08,69.33],"#287dce","J9");
+pcbRect([84.16,51.55,95.16,67.99],"#287dce","J7");
+for(const p of [[10,8],[94.5,8],[10,115],[94.5,115]]){
+  const [x,y]=map(p);circle(topSvg,x,y,3.5,"#263442");circle(topSvg,x,y,1.5,"#263442");
+}
+rect(topSvg,60.9,D-52.1,46.35,38.25,"#22956a");
+for(const [i,p] of [[70.85,89.5],[89.9,89.5],[62.75,108.55],[81.8,108.55]].entries()){
+  const [x,y]=map(p);label(topSvg,x-3,y,`SW${i+1}`);
+}
+circle(topSvg,24.55,D-36.5,17.5,"#22956a");
+label(topSvg,10,D-36.5,"Ø35 / 现成帽");
+circle(topSvg,52.205,D-41.75,9.75,"#287dce");
+circle(topSvg,52.205,D-41.75,2.5,"#22956a");
+label(topSvg,45,D-30,"MIC Ø5");
+for(const x of [28,48]){circle(topSvg,x,0,6,"#c44");label(topSvg,x-5,9,`X=${x}`)}
+label(topSvg,26,D+7,"正面 / 使用者；X →；Y 朝上");
+node(topSvg,"line",{x1:0,y1:D-deck,x2:120,y2:D-deck,stroke:"#667788","stroke-width":.4,"stroke-dasharray":"2 1"});
+label(topSvg,45,D-54,"全宽转折 Y=52，无凸起");
+rect(side,0,H-4,D,4,"#8a95a5");
+const tangent=6*Math.tan(angle/2),roof=[[0,H-28]];
+for(let i=0;i<=32;i++){const a=-Math.PI/2+angle*i/32;roof.push([deck-tangent+6*Math.cos(a),H-(34+6*Math.sin(a))]);}
+for(let i=0;i<=32;i++){const a=Math.PI/2+angle*(1-i/32);roof.push([deck+cos*L+tangent+6*Math.cos(a),6-6*Math.sin(a)]);}
+roof.push([D,0]);
+polygon(side,[[0,H],...roof,[D,H]],"#8a95a5");
+label(side,67,H-106,"80° 连续斜面");
+rect(side,12,H-10.6,117,1.6,"#287dce","PCB Z=9..10.6");
+rect(side,60,H-38.6,24,28,"#e8a12e","功放+端子 28");
+rect(side,60,H-48.6,24,10,"#e8a12e","线 10");
+rect(side,86.03,H-30.6,27.94,20,"#287dce","ESP32");
+rect(side,117,H-50.6,12,40,"#287dce","RTC");
+rect(side,32,H-23.6,19.5,13,"#287dce","MIC");
+rect(side,33.5,H-36.05,18,25.45,"#22956a","未按下键帽");
+slopedBox(side,22,46,-43,-3,"#d34c4c");
+label(side,78,H-58,"开关内部 30 + 10");
+slopedBox(side,20,48,0,12,"#d34c4c");
+label(side,17,H-69,"开关外部 Ø28 / 深12");
+const switchMin=28+20*sin;
+node(side,"line",{x1:40,y1:H-switchMin,x2:40,y2:H-36.05,stroke:"#bf2121","stroke-width":.6});
+label(side,17,H-41,`竖直间隔 ${(switchMin-36.05).toFixed(2)}`);
+slopedBox(side,16.05,43.95,-26.2,-13,"#8e5dbb");
+slopedBox(side,14.6,45.4,-13,-3,"#8e5dbb");
+label(side,80,H-76,"喇叭 13 + 柱 10");
+slopedBox(side,52.13,113.87,-9,-4,"#22956a");
+label(side,79,38,"屏幕");
+label(side,20,H+9,"使用者 ← Y → 背面；Z 朝上");
+rect(slope,0,0,120,L,"#8a95a5");
+rect(slope,5.98,L-113.87,108.04,61.74,"#287dce");
+label(slope,7,L-50,"屏幕 PCB");
+rect(slope,14.98,L-(83+28.84),85.52,57.68,"#22956a","显示窗口 85.52 × 57.68 / R6");
+for(const [x,s] of [[9.05,55.55],[9.05,110.45],[110.95,55.55]]){
+  circle(slope,x,L-s,4,"#263442");circle(slope,x,L-s,2.35,"#263442");
+}
+rect(slope,106.02,L-113.87,8,42,"#d34c4c","排针");
+label(slope,71,6,"右上柱已删除");
+rect(slope,12.25,L-43.75,27.5,27.5,"#8e5dbb");
+for(let row=-3;row<=3;row++)for(let col=-3;col<=3;col++){
+ const x=3.6*(col+(Math.abs(row)%2)/2),y=3.6*row*Math.sqrt(3)/2;
+ if(Math.hypot(x,y)<=11.75-1.2/Math.cos(Math.PI/6))
+   polygon(slope,Array.from({length:6},(_,i)=>{
+     const a=(30+60*i)*Math.PI/180,r=1.2/Math.cos(Math.PI/6);
+     return[26+x+r*Math.cos(a),L-30-y-r*Math.sin(a)];
+   }),"#8e5dbb");
+}
+for(const dx of [-11.5,11.5])for(const ds of [-11.5,11.5])
+  circle(slope,26+dx,L-30-ds,3.7,"#8e5dbb");
+circle(slope,90,L-34,10.5,"#d34c4c");
+label(slope,13,114,"喇叭四孔 23 × 23");
+label(slope,76,114,"开关 Ø21（待核实）");
+label(slope,17,130,"独立沿面中心：喇叭30 / 开关34");
+const views={
+  bottom:{name:"底壳",items:{isometric:"立体 / 三点屏幕支撑",top:"俯视 / 载板四柱",rear:"后视 / Type-C",side:"侧视 / 连续轮廓"}},
+  lid:{name:"盖板",items:{isometric:"立体 / 无凸起",front:"正面 / 各开孔",inside:"背面 / 扬声器四柱",side:"侧视 / 80°"}},
+  assembly:{name:"整机",items:{isometric:"装配立体",front:"装配正面",side:"装配侧面"}}
+};
+for(const [part,spec] of Object.entries(views))for(const [view,title] of Object.entries(spec.items)){
+ const figure=document.createElement("figure"),link=document.createElement("a"),img=document.createElement("img"),caption=document.createElement("figcaption");
+ link.href=`renders/${part}-${view}.png`;link.target="_blank";link.rel="noopener";
+ img.src=link.href;img.alt=`${spec.name}：${title}`;img.loading="lazy";
+ caption.textContent=img.alt;link.append(img);figure.append(link,caption);document.querySelector("#render-gallery").append(figure);
+}
+const first=new Map();
+for(const svg of [topSvg,side,slope])svg.addEventListener("click",e=>{
+  const point=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());
+  const p=[point.x,heights[svg.id]-point.y],out=document.querySelector(`#${svg.id}-read`);
+  circle(svg,point.x,point.y,.8,"#e32939","#e32939");
+  svg.lastChild.classList.add("measure");
+  if(first.has(svg)){
+    const a=first.get(svg),distance=Math.hypot(p[0]-a[0],p[1]-a[1]);
+    node(svg,"line",{x1:a[0],y1:heights[svg.id]-a[1],x2:point.x,y2:point.y,stroke:"#e32939","stroke-width":.4,class:"measure"});
+    out.textContent=`(${a.map(v=>v.toFixed(2))}) → (${p.map(v=>v.toFixed(2))}) = ${distance.toFixed(2)} mm`;
+    first.delete(svg);
+  }else{first.set(svg,p);out.textContent=`起点 (${p.map(v=>v.toFixed(2))}) mm；再点击终点`}
+});
+document.querySelector("#clear").onclick=()=>{first.clear();document.querySelectorAll(".measure").forEach(n=>n.remove());document.querySelectorAll("output").forEach(n=>n.textContent="已清除")};
+</script>
+</html>

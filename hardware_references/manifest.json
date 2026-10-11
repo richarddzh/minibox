@@ -1,5 +1,31 @@
 [
   {
+    "path": "enclosure-hardware-specs.md",
+    "bytes": 6327,
+    "sha256": "1590811903df194a6cde8d09552e1c9210e83a788ae71e931b3ccf25f6f91d4f"
+  },
+  {
+    "path": "datasheets/xhxdz-2828box-4ohm3w.pdf",
+    "bytes": 542038,
+    "sha256": "f24a5eb11164c317b5665c7ebb2be828fa310e50153d8534ac6fd904b9221760",
+    "pages": 7
+  },
+  {
+    "path": "drawings/xhxdz-2828box-dimensions.png",
+    "bytes": 493800,
+    "sha256": "5b1498b953bbfe31f6997892f77b689f8718a7908aee3848c99ccebff2528e32"
+  },
+  {
+    "path": "drawings/yv13s-shaft-front.jpg",
+    "bytes": 198294,
+    "sha256": "8ffe86386f639facae9d99b1e94f80a0bedb51506efd177452697943801908a9"
+  },
+  {
+    "path": "drawings/yv13s-shaft-rear.jpg",
+    "bytes": 197225,
+    "sha256": "abf9c180927acabadd5954a55d9441079491e140b0b81574d3278971a4d57d70"
+  },
+  {
     "path": "carrier-revision-references.md",
     "bytes": 3860,
     "sha256": "cd78061e56d286f2776f489db975c25dd1a81038861c7dbbb5d24997bf1d0b26"
@@ -356,7 +382,7 @@
   },
   {
     "path": "README.md",
-    "bytes": 3256,
-    "sha256": "eb95b3fe1f2c3db631fa9527db1cacb40b78a0c68c9716621c4798eb85b1d347"
+    "bytes": 3686,
+    "sha256": "224ecffd3648da188ef37e8e34affe0c6400a69f01dbee887d69356ac46ad5ef"
   }
 ]

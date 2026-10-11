@@ -1,5 +1,5 @@
 /*
-  Sketch-based enclosure. Units: mm.
+  Carrier-board enclosure. Units: mm.
   X = left/right, Y = front/back, Z = up.
   Both halves use the same tangent, rounded side profile.
   Unmeasured radii, component heights and control windows are provisional.
@@ -13,11 +13,11 @@ $fn = 32;
 
 /* [Enclosure] */
 case_width = 120;
-deck_depth = 58;
+case_depth = 136;
+deck_depth = 52;
 deck_height = 28;
-slope_angle = 60;
-slope_length = 111;
-rear_ledge = 18;
+slope_angle = 80;
+slope_length = 122;
 wall = 2.4;
 floor_thickness = 4;
 panel_thickness = 3;
@@ -29,7 +29,7 @@ support_lip_thickness = 1.5;
 /* [Rounded corners] */
 bottom_radius = 12;
 rim_radius = 6;
-bend_radius = 10;
+bend_radius = 6;
 
 /* [M2.5 fasteners] */
 screw_clearance = 2.8;
@@ -46,53 +46,42 @@ screen_tab_depth = 10;
 shell_boss_diameter = 9;
 shell_corner_depth = 7;
 rear_mount_depth = 10;
-middle_boss_diameter = 7;
-middle_mount_y = 49.2;
 screen_gusset_thickness = 2;
-screen_brace_clearance = 2.5; // Compact side-wall brace clearance to floor-mounted modules
 support_angle = 75; // Minimum brace slope measured from the horizontal
-small_gap_fill = 5;
 
-/* [Controls: joystick left, keyboard right] */
-joystick_size = [30, 40];
-joystick_hole_spacing = [21, 28];
-joystick_center = [31, 29];
-joystick_hole_bottom_margin = 4.5;
-joystick_hole_top_margin = 7.5;
-joystick_window_diameter = 29;
-joystick_window_from_left = 13.8;
-joystick_window_from_bottom = 14.9;
-joystick_lid_gap = 5;
-joystick_total_height = 30;
-keyboard_size = [57.4, 27.2, 20.6];
-keyboard_hole_spacing = [53.34, 22.86];
-keyboard_center = [84, 30.1];
-keyboard_window = [57.4, 20.2];
-keyboard_window_top_margin = 4;
-keyboard_window_bottom_margin = 3;
-keyboard_lid_gap = 5;
+/* [Single KiCad carrier: F.Cu faces the lid] */
+carrier_size = [94.5, 117];
+carrier_front_y = 12;
+carrier_standoff_height = 5;
+carrier_boss_diameter = 7; // Inside the PCB's 3.5 mm-radius screw keepout
+carrier_screw_length = 6;
+carrier_socket_depth = 5.2;
 pcb_thickness = 1.6;
 module_clearance = 1;
-control_clearance = 2;
-
-/* [ESP32 expansion board: rotated 90 degrees on the rear floor] */
-esp32_size = [58, 68];
-esp32_hole_spacing = [49, 58];
-esp32_hole_diameter = 3;
-esp32_standoff_height = 5;
-esp32_rear_clearance = 20;
-esp32_screw_length = 6;
-esp32_socket_depth = 5.2;
-// Provisional component height above the PCB; measure connectors and the ESP32 stack.
-esp32_component_height = 10;
-
-/* [Breadboard: beside ESP32, with aligned front edges] */
-breadboard_size = [35, 47];
-floor_board_gap = 10;
-floor_module_clearance = 10;
-floor_side_clearance = 1; // Minimum at the inward-curving bottom wall, not the straight wall
-// Provisional thickness; no fixing holes or adhesive thickness have been supplied.
-breadboard_height = 10;
+assembly_clearance = 1;
+solder_tail_depth = 3.5;
+joystick_window_diameter = 35;
+joystick_motion_diameter = 34; // Acceptance envelope for the purchased cap over its entire motion
+joystick_body_height = 12.4;
+joystick_total_height = 30; // Acceptance envelope including the unselected thumb cap
+keycap_size = 18; // PCB acceptance limit, not an identified keycap
+keycap_lateral_clearance = 0.6;
+keycap_vertical_clearance = 1;
+key_travel = 4.3; // Rated 4 mm travel plus 0.3 mm design allowance
+key_window_size = keycap_size + 2 * keycap_lateral_clearance;
+key_switch_top_height = 15.45; // CPG151101D13: 11+0.15 body + 4+0.30 released stem
+keycap_height = 12; // Common OEM-style cap acceptance limit; exact cap not selected
+keycap_stem_engagement = 2; // Minimum overlap, conservative for the released overall height
+keycap_top_height = key_switch_top_height + keycap_height - keycap_stem_engagement;
+socket_height = 8.7; // LAIL 8.5 +/-0.2, maximum
+// Maximum installed heights above the carrier, including sockets and module PCBs.
+esp32_stack_height = 20;
+// 8.7 socket + 2.5 male-header seating + 1.6 module PCB + 14.07 terminal = 26.87.
+// The amplifier's terminal is not identified; 28 mm is an acceptance limit.
+amplifier_stack_height = 28;
+amplifier_wire_clearance = 10;
+rtc_stack_height = 40;
+microphone_stack_height = 13;
 
 /* [Landscape TFT: dimensions rotated together] */
 tft_size = [108.04, 61.74];
@@ -106,29 +95,40 @@ screen_stack_above_pcb = 3;
 screen_front_clearance = 1; // Reserved for acrylic film and assembly clearance
 screen_back_height = 4;
 screen_back_edge_margin = 8;
-screen_shift_along = 26.62;
+screen_shift_along = 37;
 screen_port_clearance = 8;
+screen_header_size = [8, 42, 12]; // Provisional upper-right connector/cable reservation
 
 /* [Switch below the screen, right side] */
 switch_hole_diameter = 21;
-switch_center = [90, 22]; // X and distance along the inclined panel
-// Provisional envelope inside the case, not measured switch dimensions.
-switch_body_depth = 20;
-switch_body_diameter = 21;
+switch_center = [90, 34]; // Independent of the larger speaker's center
+switch_screen_clearance = 2;
+// Taobao SKU drawing unavailable: retain the existing bore, reserve larger internals.
+switch_body_depth = 30;
+switch_body_diameter = 24;
+switch_wire_depth = 10;
+switch_outer_diameter = 28; // Unverified SKU: flange plus full rocker motion acceptance envelope
+switch_outer_height = 12;
 
-/* [Audio openings left of the switch] */
-speaker_diameter = 23;
-speaker_hole_diameter = 23.5;
-speaker_center = [30, 22];
+/* [XHXDZ 2828BOX-4ohm3W-2P1.25 / C49247008] */
+speaker_size = [27.5, 27.5, 13];
+speaker_tolerance = 0.2;
+speaker_hole_spacing = [23, 23];
+speaker_grille_diameter = 23.5;
+speaker_grille_hole_diameter = 2.4; // Hexagonal vent width across flats
+speaker_grille_pitch = 3.6;
+speaker_center = [26, 30];
+speaker_post_depth = 10;
+speaker_post_diameter = 7.4;
+speaker_screw_length = 20;
+speaker_screw_head_depth = 2;
 microphone_hole_diameter = 5;
-microphone_center = [60, 22];
-// Provisional internal depths; mounting hardware and wiring are not yet measured.
-speaker_body_depth = 10;
-microphone_body_depth = 10;
+microphone_diameter = 19.5;
 
 /* [Rear panel Type-C sockets] */
 typec_hole_diameter = 12;
 typec_hole_spacing = 20;
+typec_center_x = 38; // Front view: left; rear view: right
 typec_thread_diameter = 10.5;
 typec_thread_length = 14.5;
 typec_head_diameter = 13.8;
@@ -144,6 +144,7 @@ cable_opening_z = 10;
 /* [Hidden] */
 eps = 0.02;
 screen_top_y = deck_depth + cos(slope_angle) * slope_length;
+rear_ledge = case_depth - screen_top_y;
 rear_height = deck_height + sin(slope_angle) * slope_length;
 typec_center_z = rear_height / 2;
 // Conservative envelope if the quoted hex size is across flats rather than corners.
@@ -155,34 +156,26 @@ screen_window_offset = [(tft_view_side_margins[0] - tft_view_side_margins[1]) / 
 tft_center = [case_width / 2, 46 + screen_shift_along];
 tft_rear_extent = deck_depth + cos(slope_angle) * (tft_center[1] + tft_size[1] / 2) -
                   sin(slope_angle) * screen_mount_normal;
-floor_side_inset = (case_width - esp32_size[0] - floor_board_gap - breadboard_size[0]) / 2;
-// Above-floor parts are checked in 3D, rather than wasting their entire XY projection.
-esp32_front_y = max(keyboard_center[1] + keyboard_size[1] / 2,
-                   joystick_center[1] + joystick_size[1] / 2,
-                   middle_mount_y + middle_boss_diameter / 2) + floor_module_clearance;
-esp32_center = [floor_side_inset + esp32_size[0] / 2,
-                esp32_front_y + esp32_size[1] / 2];
-breadboard_center = [case_width - floor_side_inset - breadboard_size[0] / 2,
-                    esp32_front_y + breadboard_size[1] / 2];
-breadboard_mount_z = floor_thickness;
-floor_group_rear = esp32_front_y + max(esp32_size[1], breadboard_size[1]);
-esp32_mount_z = floor_thickness + esp32_standoff_height;
-case_depth = ceil(max(screen_top_y + rear_ledge,
-                      tft_rear_extent + 10 + shell_boss_diameter / 2 + module_clearance,
-                      floor_group_rear + esp32_rear_clearance + wall));
-keyboard_window_offset = [0, (keyboard_window_bottom_margin - keyboard_window_top_margin) / 2];
-keyboard_window_center = keyboard_center + keyboard_window_offset;
-keyboard_mount_z = deck_height - panel_thickness - keyboard_lid_gap;
-keyboard_standoff_height = keyboard_mount_z - floor_thickness;
-// Peripheral components remain provisional; the measured opening bounds the tall keys.
-keyboard_component_height = keyboard_lid_gap - pcb_thickness - module_clearance;
-joystick_hole_center = joystick_center +
-    [0, (joystick_hole_bottom_margin - joystick_hole_top_margin) / 2];
-joystick_window_center = joystick_center - joystick_size / 2 +
-    [joystick_window_from_left, joystick_window_from_bottom];
-joystick_mount_z = deck_height - panel_thickness - joystick_lid_gap;
-joystick_standoff_height = joystick_mount_z - floor_thickness;
-joystick_component_height = joystick_lid_gap - pcb_thickness - module_clearance;
+carrier_left_x = (case_width - carrier_size[0]) / 2;
+carrier_mount_z = floor_thickness + carrier_standoff_height;
+carrier_top_z = carrier_mount_z + pcb_thickness;
+// Saved PCB coordinates: X=5..99.5, Y=3..120. KiCad +Y points toward the user.
+function pcb_point(p) = [carrier_left_x + p[0] - 5, carrier_front_y + 120 - p[1]];
+carrier_holes = [for (p = [[10, 8], [94.5, 8], [10, 115], [94.5, 115]]) pcb_point(p)];
+key_centers = [for (p = [[70.85, 89.5], [89.9, 89.5],
+                         [62.75, 108.55], [81.8, 108.55]]) pcb_point(p)];
+keyboard_window_min = [for (axis = [0, 1]) min([for (p = key_centers) p[axis]]) - key_window_size / 2];
+keyboard_window_max = [for (axis = [0, 1]) max([for (p = key_centers) p[axis]]) + key_window_size / 2];
+keyboard_window_size = keyboard_window_max - keyboard_window_min;
+joystick_center = pcb_point([16.8, 95.5]);
+microphone_center = pcb_point([44.455, 90.25]);
+screen_mounts = [[-1, -1], [-1, 1], [1, -1]];
+speaker_grille_centers = [
+    for (row = [-3 : 3], column = [-3 : 3])
+        let(p = [speaker_grille_pitch * (column + (abs(row) % 2) / 2),
+                 speaker_grille_pitch * row * sqrt(3) / 2])
+            if (norm(p) <= (speaker_grille_diameter - speaker_grille_hole_diameter / cos(30)) / 2) p
+];
 shell_hole_x = [9, case_width - 9];
 shell_hole_y = [11, case_depth - 11];
 shell_head_diameter = lid_counterbore_diameter;
@@ -211,10 +204,6 @@ function column_root_z(x, y) =
     y > deck_depth ?
         rear_height - panel_thickness - rear_mount_depth - rear_brace_rise(x, y) :
         floor_thickness;
-function distance_to_rectangle(p, bounds) = norm([
-    max(bounds[0] - p[0], 0, p[0] - bounds[2]),
-    max(bounds[1] - p[1], 0, p[1] - bounds[3])
-]);
 function reverse_list(a) = [for (i = [len(a) - 1 : -1 : 0]) a[i]];
 function corner_angle(i) =
     let(p = profile_vertices[i],
@@ -236,8 +225,11 @@ function corner_points(i) =
         steps = max(4, ceil(abs(sweep) * $fn / 360)))
     // Remove trig drift at tangent endpoints before boolean intersections.
     [for (j = [0 : steps])
-        [for (v = center + radius * [cos(a0 + sweep * j / steps), sin(a0 + sweep * j / steps)])
-            round(v * 1000000) / 1000000]];
+        let(q = center + radius * [cos(a0 + sweep * j / steps), sin(a0 + sweep * j / steps)])
+            [round(q[0] * 1000000) / 1000000,
+             (i == 4 && j == steps) || (i == 5 && j == 0) ? deck_height :
+             (i == 3 && j == 0) || (i == 2 && j == steps) ? rear_height :
+             round(q[1] * 1000000) / 1000000]];
 
 function top_path(trim = 0) = concat(
     [[rim_radius + trim, deck_height]],
@@ -256,11 +248,11 @@ function inner_path(path, depth) = [
         path[i] + depth * (n1 + n2) / (1 + n1 * n2)
 ];
 
-// All six screws are vertical and sit on the two horizontal portions of the lid.
+// Two front screws and two top/rear screws, all vertical.
 assert(part == "assembly" || part == "exploded" || part == "bottom" ||
        part == "lid" || part == "lid-print" || part == "bottom-y-up" ||
        part == "lid-y-up" || part == "none", "Unknown part.");
-assert(slope_angle > 30 && slope_angle < 80, "Screen slope must be between 30 and 80 degrees.");
+assert(slope_angle > 30 && slope_angle <= 85, "Screen slope must be between 30 and 85 degrees.");
 assert(min(bottom_radius, rim_radius) > wall && bend_radius > panel_thickness,
        "Corner radii must exceed their wall/panel thickness.");
 assert(floor_thickness >= wall, "Floor thickness must be at least the wall thickness.");
@@ -276,27 +268,38 @@ assert(tft_window_clearance >= 2, "Screen aperture needs at least 1 mm per side.
 assert(tft_window_radius > 0 &&
        2 * tft_window_radius <= min(tft_view) + tft_window_clearance,
        "Screen window corner radius does not fit its aperture.");
-assert(screen_brace_clearance >= floor_side_clearance,
-       "Screen side braces must retain at least the side-wall assembly clearance.");
 assert(switch_center[1] + max(switch_hole_diameter, switch_body_diameter) / 2 +
-       screen_port_clearance <= tft_center[1] - tft_size[1] / 2,
+       switch_screen_clearance <= tft_center[1] - tft_size[1] / 2,
        "Switch must clear the entire screen PCB, not just the display window.");
 assert(tft_center[1] + tft_size[1] / 2 + module_clearance <
        slope_length - tangent_length(3), "Raised screen overlaps the top bend.");
 assert(switch_body_depth > 0 && switch_body_diameter > 0,
        "Switch envelope dimensions must be positive.");
-assert(speaker_center[0] < microphone_center[0] && microphone_center[0] < switch_center[0],
-       "Audio openings must remain to the left of the switch.");
-for (port = [[speaker_center, speaker_hole_diameter],
-             [microphone_center, microphone_hole_diameter]])
+assert(switch_outer_diameter > switch_hole_diameter && switch_outer_height > 0,
+       "The switch flange must overlap its bore.");
+assert(deck_height + sin(slope_angle) * (switch_center[1] - switch_outer_diameter / 2) -
+       (carrier_top_z + keycap_top_height) >= 8,
+       "The external rocker sweep needs at least 8 mm vertically above released keycaps.");
+assert(joystick_center[0] < microphone_center[0] &&
+       microphone_center[0] < min([for (p = key_centers) p[0]]),
+       "Microphone must be between the joystick and keys.");
+for (port = [[speaker_center, speaker_size[1] + 2 * speaker_tolerance]])
     assert(port[0][1] - port[1] / 2 >= tangent_length(4) + lid_min_edge &&
            port[0][1] + port[1] / 2 + screen_port_clearance <= tft_center[1] - tft_size[1] / 2,
            "Audio opening must clear both the bend and the screen PCB.");
-assert(norm(speaker_center - microphone_center) -
-       (speaker_hole_diameter + microphone_hole_diameter) / 2 >= lid_min_edge &&
-       norm(microphone_center - switch_center) -
-       (microphone_hole_diameter + switch_hole_diameter) / 2 >= lid_min_edge,
-       "Audio and switch openings need at least 2 mm webs.");
+assert(speaker_center[0] + speaker_size[0] / 2 + speaker_tolerance + module_clearance <
+       switch_center[0] - switch_body_diameter / 2,
+       "Speaker and switch must not overlap.");
+assert(speaker_post_depth >= screw_tip_depth + 1.2 &&
+       speaker_screw_length - speaker_size[2] >= insert_depth &&
+       speaker_screw_length - speaker_size[2] <= screw_tip_depth,
+       "Speaker posts and screws must retain blind floors and nut engagement.");
+assert(speaker_post_diameter - insert_diameter >= 2.6, "Speaker nut pockets need >=1.3 mm walls.");
+assert(norm(speaker_hole_spacing / 2) - (speaker_post_diameter + 0.4) / 2 >
+       speaker_grille_diameter / 2,
+       "Speaker posts must not obstruct the sound opening.");
+assert(speaker_grille_pitch - speaker_grille_hole_diameter >= 1.2 - eps &&
+       len(speaker_grille_centers) > 0, "The grille needs at least 1.2 mm webs.");
 assert(typec_hole_diameter > typec_thread_diameter &&
        typec_head_diameter > typec_hole_diameter,
        "Type-C thread needs clearance and the flange must overlap the panel hole.");
@@ -306,6 +309,10 @@ assert(typec_thread_length > wall + typec_nut_thickness &&
 assert(typec_center_z - typec_nut_envelope / 2 > bottom_radius &&
        typec_center_z + typec_nut_envelope / 2 < rear_height - rim_radius,
        "Type-C fittings must remain on the flat rear wall.");
+assert(typec_center_x < case_width / 2 &&
+       typec_center_x - typec_hole_spacing / 2 - typec_nut_envelope / 2 > bottom_radius &&
+       typec_center_x + typec_hole_spacing / 2 + typec_nut_envelope / 2 < case_width - bottom_radius,
+       "Both Type-C fittings must clear the rear corners and be shifted left.");
 assert(lid_corner_radius > joint_clearance && support_lip_width > joint_clearance,
        "The rounded opening and support lip must retain lid clearance and bearing overlap.");
 assert(support_lip_thickness >= 1.5, "Support lip needs sufficient printing thickness.");
@@ -314,74 +321,29 @@ assert(lid_counterbore_diameter > lid_screw_diameter &&
        "Counterbores must leave at least 1.6 mm of lid under the screw head.");
 assert(shell_corner_depth >= insert_diameter + 2,
        "Corner screw seats need at least 1 mm around the glue sockets.");
-assert(middle_mount_y > max(keyboard_center[1] + keyboard_size[1] / 2,
-                           joystick_center[1] + joystick_size[1] / 2),
-       "Middle lid screws must be behind both control modules.");
-assert(middle_mount_y + shell_head_diameter / 2 + 0.5 <
-       deck_depth - tangent_length(4),
-       "Middle screws and head clearance must stay entirely on the horizontal deck.");
-assert(middle_boss_diameter >= insert_diameter + 2,
-       "Middle screw seats need at least 1 mm material around the nut pocket.");
-assert(floor_module_clearance >= 10 && floor_board_gap == 10,
-       "Floor modules need 10 mm to other parts and exactly 10 mm between boards.");
-assert(esp32_rear_clearance >= 20, "ESP32 needs at least 20 mm to the rear panel.");
 assert(support_angle >= 45 && support_angle < 90, "Brace angle must be in [45, 90) degrees.");
-assert(floor_side_clearance > 0 && floor_side_inset >= wall + floor_side_clearance,
-       "Floor modules must clear both side walls.");
-assert(breadboard_center[0] > esp32_center[0] &&
-       abs(breadboard_center[0] - breadboard_size[0] / 2 -
-           esp32_center[0] - esp32_size[0] / 2 - floor_board_gap) < eps,
-       "Place the breadboard beside ESP32 with a 10 mm edge gap.");
 assert(rear_mount_depth >= max(insert_depth, screw_tip_depth) + 1.2,
        "Rear seats must retain at least 1.2 mm below the nut and screw-tip pockets.");
-assert(min(breadboard_size) > 0 && breadboard_height > 0,
-       "Breadboard dimensions must be positive.");
-assert(esp32_mount_z - max(insert_depth, esp32_socket_depth) >= 1.5,
-       "ESP32 blind sockets must leave at least 1.5 mm of solid floor.");
-assert(esp32_screw_length > pcb_thickness &&
-       esp32_screw_length - pcb_thickness + 0.2 <= esp32_socket_depth,
-       "ESP32 screws are too long for the 5 mm posts; use shorter screws.");
-assert(esp32_component_height > 0 && esp32_standoff_height > 0,
-       "ESP32 mount and component heights must be positive.");
-for (axis = [0, 1])
-    assert(esp32_hole_spacing[axis] > 0 &&
-           esp32_hole_spacing[axis] + esp32_hole_diameter < esp32_size[axis],
-           "ESP32 mounting holes must stay inside the PCB.");
-assert(joystick_standoff_height >= insert_depth + 1,
-       "Joystick posts need material below the glued nut pockets.");
-assert(joystick_component_height > 0, "Joystick gap must accommodate the PCB and clearance.");
-assert(abs(joystick_hole_spacing[1] + joystick_hole_bottom_margin +
-           joystick_hole_top_margin - joystick_size[1]) < 0.001,
-       "Joystick hole spacing and edge margins must match the module.");
+assert(carrier_mount_z - max(insert_depth, carrier_socket_depth) >= 1.5,
+       "Carrier blind sockets must leave a solid floor.");
+assert(carrier_screw_length > pcb_thickness &&
+       carrier_screw_length - pcb_thickness + 0.2 <= carrier_socket_depth,
+       "Use M2.5x6 screws for the carrier.");
+assert(carrier_standoff_height >= solder_tail_depth + assembly_clearance,
+       "Carrier solder tails need floor clearance.");
+assert(carrier_boss_diameter >= insert_diameter + 2 && carrier_boss_diameter <= 7,
+       "Carrier posts must stay within the PCB screw keepouts.");
 assert(joystick_window_diameter > 0 &&
-       joystick_window_center[0] - joystick_window_diameter / 2 > wall + joint_clearance &&
-       joystick_window_center[1] - joystick_window_diameter / 2 > rim_radius + joint_clearance &&
-       joystick_window_center[1] + joystick_window_diameter / 2 < deck_depth - tangent_length(4),
-       "Joystick circular opening overlaps the lid boundary or bend.");
-assert(keyboard_standoff_height >= insert_depth + 1, "Keyboard posts are too short for the nuts.");
-assert(keyboard_component_height > 0, "Keyboard gap must accommodate the PCB and clearance.");
-assert(abs(keyboard_window[0] - keyboard_size[0]) < 0.001 &&
-       abs(keyboard_window[1] + keyboard_window_top_margin +
-           keyboard_window_bottom_margin - keyboard_size[1]) < 0.001,
-       "Keyboard opening and edge margins must match the module dimensions.");
-assert(min(keyboard_mount_z, joystick_mount_z) - screw_tip_depth >= 1.5,
-       "Thicken the floor: the 10 mm screws must leave at least 1.5 mm below the tip pockets.");
+       joystick_center[0] - joystick_window_diameter / 2 > wall + joint_clearance &&
+       joystick_center[1] - joystick_window_diameter / 2 > rim_radius + joint_clearance,
+       "Joystick circular opening overlaps the lid boundary.");
+assert(keycap_lateral_clearance >= 0.6 && keycap_vertical_clearance >= 1 && key_travel >= 4,
+       "Keycaps need full-travel clearance, >=0.6 mm laterally and >=1 mm vertically.");
+assert(carrier_top_z + microphone_stack_height + module_clearance <= deck_height - panel_thickness,
+       "The microphone/socket stack hits the lid.");
 assert(screen_front_clearance >= module_clearance, "Insufficient screen-to-lid clearance.");
 assert(screen_pcb_thickness > 0 && screen_stack_above_pcb > 0,
        "Screen PCB and display thicknesses must be positive.");
-assert(keyboard_mount_z + pcb_thickness + keyboard_component_height + module_clearance <=
-       deck_height - panel_thickness, "Keyboard body hits the lid.");
-assert(joystick_mount_z + pcb_thickness + joystick_component_height + module_clearance <=
-       deck_height - panel_thickness,
-       "Joystick body hits the lid.");
-assert(keyboard_center[0] - keyboard_size[0] / 2 -
-       joystick_center[0] - joystick_size[0] / 2 >= control_clearance,
-       "Keyboard and joystick modules overlap.");
-assert(joystick_center[0] - joystick_size[0] / 2 >=
-       shell_hole_x[0] + shell_boss_diameter / 2 + control_clearance &&
-       keyboard_center[1] - keyboard_size[1] / 2 >=
-       shell_hole_y[0] + shell_corner_depth / 2 + control_clearance,
-       "Controls are too close to the front lid columns.");
 assert(screen_tab_depth > screw_tip_depth &&
        deck_height - panel_thickness - floor_thickness > screw_tip_depth,
        "Mounting tabs need blind clearance for the screw tips.");
@@ -398,16 +360,18 @@ assert(tft_size[1] + 2 * tangent_length(3) + 8 < slope_length,
        "TFT overlaps the curved transitions.");
 assert(rear_ledge > tangent_length(2) + tangent_length(3) + 4,
        "Rear ledge is too short.");
+assert(tft_rear_extent + module_clearance < case_depth - wall &&
+       carrier_front_y + carrier_size[1] + 4 <= case_depth - wall,
+       "Screen and carrier need rear-wall clearance.");
 for (i = [0 : 5])
     assert(tangent_length(i) + tangent_length((i + 1) % 6) <
            norm(profile_vertices[(i + 1) % 6] - profile_vertices[i]),
            "Fillets overlap: reduce radii or enlarge the profile.");
-for (spec = [[joystick_center, joystick_size], [keyboard_center, keyboard_size]])
-    assert(spec[0][0] - spec[1][0] / 2 > wall &&
-           spec[0][0] + spec[1][0] / 2 < case_width - wall &&
-           spec[0][1] - spec[1][1] / 2 > rim_radius &&
-           spec[0][1] + spec[1][1] / 2 < deck_depth - tangent_length(4),
-           "Control PCB overlaps a wall or the lower curved transition.");
+for (p = key_centers)
+    assert(p[0] - key_window_size / 2 > wall + joint_clearance &&
+           p[0] + key_window_size / 2 < case_width - wall - joint_clearance &&
+           p[1] - key_window_size / 2 > rim_radius + joint_clearance,
+           "Key opening overlaps the lid boundary.");
 
 module extrude_along_x(length) {
     multmatrix([[0, 0, 1, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1]])
@@ -546,21 +510,6 @@ module support_lip() {
     }
 }
 
-module middle_fasteners() {
-    for (x = shell_hole_x)
-        translate([x, middle_mount_y, deck_height - panel_thickness]) children();
-}
-
-module middle_mount_columns() {
-    for (x = shell_hole_x)
-        translate([x < case_width / 2 ? 0 : x - middle_boss_diameter / 2,
-                   middle_mount_y - middle_boss_diameter / 2, floor_thickness - eps])
-            cube([x < case_width / 2 ? x + middle_boss_diameter / 2 :
-                      case_width - x + middle_boss_diameter / 2,
-                  middle_boss_diameter,
-                  deck_height - panel_thickness - floor_thickness + eps]);
-}
-
 module on_slope(x, along, normal = 0) {
     translate([x, deck_depth + cos(slope_angle) * along,
                deck_height + sin(slope_angle) * along])
@@ -568,18 +517,16 @@ module on_slope(x, along, normal = 0) {
             translate([0, 0, normal]) children();
 }
 
-module hole_pattern(center, spacing) {
-    for (dx = [-spacing[0] / 2, spacing[0] / 2])
-        for (dy = [-spacing[1] / 2, spacing[1] / 2])
-            let($hole_x = center[0] + dx, $hole_y = center[1] + dy)
-                translate([$hole_x, $hole_y, 0]) children();
+module carrier_fasteners() {
+    for (p = carrier_holes)
+        translate([p[0], p[1], carrier_mount_z]) children();
 }
 
-module control_holes() {
-    let($control_z = joystick_mount_z)
-        hole_pattern(joystick_hole_center, joystick_hole_spacing) children();
-    let($control_z = keyboard_mount_z)
-        hole_pattern(keyboard_center, keyboard_hole_spacing) children();
+module screen_fasteners() {
+    for (p = screen_mounts)
+        on_slope(tft_center[0] + p[0] * tft_hole_spacing[0] / 2,
+                 tft_center[1] + p[1] * tft_hole_spacing[1] / 2,
+                 screen_mount_normal) children();
 }
 
 // The opening is at Z=0; screw and insert extend into negative Z.
@@ -595,7 +542,6 @@ module shell_fasteners() {
         for (y = shell_hole_y)
             translate([x, y, (y < deck_depth ? deck_height : rear_height) - panel_thickness])
                 children();
-    middle_fasteners() children();
 }
 
 module shell_mount_columns() {
@@ -608,11 +554,12 @@ module shell_mount_columns() {
             if (y > deck_depth) {
                 rise = rear_brace_rise(x, y);
                 steps = max(8, $fn);
-                profile = concat([[0, 0], [wall, 0]],
+                // Absolute Z avoids separately quantizing (top-root) and root into a sliver.
+                profile = concat([[0, root], [wall, root]],
                     [for (i = [1 : steps])
-                        [wall + (width - wall) * brace_ease(i / steps), rise * i / steps]],
-                    [[width, top - root], [0, top - root]]);
-                translate([x < case_width / 2 ? bounds[0] : bounds[2], bounds[3], root])
+                        [wall + (width - wall) * brace_ease(i / steps), root + rise * i / steps]],
+                    [[width, top], [0, top]]);
+                translate([x < case_width / 2 ? bounds[0] : bounds[2], bounds[3], 0])
                     rotate([90, 0, 0])
                         linear_extrude(height = bounds[3] - bounds[1])
                             polygon([for (p = profile)
@@ -621,45 +568,21 @@ module shell_mount_columns() {
                 translate([bounds[0], bounds[1], floor_thickness - eps])
                     cube([width, bounds[3] - bounds[1], top - floor_thickness + eps]);
         }
-    middle_mount_columns();
-}
-
-module control_mount_footprint(top_z) {
-    radius = module_boss_diameter / 2;
-    circle(d = module_boss_diameter);
-    if ($hole_x - radius - wall <= small_gap_fill)
-        translate([-$hole_x, -radius]) square([$hole_x, 2 * radius]);
-    if (case_width - wall - $hole_x - radius <= small_gap_fill)
-        translate([0, -radius]) square([case_width - $hole_x, 2 * radius]);
-    if ($hole_y - radius - wall <= small_gap_fill)
-        translate([-radius, -$hole_y]) square([2 * radius, $hole_y]);
-    if (case_depth - wall - $hole_y - radius <= small_gap_fill)
-        translate([-radius, 0]) square([2 * radius, case_depth - $hole_y]);
-    for (x = shell_hole_x)
-        for (y = shell_hole_y) {
-            bounds = column_bounds(x, y);
-            if (column_root_z(x, y) <= top_z &&
-                distance_to_rectangle([$hole_x, $hole_y], bounds) - radius <= small_gap_fill)
-                hull() {
-                    circle(d = module_boss_diameter);
-                    translate([bounds[0] - $hole_x + eps, bounds[1] - $hole_y + eps])
-                        square([bounds[2] - bounds[0] - 2 * eps,
-                                bounds[3] - bounds[1] - 2 * eps]);
-                }
-        }
 }
 
 module screen_tab_pad(side, x, height) {
     hull() {
         translate([x, 0, 0]) cylinder(d = module_boss_diameter, h = height);
-        translate([side < 0 ? wall / 2 : case_width - wall / 2, 0, 0])
-            cylinder(d = wall, h = height);
+        // A rectangular root crosses the wall instead of meeting its inner face tangentially.
+        translate([side < 0 ? 0 : case_width - wall - 0.5, -wall / 2, 0])
+            cube([wall + 0.5, wall, height]);
     }
 }
 
 module screen_tabs() {
-    for (side = [-1, 1])
-        for (v = [-tft_hole_spacing[1] / 2, tft_hole_spacing[1] / 2]) {
+    for (p = screen_mounts) {
+            side = p[0];
+            v = p[1] * tft_hole_spacing[1] / 2;
             x = tft_center[0] + side * tft_hole_spacing[0] / 2;
             along = tft_center[1] + v;
             base_normal = screen_mount_normal - screen_tab_depth;
@@ -687,7 +610,7 @@ module screen_tabs() {
 
 module rear_typec_positions() {
     for (dx = [-typec_hole_spacing / 2, typec_hole_spacing / 2])
-        translate([case_width / 2 + dx, case_depth, typec_center_z])
+        translate([typec_center_x + dx, case_depth, typec_center_z])
             rotate([90, 0, 0]) children();
 }
 
@@ -707,16 +630,45 @@ module typec_envelopes(inset = 0) {
 
 module switch_envelope(inset = 0) {
     on_slope(switch_center[0], switch_center[1],
-             -panel_thickness - switch_body_depth + inset)
+             -panel_thickness - switch_body_depth - switch_wire_depth + inset)
         cylinder(d = switch_body_diameter - 2 * inset,
-                 h = switch_body_depth - 2 * inset);
+                 h = switch_body_depth + switch_wire_depth - 2 * inset);
 }
 
-module audio_envelopes(inset = 0) {
-    for (port = [[speaker_center, speaker_diameter, speaker_body_depth],
-                 [microphone_center, microphone_hole_diameter, microphone_body_depth]])
-        on_slope(port[0][0], port[0][1], -panel_thickness - port[2] + inset)
-            cylinder(d = port[1] - 2 * inset, h = port[2] - 2 * inset);
+module switch_outer_envelope(inset = 0) {
+    on_slope(switch_center[0], switch_center[1], inset)
+        cylinder(d = switch_outer_diameter - 2 * inset, h = switch_outer_height - 2 * inset);
+}
+
+module speaker_fasteners() {
+    for (dx = [-speaker_hole_spacing[0] / 2, speaker_hole_spacing[0] / 2])
+        for (dy = [-speaker_hole_spacing[1] / 2, speaker_hole_spacing[1] / 2])
+            on_slope(speaker_center[0] + dx, speaker_center[1] + dy,
+                     -panel_thickness - speaker_post_depth) children();
+}
+
+module speaker_posts() {
+    speaker_fasteners()
+        cylinder(d1 = speaker_post_diameter, d2 = speaker_post_diameter + 0.4,
+                 h = speaker_post_depth + 1.5, $fn = 24);
+}
+
+module speaker_envelope(inset = 0) {
+    on_slope(speaker_center[0] - speaker_size[0] / 2 - speaker_tolerance + inset,
+             speaker_center[1] - speaker_size[1] / 2 - speaker_tolerance + inset,
+             -panel_thickness - speaker_post_depth - speaker_size[2] -
+                 speaker_tolerance + inset)
+        cube([speaker_size[0] + 2 * (speaker_tolerance - inset),
+              speaker_size[1] + 2 * (speaker_tolerance - inset),
+              speaker_size[2] + speaker_tolerance - 2 * inset]);
+    speaker_fasteners()
+        translate([0, 0, -speaker_size[2] - speaker_screw_head_depth + inset])
+            cylinder(d = 5 - 2 * inset, h = speaker_screw_head_depth - 2 * inset);
+    // Lead exits to the right; reserve its first 10 mm before routing to the amplifier.
+    on_slope(speaker_center[0] + speaker_size[0] / 2,
+             speaker_center[1] - 3 + inset,
+             -panel_thickness - speaker_post_depth - speaker_size[2] + inset)
+        cube([10, 6 - 2 * inset, 6 - 2 * inset]);
 }
 
 module bottom_shell() {
@@ -737,26 +689,17 @@ module bottom_shell() {
                     }
                 }
                 support_lip();
-                control_holes()
-                    translate([0, 0, floor_thickness - eps])
-                        linear_extrude(height = $control_z - floor_thickness + eps)
-                            control_mount_footprint($control_z);
-                hole_pattern(esp32_center, esp32_hole_spacing)
-                    translate([0, 0, floor_thickness - eps])
-                        linear_extrude(height = esp32_standoff_height + eps)
-                            control_mount_footprint(esp32_mount_z);
+                carrier_fasteners()
+                    translate([0, 0, -carrier_standoff_height - eps])
+                        cylinder(d = carrier_boss_diameter, h = carrier_standoff_height + eps);
                 screen_tabs();
                 shell_mount_columns();
             }
         }
-        control_holes() translate([0, 0, $control_z]) insert_socket();
-        hole_pattern(esp32_center, esp32_hole_spacing)
-            translate([0, 0, esp32_mount_z]) insert_socket(esp32_socket_depth);
-        for (dx = [-tft_hole_spacing[0] / 2, tft_hole_spacing[0] / 2])
-            for (dv = [-tft_hole_spacing[1] / 2, tft_hole_spacing[1] / 2])
-                on_slope(tft_center[0] + dx, tft_center[1] + dv, screen_mount_normal)
-                    insert_socket();
+        carrier_fasteners() insert_socket(carrier_socket_depth);
+        screen_fasteners() insert_socket();
         shell_fasteners() insert_socket();
+        carrier_installation_clearance();
         rear_typec_positions()
             translate([0, 0, -eps])
                 cylinder(d = typec_hole_diameter, h = wall + 2 * eps);
@@ -768,19 +711,25 @@ module bottom_shell() {
 }
 
 module lid_openings() {
-        for (port = [[speaker_center, speaker_hole_diameter],
-                     [microphone_center, microphone_hole_diameter]])
-            on_slope(port[0][0], port[0][1], -panel_thickness - eps)
-                cylinder(d = port[1], h = panel_thickness + 2 * eps);
+        for (p = speaker_grille_centers)
+            on_slope(speaker_center[0] + p[0], speaker_center[1] + p[1], -panel_thickness - eps)
+                rotate([0,0,30])
+                    cylinder(d = speaker_grille_hole_diameter / cos(30),
+                             h = panel_thickness + 2 * eps, $fn = 6);
         on_slope(switch_center[0], switch_center[1], -panel_thickness - eps)
             cylinder(d = switch_hole_diameter, h = panel_thickness + 2 * eps);
-        translate([keyboard_window_center[0] - keyboard_window[0] / 2,
-                   keyboard_window_center[1] - keyboard_window[1] / 2,
+        translate([keyboard_window_min[0], keyboard_window_min[1],
                    deck_height - panel_thickness - eps])
-            cube([keyboard_window[0], keyboard_window[1], panel_thickness + 2 * eps]);
-        translate([joystick_window_center[0], joystick_window_center[1],
+            cube([keyboard_window_size[0], keyboard_window_size[1],
+                  carrier_top_z + keycap_top_height + keycap_vertical_clearance -
+                      deck_height + panel_thickness + 2 * eps]);
+        translate([microphone_center[0], microphone_center[1],
                    deck_height - panel_thickness - eps])
-            cylinder(d = joystick_window_diameter, h = panel_thickness + 2 * eps);
+            cylinder(d = microphone_hole_diameter, h = panel_thickness + 2 * eps);
+        translate([joystick_center[0], joystick_center[1],
+                   deck_height - panel_thickness - eps])
+            cylinder(d = joystick_window_diameter,
+                     h = carrier_top_z + joystick_total_height - deck_height + panel_thickness + 2 * eps);
         on_slope(tft_center[0] + screen_window_offset[0] -
                      (tft_view[0] + tft_window_clearance) / 2,
                  tft_center[1] + screen_window_offset[1] -
@@ -799,74 +748,118 @@ module lid_openings() {
 
 module lid() {
     difference() {
-        lid_blank();
+        union() {
+            lid_blank();
+            speaker_posts();
+        }
         lid_openings();
+        speaker_fasteners() rotate([180, 0, 0]) insert_socket();
     }
 }
 
-module module_boards(inset = 0, include_esp32 = true) {
+module carrier_board(inset = 0) {
+    difference() {
+        translate([carrier_left_x + inset, carrier_front_y + inset, carrier_mount_z + inset])
+            linear_extrude(height = pcb_thickness - 2 * inset)
+                rounded_rectangle(carrier_size - [2 * inset, 2 * inset], 5 - inset);
+        carrier_fasteners() translate([0, 0, -eps])
+            cylinder(d = 3, h = pcb_thickness + 2 * eps);
+    }
+}
+
+module carrier_installation_clearance() {
+    difference() {
+        translate([carrier_left_x - assembly_clearance, carrier_front_y - assembly_clearance,
+                   carrier_mount_z - solder_tail_depth - assembly_clearance])
+            linear_extrude(height = pcb_thickness + solder_tail_depth + 2 * assembly_clearance)
+                rounded_rectangle(carrier_size + [2 * assembly_clearance, 2 * assembly_clearance],
+                                  5 + assembly_clearance);
+        carrier_fasteners()
+            translate([0, 0, -carrier_standoff_height - 1])
+                cylinder(d = carrier_boss_diameter + 2 * eps,
+                         h = carrier_standoff_height + pcb_thickness + assembly_clearance + 2);
+    }
+}
+
+module module_boards(inset = 0) {
     assert(inset >= 0 && 2 * inset < min(pcb_thickness, screen_pcb_thickness),
            "Invalid PCB inspection inset.");
-    for (spec = [[joystick_center, joystick_size, joystick_mount_z],
-                 [keyboard_center, keyboard_size, keyboard_mount_z]])
-        translate([spec[0][0] - spec[1][0] / 2 + inset,
-                   spec[0][1] - spec[1][1] / 2 + inset, spec[2] + inset])
-            cube([spec[1][0] - 2 * inset, spec[1][1] - 2 * inset, pcb_thickness - 2 * inset]);
+    carrier_board(inset);
     on_slope(tft_center[0] - tft_size[0] / 2 + inset,
              tft_center[1] - tft_size[1] / 2 + inset, screen_mount_normal + inset)
         cube([tft_size[0] - 2 * inset, tft_size[1] - 2 * inset, screen_pcb_thickness - 2 * inset]);
-    if (include_esp32) difference() {
-        translate([esp32_center[0] - esp32_size[0] / 2 + inset,
-                   esp32_front_y + inset, esp32_mount_z + inset])
-            cube([esp32_size[0] - 2 * inset, esp32_size[1] - 2 * inset,
-                  pcb_thickness - 2 * inset]);
-        hole_pattern(esp32_center, esp32_hole_spacing)
-            translate([0, 0, esp32_mount_z - eps])
-                cylinder(d = esp32_hole_diameter, h = pcb_thickness + 2 * eps);
+}
+
+module pcb_box(bounds, height, inset = 0, base = carrier_top_z) {
+    p = pcb_point([bounds[0], bounds[3]]);
+    translate([p[0] + inset, p[1] + inset, base + inset])
+        cube([bounds[2] - bounds[0] - 2 * inset, bounds[3] - bounds[1] - 2 * inset,
+              height - 2 * inset]);
+}
+
+module amplifier_envelope(inset = 0) {
+    pcb_box([35, 48, 62, 72], amplifier_stack_height, inset);
+    // Full-footprint upper allowance deliberately overbounds the unknown terminal location.
+    pcb_box([35, 48, 62, 72], amplifier_wire_clearance, inset,
+            carrier_top_z + amplifier_stack_height);
+}
+
+module keycap_swept_envelope(inset = 0) {
+    for (p = key_centers)
+        translate([p[0] - keycap_size / 2 - keycap_lateral_clearance + inset,
+                   p[1] - keycap_size / 2 - keycap_lateral_clearance + inset,
+                   carrier_top_z + key_switch_top_height - keycap_stem_engagement -
+                       key_travel - keycap_vertical_clearance + inset])
+            cube([key_window_size - 2 * inset, key_window_size - 2 * inset,
+                  keycap_height + key_travel + 2 * keycap_vertical_clearance - 2 * inset]);
+}
+
+module carrier_components(inset = 0) {
+    pcb_box([20, 18.03, 88.5, 45.97], esp32_stack_height, inset);
+    amplifier_envelope(inset);
+    pcb_box([60.5, 3, 88, 15], rtc_stack_height, inset);
+    // J6 display cable connector, including a 10 mm cable bend above the socket.
+    pcb_box([21.65, 8.26, 59.15, 11.74], socket_height + 10, inset);
+    // Exact rotated WJ500V bodies plus joining lugs, bounded with 0.5 mm tolerance.
+    pcb_box([5.08, 45.47, 16.08, 56.83], 14.57, inset);
+    pcb_box([5.08, 57.97, 16.08, 69.33], 14.57, inset);
+    pcb_box([84.16, 51.55, 95.16, 67.99], 14.57, inset);
+    translate([microphone_center[0], microphone_center[1], carrier_top_z + inset])
+        cylinder(d = microphone_diameter - 2 * inset, h = microphone_stack_height - 2 * inset);
+    for (p = key_centers)
+        translate([p[0] - keycap_size / 2 + inset, p[1] - keycap_size / 2 + inset,
+                   carrier_top_z + inset])
+            cube([keycap_size - 2 * inset, keycap_size - 2 * inset,
+                  keycap_top_height - 2 * inset]);
+    pcb_box([7.05, 86.1, 26.75, 107.1], joystick_body_height, inset);
+    translate([joystick_center[0], joystick_center[1], carrier_top_z + inset])
+        cylinder(d = joystick_motion_diameter - 2 * inset,
+                 h = joystick_total_height - 2 * inset);
+}
+
+module carrier_solder_envelope(inset = 0) {
+    difference() {
+        translate([carrier_left_x + inset, carrier_front_y + inset,
+                   carrier_mount_z - solder_tail_depth + inset])
+            linear_extrude(height = solder_tail_depth - 2 * inset)
+                rounded_rectangle(carrier_size - [2 * inset, 2 * inset], 5 - inset);
+        carrier_fasteners() translate([0, 0, -solder_tail_depth - 1])
+            cylinder(d = 7 + 2 * inset, h = solder_tail_depth + 2);
     }
 }
 
-module control_envelope(center, size, mount_z, active_size, component_height, inset = 0,
-                        active_offset = [0, 0]) {
-    translate([center[0] - size[0] / 2 + inset, center[1] - size[1] / 2 + inset,
-               mount_z + pcb_thickness + inset])
-        cube([size[0] - 2 * inset, size[1] - 2 * inset, component_height - 2 * inset]);
-    translate([center[0] + active_offset[0] - active_size[0] / 2 + inset,
-               center[1] + active_offset[1] - active_size[1] / 2 + inset,
-               mount_z + pcb_thickness + inset])
-        cube([active_size[0] - 2 * inset, active_size[1] - 2 * inset,
-              size[2] - pcb_thickness - 2 * inset]);
+module screen_header_envelope(inset = 0) {
+    on_slope(tft_center[0] + tft_size[0] / 2 - screen_header_size[0] + inset,
+             tft_center[1] + tft_size[1] / 2 - screen_header_size[1] + inset,
+             screen_mount_normal - screen_header_size[2] + inset)
+        cube(screen_header_size - [2 * inset, 2 * inset, 2 * inset]);
 }
 
-module breadboard_envelope(inset = 0) {
-    translate([breadboard_center[0] - breadboard_size[0] / 2 + inset,
-               breadboard_center[1] - breadboard_size[1] / 2 + inset,
-               breadboard_mount_z + inset])
-        cube([breadboard_size[0] - 2 * inset, breadboard_size[1] - 2 * inset,
-              breadboard_height - 2 * inset]);
-}
-
-module module_envelopes(inset = 0, include_floor_modules = true) {
-    module_boards(inset, include_floor_modules);
-    if (include_floor_modules) {
-        breadboard_envelope(inset);
-        translate([esp32_center[0] - esp32_size[0] / 2 + inset,
-                   esp32_front_y + inset, esp32_mount_z + pcb_thickness + inset])
-            cube([esp32_size[0] - 2 * inset, esp32_size[1] - 2 * inset,
-                  esp32_component_height - 2 * inset]);
-    }
-    control_envelope(keyboard_center, keyboard_size, keyboard_mount_z,
-                     keyboard_window, keyboard_component_height, inset, keyboard_window_offset);
-    translate([joystick_center[0] - joystick_size[0] / 2 + inset,
-               joystick_center[1] - joystick_size[1] / 2 + inset,
-               joystick_mount_z + pcb_thickness + inset])
-        cube([joystick_size[0] - 2 * inset, joystick_size[1] - 2 * inset,
-              joystick_component_height - 2 * inset]);
-    // The requested circular opening bounds the tall operating envelope, not the PCB.
-    translate([joystick_window_center[0], joystick_window_center[1],
-               joystick_mount_z + pcb_thickness + inset])
-        cylinder(d = joystick_window_diameter - 2 * inset,
-                 h = joystick_total_height - pcb_thickness - 2 * inset);
+module module_envelopes(inset = 0) {
+    module_boards(inset);
+    carrier_components(inset);
+    carrier_solder_envelope(inset);
+    screen_header_envelope(inset);
     on_slope(tft_center[0] - tft_size[0] / 2 + inset,
              tft_center[1] - tft_size[1] / 2 + inset,
              screen_mount_normal + screen_pcb_thickness + inset)
@@ -881,7 +874,8 @@ module module_envelopes(inset = 0, include_floor_modules = true) {
 }
 
 module printable_lid() {
-    translate([rear_height, -rim_radius - joint_clearance, -wall - joint_clearance])
+    // Integer X shift preserves decimal-grid precision after the rigid print rotation.
+    translate([ceil(rear_height), -rim_radius - joint_clearance, -wall - joint_clearance])
         rotate([0, -90, 0]) lid();
 }
 
@@ -905,6 +899,7 @@ if (part == "bottom") {
         %module_envelopes();
         %typec_envelopes();
         %switch_envelope();
-        %audio_envelopes();
+        %switch_outer_envelope();
+        %speaker_envelope();
     }
 }
