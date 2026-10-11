@@ -665,7 +665,7 @@
   ],
   "factory_saved_snapshot": {
     "file": "jlc-saved-placement.json",
-    "matches_current_board": false,
-    "verified": false
+    "matches_current_board": true,
+    "verified": true
   }
 }
