@@ -256,20 +256,15 @@ difference() {
     extrude_along_x(case_width) panel_band(-eps, panel_thickness + eps);
     microphone_cover();
 }
-// The rear control edges are perpendicular to the slope and retain the complete panel.
-// The flat-to-curved junction must not retain the old cutter's tapered top membrane.
-intersection() {
-    lid();
-    for (bounds = control_relief_bounds)
-        translate([bounds[0] + eps, control_relief_front_y + eps,
-                   deck_height - panel_thickness + eps])
-            cube([bounds[1] - 2 * eps, minimum_print_wall - 2 * eps,
-                  panel_thickness - 2 * eps]);
+// Cleanup is confined to the inner 1.2 mm, with no new exterior aperture.
+difference() {
+    control_thin_edge_cleanup();
+    extrude_along_x(case_width)
+        panel_band(panel_thickness - minimum_print_wall - eps, panel_thickness + 2 * eps);
 }
 intersection() {
     lid();
-    for (bounds = [[7.65,33.8],[67.5,41.25]])
-        on_slope(bounds[0],11.5,-2.9) cube([bounds[1],0.2,2.8]);
+    control_thin_edge_cleanup();
 }
 difference() {
     for (bounds = [[7.65,33.8],[67.5,41.25]])

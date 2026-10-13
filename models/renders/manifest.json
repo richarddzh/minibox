@@ -2,24 +2,24 @@
   "description": "Exported meshes plus four metal speaker nuts (gold). Front-ear offsets are proportional drawing estimates; other hardware is not rendered.",
   "source_sha256": {
     "bottom.stl": "59b397d7671a15f8018497352cc038eae7043e840329a3949496f359ae826f51",
-    "lid.stl": "7d1131b51c6f08eebc719f1ab95c8c798ad77059f2bf891b8128c3e68036a316",
-    "minibox-enclosure.scad": "32badd0a732baa443bdd9ac43d377d963666f0189d9347e493e20300e030ed17"
+    "lid.stl": "b77d3e3c5ffe685532c71c8ab035f9f6a2096bb772720db3d8a77d6c3f94037b",
+    "minibox-enclosure.scad": "4e6b2505a1bbee869d77d35fd42a9de8323c9df40e69ab65541a24a721f25eea"
   },
   "images": {
     "bottom-isometric.png": "bd3f5fd840b7840a34349447bb84221db52c603e0e0dc11d23713fcace08d6b7",
     "bottom-top.png": "77225a12315b02ff4e2635892d6588f500efd724cb5356215e36a3e1ef9f3892",
     "bottom-rear.png": "5e67fefd538c3d789cf926d950bbfdec92d05e364ded8c07b185182c617b91d6",
     "bottom-side.png": "15870c416bc5c92692d41c0d96762d612f56572a1141854c2aaa8450d2c3b75c",
-    "lid-isometric.png": "b784bcc2d577dc375469477fa9ba9e33ff086bd6c43759e2ff49d316a2a8391f",
-    "lid-top.png": "a0558d01636684c8dfcc467e140b3bd587369df87b290dcdc9feb126f7ba8b54",
-    "lid-front.png": "3718524f28f044b5c31085f97b3e45a50a38db69f79bbc5a878c1e73c788d7fc",
-    "lid-inside.png": "70bab53240e5b8b13ec4b218095914c7cf196fc457c35113554a1be5e4f17385",
+    "lid-isometric.png": "95df21f1b140192b22016e8748eebbd814f3d47982225a11e48eeb97fbfa2fb5",
+    "lid-top.png": "db28d7694c8a17086338a2ae2ae6d4cccdc62cac3f610be7b721a43baab0601f",
+    "lid-front.png": "36d3a10590120b48094e95d0d29fb33089a6c21c6f54fcfcd2891fed573cfff7",
+    "lid-inside.png": "2167ab0e8d00bfb1cb09e83e5c36d35b5e66839bf0491cbb160492bea801e0ff",
     "lid-side.png": "0cad5228849bb054b6d09535e4b6d67a0c78989691346770a3cf0646d98943f6",
-    "lid-controls.png": "f08d0fa113fc93a0325323ab64ab5ba0745db00011f26893ca964736ac313fdd",
-    "lid-controls-inside.png": "5b7611e3c2f7cb3d5ac6f0433eda1b0961a3d8d23eaa47d372f6c65836b1ff69",
-    "assembly-isometric.png": "773c62a593231cb89aa48831506a0fe3e6665ea1e40138f485d5c56ffd9c4f7e",
-    "assembly-top.png": "046d046458b8b6cbcceb70f0748b297d3f1a865c5651eedc952bff1bc36bd372",
-    "assembly-front.png": "b47b713373044b8782e926e8148751cd688ef9ef237a0608fcc507c97200d3c9",
+    "lid-controls.png": "988b916e3c417deeae8468a0078946e6b483cc44d4ea1c379673c9360fb124ac",
+    "lid-controls-inside.png": "e4fce1996fa720882edbb79fa98b1742da5ec497773bac4a7189a63a1d6af389",
+    "assembly-isometric.png": "f6894e179c60390d19d6a46a78c8f9b36b91f4300476a4fa55ae5452d09b1a66",
+    "assembly-top.png": "91d52b8a946bb508886989c92dc4c66739cd0e1da1d8f5b9141f6c9b32436995",
+    "assembly-front.png": "5f5563010021c748ae60d7a7701dffd8f0e25d5297b76d6f4a6b0fbced52b84d",
     "assembly-side.png": "17c86900664ef51a7c682a93a0b289661525464c6370d4208cd36738e19bcfe6"
   }
 }

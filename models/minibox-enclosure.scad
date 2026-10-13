@@ -232,19 +232,6 @@ function corner_angle(i) =
     acos(max(-1, min(1, u * v)));
 function tangent_length(i) = profile_radii[i] / tan(corner_angle(i) / 2);
 
-control_relief_front_y = deck_transition_y - tangent_length(4) - minimum_print_wall;
-control_relief_bounds = [
-    [joystick_center[0] - joystick_motion_diameter / 2, joystick_motion_diameter],
-    [keyboard_row_bounds[0][0] - minimum_print_wall,
-     keyboard_row_bounds[0][2] + 2 * minimum_print_wall]
-];
-assert(control_relief_front_y > joystick_center[1] &&
-       control_relief_front_y < joystick_center[1] + joystick_window_diameter / 2 &&
-       joystick_motion_diameter / 2 -
-           sqrt(pow(joystick_window_diameter / 2, 2) -
-                pow(control_relief_front_y - joystick_center[1], 2)) >= minimum_print_wall,
-       "The joystick relief must retain printable shoulders at its circular junction.");
-
 function corner_points(i) =
     let(p = profile_vertices[i],
         u = unit(profile_vertices[(i + 5) % 6] - p),
@@ -811,14 +798,42 @@ module keyboard_opening_profile() {
             translate([row[0], row[1]]) square([row[2], row[3]]);
 }
 
-module control_slope_relief() {
-    // Clip a through-cutter at the flat deck; its old sloped cap left a tapered membrane.
+module control_vertical_openings() {
+    translate([0, 0, deck_height - panel_thickness - eps])
+        linear_extrude(height = carrier_top_z + keycap_top_height + keycap_vertical_clearance -
+                                  deck_height + panel_thickness + 2 * eps)
+            keyboard_opening_profile();
+    translate([joystick_center[0], joystick_center[1],
+               deck_height - panel_thickness - eps])
+        cylinder(d = joystick_window_diameter,
+                 h = rear_height - deck_height + panel_thickness + 2 * eps);
+}
+
+module control_thin_edge_cleanup() {
+    path = top_path(-rim_radius);
+    depth = panel_thickness - minimum_print_wall;
+    // Only remove inner remnants thinner than 1.2 mm; never change the exterior aperture.
     intersection() {
-        for (bounds = control_relief_bounds)
-            on_slope(bounds[0], -14, -panel_thickness - 1)
-                cube([bounds[1], 26, 2 * panel_thickness + 1 + bend_radius]);
-        translate([0, control_relief_front_y, 0])
-            cube([case_width, case_depth - control_relief_front_y, rear_height + eps]);
+        extrude_along_x(case_width) panel_band(depth, panel_thickness + eps);
+        union()
+            for (i = [1 : len(path) - 2])
+                let(v = path[i + 1] - path[i],
+                    angle = atan2(v[1], v[0]))
+                if (path[i][0] < joystick_center[1] + joystick_window_diameter / 2 &&
+                    path[i + 1][0] > deck_transition_y - tangent_length(4))
+                    translate([0, path[i][0], path[i][1]])
+                        rotate([angle, 0, 0])
+                            translate([0, 0, -panel_thickness - eps])
+                                linear_extrude(height = minimum_print_wall + 2 * eps)
+                                    intersection() {
+                                        translate([0, -panel_thickness])
+                                            square([case_width, norm(v) + 2 * panel_thickness]);
+                                        projection(cut = true)
+                                            translate([0, 0, depth])
+                                                rotate([-angle, 0, 0])
+                                                    translate([0, -path[i][0], -path[i][1]])
+                                                        control_vertical_openings();
+                                    }
     }
 }
 
@@ -832,10 +847,7 @@ module lid_openings() {
                     cylinder(d = speaker_grille_hole_diameter, h = panel_thickness + 2);
         on_slope(switch_center[0], switch_center[1], -panel_thickness - eps)
             cylinder(d = switch_hole_diameter, h = panel_thickness + 2 * eps);
-        translate([0, 0, deck_height - panel_thickness - eps])
-            linear_extrude(height = carrier_top_z + keycap_top_height + keycap_vertical_clearance -
-                                      deck_height + panel_thickness + 2 * eps)
-                keyboard_opening_profile();
+        control_vertical_openings();
         translate([microphone_center[0], microphone_center[1],
                    deck_height - panel_thickness - eps])
             cylinder(d = microphone_cover_inner_diameter,
@@ -843,11 +855,7 @@ module lid_openings() {
         translate([microphone_center[0], microphone_center[1],
                    microphone_cover_top - panel_thickness - eps])
             cylinder(d = microphone_hole_diameter, h = panel_thickness + 2 * eps);
-        translate([joystick_center[0], joystick_center[1],
-                   deck_height - panel_thickness - eps])
-            cylinder(d = joystick_window_diameter,
-                     h = rear_height - deck_height + panel_thickness + 2 * eps);
-        control_slope_relief();
+        control_thin_edge_cleanup();
         on_slope(tft_center[0] + screen_window_offset[0] -
                      (tft_view[0] + tft_window_clearance) / 2,
                  tft_center[1] + screen_window_offset[1] -
