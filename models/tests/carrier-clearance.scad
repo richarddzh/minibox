@@ -11,26 +11,35 @@ assert(carrier_size == [94.5, 117] && len(carrier_holes) == 4);
 assert(screen_mounts == [[-1, -1], [-1, 1], [1, -1]]);
 assert(typec_center_x == 38 && typec_hole_spacing == 20 && typec_hole_diameter == 12);
 assert(speaker_size == [27.5, 27.5, 13] && speaker_hole_spacing == [23, 23]);
-assert(speaker_grille_diameter == 23.5 && speaker_grille_hole_diameter == 2.4);
-assert(speaker_grille_pitch == 3.6 && len(speaker_grille_centers) == 31);
+assert(speaker_grille_diameter == 23.5 && speaker_grille_hole_diameter == 3.8);
+assert(speaker_grille_pitch == 6 && speaker_grille_row_pitch == 4.5 &&
+       len(speaker_grille_centers) == 14);
+assert(speaker_grille_row_counts == [2,3,4,3,2]);
+assert(abs(speaker_grille_pitch - speaker_grille_hole_diameter - 2.2) < 0.001);
+assert(abs(speaker_post_depth - 3.2) < 0.001 && speaker_ear_thickness == 3.2);
+assert(abs(speaker_nut_embed_depth - 1.8) < 0.001 &&
+       speaker_post_diameter == 4.5 && speaker_screw_length == 6);
+assert(minimum_print_wall == 1.2);
 assert(socket_height == 8.7 && amplifier_above_socket == 15 && microphone_above_socket == 7.5);
 assert(abs(amplifier_stack_height - 23.7) < 0.001);
 assert(abs(microphone_stack_height - 16.2) < 0.001);
-assert(deck_height == 31 && abs(deck_height - panel_thickness - carrier_top_z -
+assert(deck_height == 21.6 && abs(deck_height - carrier_top_z - 11) < 0.001);
+assert(slope_base_height == 31 && abs(microphone_cover_top - panel_thickness - carrier_top_z -
        microphone_stack_height - 1.2) < 0.001);
+assert(microphone_diameter == 14 && microphone_cover_inner_diameter == 16 &&
+       microphone_hole_diameter == 6 && microphone_cover_top == 31);
 assert(amplifier_wire_clearance >= 10);
-assert(carrier_top_z + joystick_body_height + 1 <= deck_height - panel_thickness);
-assert(carrier_top_z + microphone_stack_height + 1 <= deck_height - panel_thickness);
-assert(abs(key_window_size - 19.2) < 0.001 && joystick_window_diameter == 35);
+assert(carrier_top_z + microphone_stack_height + 1 <= microphone_cover_top - panel_thickness);
+assert(abs(key_window_size - 20) < 0.001 && joystick_window_diameter == 35);
 assert(slope_angle == 80 && deck_depth == 52 && bend_radius == 6);
 assert(speaker_center == [26,30] && switch_center == [90,34]);
 assert(tft_center == [60,83]);
 assert(shell_hole_x == [9,111] && shell_hole_y == [11,125]);
-assert(norm(keyboard_window_min - [60.9,13.85]) < 0.001);
-assert(norm(keyboard_window_size - [46.35,38.25]) < 0.001);
-assert(norm(keyboard_row_bounds[0] - [69,32.9,38.25,19.2]) < 0.001);
-assert(norm(keyboard_row_bounds[1] - [60.9,13.85,38.25,19.2]) < 0.001);
-assert(keycap_lateral_clearance == 0.6 && keycap_vertical_clearance == 1 && key_travel == 4.3);
+assert(norm(keyboard_window_min - [60.5,13.45]) < 0.001);
+assert(norm(keyboard_window_size - [47.15,39.05]) < 0.001);
+assert(norm(keyboard_row_bounds[0] - [68.6,32.5,39.05,20]) < 0.001);
+assert(norm(keyboard_row_bounds[1] - [60.5,13.45,39.05,20]) < 0.001);
+assert(keycap_lateral_clearance == 1 && keycap_vertical_clearance == 1 && key_travel == 4.3);
 assert(abs(keycap_top_height - 25.45) < 0.001);
 assert(keycap_height == 12 && keycap_size == 18 && keycap_stem_engagement == 2);
 assert(switch_outer_diameter == 28 && switch_outer_height == 12);
@@ -39,26 +48,45 @@ assert(switch_outer_diameter == 28 && switch_outer_height == 12);
 intersection() {
     lid();
     union() {
-        translate([69.01,32.91,27.9]) cube([38.23,19.18,9.15]);
-        translate([60.91,13.86,27.9]) cube([38.23,19.18,9.15]);
-        translate([70,32.7,27.9]) cube([28,0.55,9.15]);
+        translate([68.61,32.51,18.5]) cube([39.03,19.98,18.55]);
+        translate([60.51,13.46,18.5]) cube([39.03,19.98,18.55]);
+        translate([70,32.6,18.5]) cube([28,0.75,18.55]);
     }
 }
 intersection() {
     lid();
-    translate([24.55, 36.5, 27.9]) cylinder(d = 34.98, h = rear_height);
+    translate([24.55, 36.5, 18.5]) cylinder(d = 34.98, h = rear_height);
 }
 intersection() {
     lid();
-    translate([52.205, 41.75, 27.9]) cylinder(d = 4.98, h = 3.2);
+    union() {
+        translate([52.205, 41.75, 18.5]) cylinder(d = 15.98, h = 9.49);
+        translate([52.205, 41.75, 27.9]) cylinder(d = 5.98, h = 3.2);
+    }
+}
+difference() {
+    translate([52.205, 41.75, 18.7])
+        difference() {
+            cylinder(d = 20.6, h = 12.2);
+            translate([0, 0, -eps]) cylinder(d = 16.2, h = 12.2 + 2 * eps);
+        }
+    lid();
+}
+difference() {
+    translate([52.205, 41.75, 28.1])
+        difference() {
+            cylinder(d = 15.8, h = 2.8);
+            translate([0, 0, -eps]) cylinder(d = 6.2, h = 2.8 + 2 * eps);
+        }
+    lid();
 }
 // Keep both staggered shoulders: an enclosing rectangle must fail these positive probes.
 difference() {
     union() {
         for (p = [[62,35], [67,44], [101,16], [106,30]])
-            translate([p[0],p[1],28.1]) cube([0.4,0.4,2.8]);
-        for (p = [[60.7,30], [107.45,30], [84,13.65]])
-            translate([p[0] - 0.1, p[1] - 0.1, 28.1]) cube([0.2, 0.2, 2.8]);
+            translate([p[0],p[1],18.7]) cube([0.4,0.4,2.8]);
+        for (p = [[60.3,30], [107.85,30], [84,13.25]])
+            translate([p[0] - 0.1, p[1] - 0.1, 18.7]) cube([0.2, 0.2, 2.8]);
         on_slope(60, 22, -2.9) cylinder(d = 4.8, h = 2.8);
     }
     lid();
@@ -77,14 +105,14 @@ difference() {
 }
 intersection() {
     lid();
-    for (row=[-3:3], column=[-3:3])
-        let(p=[3.6*(column+(abs(row)%2)/2),3.6*row*sqrt(3)/2])
-            if(norm(p)<=10.55)
-                on_slope(26+p[0],30+p[1],-3.1) cylinder(d=2.36,h=3.2);
+    for (row=[-2:2], column=[0:3-abs(row)])
+        let(count=4-abs(row),
+            p=[6*(column-(count-1)/2),4.5*row])
+            on_slope(26+p[0],30+p[1],-3.1) cylinder(d=3.78,h=3.2);
 }
 // The solid plate between vents must remain; a single large circular cut fails this probe.
 difference() {
-    for (p=[[1.8,0],[-1.8,0],[0,1.5588457]])
+    for (p=[[0,0],[6,0],[-6,0]])
         on_slope(26+p[0]-0.1,30+p[1]-0.1,-2.9) cube([0.2,0.2,2.8]);
     lid();
 }
@@ -160,7 +188,7 @@ difference() {
                 along = tft_center[1] + p[1] * 27.45)
                 translate([x - 0.5, deck_depth + cos(80) * along -
                            sin(80) * screen_mount_normal - 0.5,
-                           deck_height + sin(80) * along +
+                           slope_base_height + sin(80) * along +
                            cos(80) * screen_mount_normal - 6]) cube([1, 1, 1]);
     bottom_shell();
 }
@@ -172,12 +200,14 @@ intersection() {
 }
 intersection() {
     lid();
-    speaker_fasteners() translate([0, 0, -eps]) cylinder(d = 4.68, h = 5.2);
+    speaker_posts(eps);
 }
 difference() {
     union() {
-        speaker_fasteners() translate([3, -0.1, 0.1]) cube([0.2, 0.2, 9.8]);
-        speaker_fasteners() translate([-0.5, -0.5, 8.9]) cube([1, 1, 1]);
+        speaker_fasteners() translate([2.8, -0.1, speaker_post_depth + 0.1])
+            cube([0.2, 0.2, 1.4]);
+        speaker_fasteners() translate([-0.4, -0.4, speaker_nut_length + eps])
+            cube([0.8, 0.8, 1.2 - 2 * eps]);
     }
     lid();
 }
@@ -197,12 +227,14 @@ intersection() { switch_envelope(-assembly_clearance); module_envelopes(eps); }
 intersection() { switch_outer_envelope(-assembly_clearance); carrier_components(eps); }
 intersection() { switch_outer_envelope(eps); lid(); }
 intersection() { switch_outer_envelope(eps); bottom_shell(); }
-assert(deck_height + sin(80) * (34 - 14) - (carrier_top_z + 25.45) > 11.6);
+assert(slope_base_height + sin(80) * (34 - 14) - (carrier_top_z + 25.45) > 11.6);
 intersection() { speaker_envelope(eps); bottom_shell(); }
 intersection() { speaker_envelope(eps); lid(); }
 intersection() { speaker_envelope(eps); module_envelopes(eps); }
 intersection() { speaker_envelope(-assembly_clearance); module_envelopes(eps); }
 intersection() { speaker_envelope(eps); switch_envelope(eps); }
+intersection() { speaker_posts(eps); speaker_body_envelope(eps); }
+intersection() { speaker_posts(eps); bottom_shell(); }
 intersection() { typec_envelopes(eps); bottom_shell(); }
 intersection() { typec_envelopes(eps); lid(); }
 intersection() { typec_envelopes(eps); module_envelopes(eps); }
@@ -218,11 +250,22 @@ assert(joystick_motion_diameter == 34 && joystick_total_height == 30);
 assert(joystick_window_diameter - joystick_motion_diameter >= 1);
 
 // CHECK_GROUP shell
-// No local amplifier blister: every piece of the lid except speaker posts is in the shared band.
+// Only the microphone cover may leave the shared printed panel band.
 difference() {
     lid();
     extrude_along_x(case_width) panel_band(-eps, panel_thickness + eps);
-    speaker_posts();
+    microphone_cover();
+}
+// The rear control edges are perpendicular to the slope and retain the complete panel.
+intersection() {
+    lid();
+    for (bounds = [[7.65,33.8],[67.5,41.25]])
+        on_slope(bounds[0],11.5,-2.9) cube([bounds[1],0.2,2.8]);
+}
+difference() {
+    for (bounds = [[7.65,33.8],[67.5,41.25]])
+        on_slope(bounds[0],12.2,-2.9) cube([bounds[1],1.2,2.8]);
+    lid();
 }
 difference() { bottom_shell(); case_volume(-eps); }
 intersection() {

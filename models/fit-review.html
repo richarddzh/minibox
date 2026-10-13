@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="zh-CN">
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Minibox 载板外壳空间复核</title>
 <style>
 body{font:15px system-ui,sans-serif;background:#f4f6fa;color:#172334;margin:24px;max-width:1400px}
@@ -12,21 +13,105 @@ figure{margin:0;background:white;border:1px solid #dbe1ec;border-radius:10px;ove
 figure img{width:100%;display:block}figcaption{padding:12px}nav{display:flex;gap:16px;margin:16px 0;flex-wrap:wrap}
 section{background:white;border-radius:12px;padding:18px;border:1px solid #dbe1ec}
 svg{width:100%;height:500px;border:1px solid #dbe1ec;cursor:crosshair}
+.details svg{height:440px;cursor:default}.details{margin-top:18px}
 text{font:3.3px system-ui,sans-serif;fill:#172334;paint-order:stroke;stroke:white;stroke-width:.65px;stroke-linejoin:round}
 .shape{stroke-width:.4;fill-opacity:.3}table{border-collapse:collapse;width:100%;font-size:14px}
 td,th{text-align:left;padding:8px;border-bottom:1px solid #ddd}
 output{display:block;min-height:24px;font-family:monospace;margin-top:8px}
 button{padding:6px 12px}a{color:#1265a8}
 </style>
-<h1>Minibox：80° 直立屏幕，无局部凸起</h1>
-<p>尺寸单位 mm。外壳 120 × 136 × 151.147；操作区外高31、盖板内面Z=28，以容纳新的麦克风叠层。PCB 孔位不动。点击任一视图的两个点可量取该投影平面距离。</p>
-<nav><a href="#top">位置图</a><a href="#side">叠高与开关外侧</a><a href="pcb-installation.html">PCB装入路径示意</a><a href="#gallery">11 张多视角渲染</a><a href="../hardware_references/enclosure-hardware-specs.md">归档硬件规格</a></nav>
+<h1>Minibox：低操作台、麦克风圆罩与圆孔喇叭网</h1>
+<p>尺寸单位 mm。外壳 120 × 136 × 151.147；操作台外表面Z=21.6，比PCB顶面高11，内面Z=18.6。
+麦克风圆罩顶Z=31、内径Ø16、声孔Ø6。屏幕、开关、后平台及PCB位置不变；
+喇叭按前置耳重定位，正面贴近盖板内面。
+点击下方三个总览视图中的两个点可量取该投影平面距离。</p>
+<nav><a href="#details">尺寸详图</a><a href="#top">位置总览</a><a href="#side">叠高与开关外侧</a><a href="pcb-installation.html">PCB装入路径示意</a><a href="#files">打印文件</a><a href="#gallery">13 张多视角渲染</a><a href="../hardware_references/enclosure-hardware-specs.md">归档硬件规格</a></nav>
 <p class="note">这是包络复核图，不是精确元件 CAD。侧视图叠加了不同 X 截面的投影，投影重叠不一定代表三维碰撞。
 最终数字结论以 <code>tests\carrier-clearance.scad</code> 为准。开关、插接模块和功放上层端子仍需实物复核。</p>
+<p class="note"><strong>喇叭耳板尺寸按用户要求从图量取：</strong>以13 mm总厚度为标尺，
+耳板至正面与耳厚各约3.1 mm，模型取3.2 / 3.2 / 6.6合计13。
+金属圆柱螺母外露3.2、埋入盖板1.8，改用M2.5×6。它们是比例估计，不是厂家新增标注；
+首件应松装复核。金色柱是金属件，不包含在打印STL中。</p>
 <p class="note"><strong>PCB装配路径已补充验证：</strong>水平直落仍会被上方窄口挡住。
 前角座内侧退让已向上贯通，采用左侧抬高25°、前偏1 mm下降至中心底面Z=35，
 再摆平、后移1 mm并落座的路线；RTC和摇杆帽后装。
 <a href="pcb-installation.html">查看挡点、改动和可拖动的步骤示意</a>。验证基于记录的模块包络，首件仍需试装。</p>
+<h2 id="details">关键尺寸详图：箭头为尺寸线，虚线为基准或接受包络</h2>
+<div class="views details">
+<section><h2>键盘：每键20×20、键帽18×18</h2>
+<svg id="keyboard-detail" viewBox="-14 -12 126 99" aria-label="四键错位开口的尺寸、中心距和单键冗余"></svg>
+<p>绿色为实际阶梯形连通孔，蓝色为18×18键帽，虚线是每键20×20预留。
+同排节距19.05，因此20宽开口会重叠0.95，不保留细梁；两排也重叠0.95。
+外包47.15×39.05不能代替阶梯形开孔。PCB孔位与轴体位置不动。</p></section>
+<section><h2>操作开口薄边清除：后缘保留完整面板</h2>
+<svg id="control-edge-detail" viewBox="-17 -12 78 46" aria-label="操作开口沿斜面法线切齐，后缘完整厚3毫米，打印实体最低1.2毫米"></svg>
+<p>保留摇杆Ø35与每键20×20的平面基础开口，另沿斜面方向去掉尖薄边。
+摇杆尾部避让宽34，键盘尾部避让宽41.45；后缘位于沿面坐标12，按法线切齐，
+不再留下弯折处的尖鳍。盖板标称厚3，保留实体不小于1.2；最窄侧框仍大于该值。</p></section>
+<section><h2>麦克风：轴心剖面与顶部孔径</h2>
+<svg id="microphone-detail" viewBox="-27 -9 107 56" aria-label="麦克风圆罩内径16、板径14、声孔6及完整高度剖面"></svg>
+<p>剖面穿过麦克风轴心：圆罩外径20.8、侧壁2.4、内径16，Ø14模块名义每侧留1。
+顶厚3、内顶Z=28、模块最高Z=26.8，留1.2高度间隙。圆罩比平盖抬起9.4；
+内腔贯通平盖，不留下挡住模块的底膜。</p></section>
+<section><h2>喇叭：圆孔直径与孔间实体</h2>
+<svg id="grille-detail" viewBox="-20 -19 101 64" aria-label="2/3/4/3/2五排共14个圆孔，直径3.8，左右中心距6、上下排距4.5，全部在直径23.5圆内"></svg>
+<p>五排分别2 / 3 / 4 / 3 / 2孔，每排左右中轴对称，不要求四向旋转对称。
+孔径3.8，左右中心距6、上下排距4.5；左右孔边间距2.2，上下交错孔最近边距约1.608。
+阵列外包21.8×21.8，全部14孔仍在Ø23.5圆内，至圆边界最小余量约0.363；理论通孔面积约36.6%。
+右图放大相邻两个孔，虚线标出中心。</p></section>
+<section><h2>操作台叠高：以外壳底面为Z=0</h2>
+<svg id="height-detail" viewBox="-12 -8 107 60" aria-label="底板4、安装柱5、PCB1.6、操作台距板顶11和麦克风凸起9.4"></svg>
+<p>平盖外面Z=21.6，距PCB顶Z=10.6为11；平盖内面Z=18.6，净空8。
+轴体和摇杆通过各自窗口穿出，不能再要求它们全部低于平盖内面。
+后部高度保持151.147，80°斜面与屏幕安装位置不变。</p></section>
+<section><h2>前合盖孔：沉孔、嵌件与盲孔底</h2>
+<svg id="fastener-detail" viewBox="-18 -7 84 47" aria-label="合盖孔3、沉孔4.5深1.4、嵌件孔4.7深5.2和尾孔深8.8"></svg>
+<p>前部螺孔中心X=9/111、Y=11；Ø4.5沉孔深1.4，盖板剩厚1.6，贯穿孔Ø3。
+底壳Ø4.7嵌件孔深5.2，Ø2.8螺钉尾孔深8.8，尾孔底Z=9.8。
+后部同孔型、顶面高度不同；不是六角螺母槽。</p></section>
+<section><h2>载板与安装孔：孔距和板边关系</h2>
+<svg id="carrier-detail" viewBox="-13 -15 124 150" aria-label="载板94.5乘117、R5、四个孔径3、孔距84.5乘107"></svg>
+<p>载板94.5×117、R5、厚1.6；四个Ø3孔中心距84.5×107，中心距相应板边均为5。
+底壳柱Ø7、柱高5；使用M2.5×6固定载板，不要与合盖M2.5×10混用。
+图中坐标为载板本地坐标，装配坐标见下方总览。</p></section>
+<section><h2>屏幕：PCB、窗口和三个安装耳</h2>
+<svg id="screen-detail" viewBox="-15 -19 147 118" aria-label="屏幕板108.04乘61.74、窗口85.52乘57.68、三点孔距101.9乘54.9"></svg>
+<p>屏幕PCB108.04×61.74、孔距101.9×54.9；保留左上、左下、右下三点，右上支撑删除。
+窗口85.52×57.68、R6，相对PCB中心左移2.26。有效显示83.52×55.68，
+圆角可能遮挡显示角部。PCB厚2、屏体厚3，盖板前留1。</p></section>
+<section><h2>屏幕剖面：5 mm模组与至少1 mm保护膜空间</h2>
+<svg id="screen-stack-detail" viewBox="-18 -12 110 48" aria-label="盖板厚3，屏幕保护膜空间1，屏体厚3，PCB厚2，PCB承托面距盖板内面6"></svg>
+<p>尺寸沿屏幕法线测量，不是外壳竖直Z高度。盖板内面n=−3，屏幕前面n=−4，
+屏体背面n=−7，PCB承托面n=−9；模组总厚5，前方另留1保护膜空间，
+承托面到盖板内面共6。若实际膜厚超过1，应增加前隙并同步后移屏幕支撑。</p></section>
+<section><h2>扬声器：前置耳与埋入式金属螺母柱</h2>
+<svg id="speaker-detail" viewBox="-16 -17 125 82" aria-label="扬声器方腔27.5、孔距23、厚13，金属螺母柱外露3.2、埋入盖板1.8"></svg>
+<p>方腔27.5±0.2、厚13±0.2；四孔Ø3、中心距23×23。
+四个Ø4.5×5金属圆柱螺母胶粘在Ø4.7、深1.8的盲孔中，外露3.2；
+M2.5×6只穿约3.2厚的耳板，再拧入螺母约2.8，不穿整个13厚度。
+Ø23.5只是前面网眼参考分布区，不是整圆通孔；剖面不代表气密声道。</p></section>
+<section><h2>后置Type-C：孔距与板壁装配剖面</h2>
+<svg id="typec-detail" viewBox="-6 -20 107 79" aria-label="两个Type-C孔径12、中心距20、螺纹10.5乘14.5和壁厚2.4"></svg>
+<p>后壁Y=136，孔中心X=28/48、Z≈75.573，孔径12、中心距20。
+外头Ø13.8×厚2、螺纹Ø10.5×长14.5；壁厚2.4，螺母厚3。
+螺母“14”按对边换算为保守外接圆16.17，图中虚线为该包络，不是额外通孔。</p></section>
+</div>
+<section class="details"><h2>喇叭前置耳：按13 mm图纸标尺估算</h2>
+<svg id="speaker-ear-detail" viewBox="-15 -10 120 69" aria-label="正面朝下，柱高加耳板厚加耳板至背面的距离等于喇叭厚度，螺母柱不穿过耳板"></svg>
+<table><tr><th>检查项</th><th>尺寸 / 结果</th><th>判定依据</th></tr>
+<tr><td>图量方法</td><td>13 mm约116像素；两个短段各约28像素</td><td>换算约3.1 mm，考虑图线宽度，取0.2 mm网格上的3.2。耳至背面取6.6以保持总厚13；这些值是估计。</td></tr>
+<tr><td>四柱孔轴与喇叭孔</td><td>名义23×23孔距同轴</td><td>相对喇叭中心分别偏移±11.5。厂家直接标出竖向23，横向按方形对称解释，未单独标注；实物孔距与打印误差仍需核对。</td></tr>
+<tr><td>柱高与耳板</td><td>3.2柱高 + 3.2耳厚 + 6.6后段 = 13</td><td>喇叭正面与盖板内面同为n=−3；耳前面n=−6.2，耳后面n=−9.4。柱端只承托耳板，不穿耳孔。</td></tr>
+<tr><td>圆框与金属柱</td><td>按最大Ø27.7圆框仍约有0.163径向余量</td><td>孔轴距中心约16.263，金属柱半径2.25；去掉旧Ø7.4粗塑料柱，避免它伸入圆框轮廓。</td></tr>
+<tr><td>盖板盲孔底</td><td>盖板3 − 埋深1.8 = 1.2</td><td>Ø4.5×5金属螺母埋入1.8、外露3.2；盲孔Ø4.7留胶粘间隙，不能把金属柱当成打印件。</td></tr>
+<tr><td>螺丝</td><td>M2.5×6，穿耳后约啮合2.8</td><td>不是穿过整个13 mm本体；螺丝头接受包络Ø5×高2.5，附加垫片会减少啮合。</td></tr>
+<tr><td>安装顺序</td><td>先胶粘并校准外露高度，再装喇叭</td><td>Ø4.5金属柱不穿Ø3耳孔；拧螺丝前让胶粘剂充分固化，轻拧，不硬压振膜。</td></tr>
+</table>
+<p class="note"><strong>图量估算，不是实物合格证：</strong>
+<a href="../hardware_references/drawings/xhxdz-2828box-dimensions.png">原图侧视（正面朝下）</a>
+没有独立标注耳厚和阶梯深度。首件应先松装；若高度有差异，调整参数或改用合适长度的金属柱，
+不要强拧，也不要把定位盲孔加深到后壁小于1.2。</p></section>
+<h2>完整装配位置与包络总览</h2>
 <div class="views">
 <section><h2>顶视：使用者在下方，后置 Type-C 左偏</h2><svg id="top" viewBox="-8 -6 136 186" aria-label="外壳顶视装配图"></svg><output id="top-read">X / Y</output></section>
 <section><h2>侧视：排母 + 功放板 + 端子 + 接线叠高</h2><svg id="side" viewBox="-8 -8 188 181" aria-label="完整模块叠高和斜面内伸投影"></svg><output id="side-read">Y / Z</output></section>
@@ -35,7 +120,9 @@ button{padding:6px 12px}a{color:#1265a8}
 <table><tr><th>部件</th><th>最高 Z</th><th>状态</th></tr>
 <tr><td>载板下面 / 顶面</td><td>9 / 10.6</td><td>1.6 板厚；四个 5 高柱</td></tr>
 <tr><td>摇杆静止本体</td><td>23.0</td><td>图纸高度 12.4</td></tr>
-<tr><td>排母叠加麦克风</td><td>26.8</td><td>排母8.7 + 上方模块7.5；至盖板内面留1.2</td></tr>
+<tr><td>平盖外面 / 内面</td><td>21.6 / 18.6</td><td>距PCB顶11；盖板厚3</td></tr>
+<tr><td>排母叠加麦克风</td><td>26.8</td><td>排母8.7 + 上方模块7.5；至圆罩内顶留1.2</td></tr>
+<tr><td>麦克风圆罩外顶 / 内顶</td><td>31 / 28</td><td>内径16、板径14、声孔6；抬起9.4</td></tr>
 <tr><td>功放：排母+模块和自带端子</td><td>34.3</td><td>排母8.7 + 上方15（用户预设，含模块板）</td></tr>
 <tr><td>功放顶部接线空间</td><td>44.3</td><td>再加10；全平面保守覆盖</td></tr>
 <tr><td>ESP32 / 竖装 RTC</td><td>30.6 / 50.6</td><td>20 / 40 高接受包络</td></tr>
@@ -45,28 +132,42 @@ button{padding:6px 12px}a{color:#1265a8}
 </table>
 <p>蓝色：PCB/模块；橙色：功放端子和接线；红色：开关内伸；紫色：扬声器和固定柱；绿色：操作件；灰色：外壳轮廓。</p>
 <p><strong>麦克风叠层：</strong>底板4、安装柱5、PCB 1.6、排母8.7、模块7.5，
-最高点26.8。原操作区高28时内面只有25，会干涉1.8；现改为高31、内面28，留1.2。
+最高点26.8。平盖降低到21.6，仅麦克风处抬起到31、圆罩内顶28，留1.2。
 模块7.5和功放含端子15均从排母顶面起算，不重复添加模块PCB厚度。</p>
 <p><strong>开关外部与键帽竖直分隔约14.65 mm</strong>，仅对表列包络成立。开关法兰与拨动头尺寸仍待实物图核对。
-后排按键孔和摇杆孔部分进入 R6 圆弧，切削已贯穿完整活动高度。盖板全宽共用同一轮廓，功放空间没有缩减。</p>
+后排按键孔和摇杆孔部分进入 R6 圆弧，切削已贯穿完整活动高度。
+斜面尾部进一步扩大避让并按法线切齐，去掉尖薄边，保留完整面板厚度。
+除麦克风圆罩外，盖板全宽共用同一轮廓，功放空间没有缩减。</p>
 <p><strong>键盘是上下两排错位的阶梯形连通孔，不是外包矩形</strong>。
-两排各38.25×19.20，下排左移8.10；只去掉内部细梁，保留两侧阶梯肩部。
-46.35×38.25仅为包围尺寸。键帽每侧留0.6，
+两排各39.05×20，下排左移8.10；只去掉内部细梁，保留两侧阶梯肩部。
+47.15×39.05仅为包围尺寸。18×18键帽每侧留1，
 按4.3行程检查全扫掠体并上下各留1 mm，不只检查静止位置。
 合盖共四颗螺丝：顶部后排两颗、前部两颗；顶部原Y=110的两孔及底壳座已移除。</p>
-<p>喇叭藏在盖板背后，正面为31个对边2.4的蜂窝网眼，孔距3.6、孔间实体1.2，不开整圆通孔。</p>
+<p>喇叭藏在盖板背后，正面五排2 / 3 / 4 / 3 / 2，共14个Ø3.8圆孔；
+左右中心距6、上下排距4.5，全部位于Ø23.5圆内，不开整圆通孔。</p>
 <p>摇杆帽购买现成件，不再提供自制帽模型。完整±30°扫掠须落在Ø34×高30保留包络内，
 面板孔Ø35；静态帽直径不能代替运动范围检查。</p>
 <p><a href="module-dimensions.md">完整尺寸、来源及待实物复核项</a></p>
 <button id="clear">清除测量</button></section>
 </div>
-<h2 id="gallery">打印件多视角渲染</h2>
-<p>图片来自配套 STL 实体；整机图仅展示外壳，不把未确认的模块、开关或现成摇杆帽占位冒充精确器件模型。
+<h2 id="files">配套打印与源文件（图量尺寸须首件试装）</h2>
+<section><table>
+<tr><th>部件</th><th>装配坐标STL</th><th>同网格3MF</th><th>Y-up STL</th></tr>
+<tr><td>底壳</td><td><a href="bottom.stl" download>bottom.stl</a></td><td><a href="bottom.3mf" download>bottom.3mf</a></td><td><a href="bottom-y-up.stl" download>bottom-y-up.stl</a></td></tr>
+<tr><td>盖板</td><td><a href="lid.stl" download>lid.stl</a></td><td><a href="lid.3mf" download>lid.3mf</a></td><td><a href="lid-y-up.stl" download>lid-y-up.stl</a></td></tr>
+</table><p><a href="minibox-enclosure.scad" download>参数化OpenSCAD源文件</a>。
+标准STL/3MF保留两件装配位置；盖板Y-up文件来自侧放打印姿态，并非新增零件。
+STL不包含金属喇叭柱，打印后安装Ø4.5×5圆柱螺母与M2.5×6螺丝。
+切片时复核圆罩、喇叭背柱、屏幕支撑及螺母孔是否需要局部支撑，首件须试装。</p></section>
+<h2 id="gallery">多视角渲染：金色为安装后的金属螺母柱</h2>
+<p>灰蓝色部分来自配套STL；金色是四个喇叭金属圆柱螺母，不打印。
+其他模块、开关和现成摇杆帽没有渲染，不用占位冒充精确器件模型。
 点击可打开原图。</p>
 <div class="gallery" id="render-gallery"></div>
 <script>
 const ns="http://www.w3.org/2000/svg", angle=80*Math.PI/180,sin=Math.sin(angle),cos=Math.cos(angle);
-const D=136,deckZ=31,H=deckZ+122*sin,L=122,deck=52,heights={top:D,side:H,slope:L};
+const D=136,deckZ=21.6,slopeBaseZ=31,H=slopeBaseZ+122*sin,L=122,deck=52;
+const transition=deck-(slopeBaseZ-deckZ)/Math.tan(angle),heights={top:D,side:H,slope:L};
 function node(svg,tag,attrs,text){
   const n=document.createElementNS(ns,tag);
   for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);
@@ -83,7 +184,7 @@ function circle(svg,x,y,r,color,fill="none"){
 function polygon(svg,points,color){
   node(svg,"polygon",{points:points.map(p=>p.join(",")).join(" "),fill:color,stroke:color,class:"shape"});
 }
-function atSlope(s,n){return[deck+cos*s-sin*n,H-(deckZ+sin*s+cos*n)]}
+function atSlope(s,n){return[deck+cos*s-sin*n,H-(slopeBaseZ+sin*s+cos*n)]}
 function slopedBox(svg,s0,s1,n0,n1,color){
   polygon(svg,[atSlope(s0,n0),atSlope(s1,n0),atSlope(s1,n1),atSlope(s0,n1)],color);
 }
@@ -104,23 +205,25 @@ pcbRect([84.16,51.55,95.16,67.99],"#287dce","J7");
 for(const p of [[10,8],[94.5,8],[10,115],[94.5,115]]){
   const [x,y]=map(p);circle(topSvg,x,y,3.5,"#263442");circle(topSvg,x,y,1.5,"#263442");
 }
-polygon(topSvg,[[60.9,13.85],[99.15,13.85],[99.15,32.9],[107.25,32.9],
-                [107.25,52.1],[69,52.1],[69,33.05],[60.9,33.05]].map(([x,y])=>[x,D-y]),"#22956a");
+polygon(topSvg,[[60.5,13.45],[99.55,13.45],[99.55,32.5],[107.65,32.5],
+                [107.65,52.5],[68.6,52.5],[68.6,33.45],[60.5,33.45]].map(([x,y])=>[x,D-y]),"#22956a");
 for(const [i,p] of [[70.85,89.5],[89.9,89.5],[62.75,108.55],[81.8,108.55]].entries()){
   const [x,y]=map(p);label(topSvg,x-3,y,`SW${i+1}`);
 }
 circle(topSvg,24.55,D-36.5,17.5,"#22956a");
 label(topSvg,10,D-36.5,"Ø35 / 现成帽");
-circle(topSvg,52.205,D-41.75,9.75,"#287dce");
-circle(topSvg,52.205,D-41.75,2.5,"#22956a");
-label(topSvg,45,D-30,"MIC Ø5");
+circle(topSvg,52.205,D-41.75,10.4,"#8a95a5");
+circle(topSvg,52.205,D-41.75,8,"#22956a");
+circle(topSvg,52.205,D-41.75,7,"#287dce");
+circle(topSvg,52.205,D-41.75,3,"#22956a");
+label(topSvg,44,D-28,"MIC Ø6 / 圆罩Ø16");
 for(const x of [28,48]){circle(topSvg,x,0,6,"#c44");label(topSvg,x-5,9,`X=${x}`)}
 label(topSvg,26,D+7,"正面 / 使用者；X →；Y 朝上");
-node(topSvg,"line",{x1:0,y1:D-deck,x2:120,y2:D-deck,stroke:"#667788","stroke-width":.4,"stroke-dasharray":"2 1"});
-label(topSvg,45,D-54,"全宽转折 Y=52，无凸起");
+node(topSvg,"line",{x1:0,y1:D-transition,x2:120,y2:D-transition,stroke:"#667788","stroke-width":.4,"stroke-dasharray":"2 1"});
+label(topSvg,43,D-56,`理论转折 Y=${transition.toFixed(3)}`);
 rect(side,0,H-4,D,4,"#8a95a5");
 const tangent=6*Math.tan(angle/2),roof=[[0,H-deckZ]];
-for(let i=0;i<=32;i++){const a=-Math.PI/2+angle*i/32;roof.push([deck-tangent+6*Math.cos(a),H-(deckZ+6+6*Math.sin(a))]);}
+for(let i=0;i<=32;i++){const a=-Math.PI/2+angle*i/32;roof.push([transition-tangent+6*Math.cos(a),H-(deckZ+6+6*Math.sin(a))]);}
 for(let i=0;i<=32;i++){const a=Math.PI/2+angle*(1-i/32);roof.push([deck+cos*L+tangent+6*Math.cos(a),6-6*Math.sin(a)]);}
 roof.push([D,0]);
 polygon(side,[[0,H],...roof,[D,H]],"#8a95a5");
@@ -130,13 +233,14 @@ rect(side,60,H-34.3,24,23.7,"#e8a12e","排母+功放端子23.7");
 rect(side,60,H-44.3,24,10,"#e8a12e","线10");
 rect(side,86.03,H-30.6,27.94,20,"#287dce","ESP32");
 rect(side,117,H-50.6,12,40,"#287dce","RTC");
-rect(side,32,H-26.8,19.5,16.2,"#287dce","MIC+排母16.2");
+rect(side,31.35,H-31,20.8,12.4,"#8a95a5");
+rect(side,34.75,H-26.8,14,16.2,"#287dce","MIC+排母16.2");
 rect(side,33.5,H-36.05,18,25.45,"#22956a","未按下键帽");
 slopedBox(side,22,46,-43,-3,"#d34c4c");
 label(side,78,H-58,"开关内部 30 + 10");
 slopedBox(side,20,48,0,12,"#d34c4c");
 label(side,17,H-69,"开关外部 Ø28 / 深12");
-const switchMin=deckZ+20*sin;
+const switchMin=slopeBaseZ+20*sin;
 node(side,"line",{x1:40,y1:H-switchMin,x2:40,y2:H-36.05,stroke:"#bf2121","stroke-width":.6});
 label(side,17,H-41,`竖直间隔 ${(switchMin-36.05).toFixed(2)}`);
 slopedBox(side,16.05,43.95,-26.2,-13,"#8e5dbb");
@@ -155,13 +259,9 @@ for(const [x,s] of [[9.05,55.55],[9.05,110.45],[110.95,55.55]]){
 rect(slope,106.02,L-113.87,8,42,"#d34c4c","排针");
 label(slope,71,6,"右上柱已删除");
 rect(slope,12.25,L-43.75,27.5,27.5,"#8e5dbb");
-for(let row=-3;row<=3;row++)for(let col=-3;col<=3;col++){
- const x=3.6*(col+(Math.abs(row)%2)/2),y=3.6*row*Math.sqrt(3)/2;
- if(Math.hypot(x,y)<=11.75-1.2/Math.cos(Math.PI/6))
-   polygon(slope,Array.from({length:6},(_,i)=>{
-     const a=(30+60*i)*Math.PI/180,r=1.2/Math.cos(Math.PI/6);
-     return[26+x+r*Math.cos(a),L-30-y-r*Math.sin(a)];
-   }),"#8e5dbb");
+for(let row=-2;row<=2;row++)for(let col=0;col<4-Math.abs(row);col++){
+ const count=4-Math.abs(row),x=6*(col-(count-1)/2),y=4.5*row;
+ circle(slope,26+x,L-30-y,1.9,"#8e5dbb","#8e5dbb");
 }
 for(const dx of [-11.5,11.5])for(const ds of [-11.5,11.5])
   circle(slope,26+dx,L-30-ds,3.7,"#8e5dbb");
@@ -171,8 +271,8 @@ label(slope,76,114,"开关 Ø21（待核实）");
 label(slope,17,130,"独立沿面中心：喇叭30 / 开关34");
 const views={
   bottom:{name:"底壳",items:{isometric:"立体 / 三点屏幕支撑",top:"俯视 / 载板四柱",rear:"后视 / Type-C",side:"侧视 / 连续轮廓"}},
-  lid:{name:"盖板",items:{isometric:"立体 / 无凸起",front:"正面 / 各开孔",inside:"背面 / 扬声器四柱",side:"侧视 / 80°"}},
-  assembly:{name:"整机",items:{isometric:"装配立体",front:"装配正面",side:"装配侧面"}}
+  lid:{name:"盖板",items:{isometric:"立体 / 低操作台与麦克风圆罩",top:"俯视 / 圆罩与阶梯键孔",front:"正面 / 各开孔",inside:"背面 / 扬声器四柱",side:"侧视 / 80°"}},
+  assembly:{name:"整机",items:{isometric:"装配立体",top:"装配俯视",front:"装配正面",side:"装配侧面"}}
 };
 for(const [part,spec] of Object.entries(views))for(const [view,title] of Object.entries(spec.items)){
  const figure=document.createElement("figure"),link=document.createElement("a"),img=document.createElement("img"),caption=document.createElement("figcaption");
@@ -180,6 +280,260 @@ for(const [part,spec] of Object.entries(views))for(const [view,title] of Object.
  img.src=link.href;img.alt=`${spec.name}：${title}`;img.loading="lazy";
  caption.textContent=img.alt;link.append(img);figure.append(link,caption);document.querySelector("#render-gallery").append(figure);
 }
+const colors={shell:"#8a95a5",pcb:"#287dce",opening:"#22956a",dimension:"#9b3535"};
+function line(svg,x1,y1,x2,y2,dashed=false){
+  return node(svg,"line",{x1,y1,x2,y2,stroke:colors.dimension,"stroke-width":.25,
+    ...(dashed?{"stroke-dasharray":"1 .7"}:{})});
+}
+function dimH(svg,x1,x2,y,fromY,text){
+  line(svg,x1,fromY,x1,y);line(svg,x2,fromY,x2,y);line(svg,x1,y,x2,y);
+  node(svg,"path",{d:`M ${x1+1.2} ${y-.55} L ${x1} ${y} L ${x1+1.2} ${y+.55}
+    M ${x2-1.2} ${y-.55} L ${x2} ${y} L ${x2-1.2} ${y+.55}`,
+    fill:"none",stroke:colors.dimension,"stroke-width":.25});
+  node(svg,"text",{x:(x1+x2)/2,y:y-1,"text-anchor":"middle"},text);
+}
+function dimV(svg,y1,y2,x,fromX,text){
+  line(svg,fromX,y1,x,y1);line(svg,fromX,y2,x,y2);line(svg,x,y1,x,y2);
+  node(svg,"path",{d:`M ${x-.55} ${y1+1.2} L ${x} ${y1} L ${x+.55} ${y1+1.2}
+    M ${x-.55} ${y2-1.2} L ${x} ${y2} L ${x+.55} ${y2-1.2}`,
+    fill:"none",stroke:colors.dimension,"stroke-width":.25});
+  node(svg,"text",{transform:`translate(${x-1},${(y1+y2)/2}) rotate(-90)`,
+    "text-anchor":"middle"},text);
+}
+dimH(topSvg,0,120,D+17,D,"外宽120");
+dimV(topSvg,0,D,126,120,"外深136");
+dimH(side,0,136,H+17,H,"外深136");
+dimV(side,0,H,146,136,"外高151.147");
+const keyboard=document.querySelector("#keyboard-detail"),keyBase=55;
+polygon(keyboard,[[0,0],[39.05,0],[39.05,19.05],[47.15,19.05],
+  [47.15,39.05],[8.1,39.05],[8.1,20],[0,20]].map(([x,y])=>[x,keyBase-y]),colors.opening);
+for(const [i,[x,y]] of [[18.1,29.05],[37.15,29.05],[10,10],[29.05,10]].entries()){
+  node(keyboard,"rect",{x:x-10,y:keyBase-y-10,width:20,height:20,fill:"none",
+    stroke:colors.opening,"stroke-width":.25,"stroke-dasharray":"1 .7"});
+  rect(keyboard,x-9,keyBase-y-9,18,18,colors.pcb);
+  line(keyboard,x-2,keyBase-y,x+2,keyBase-y,true);
+  line(keyboard,x,keyBase-y-2,x,keyBase-y+2,true);
+  label(keyboard,x-3,keyBase-y+1.2,`SW${i+1}`);
+}
+dimH(keyboard,0,47.15,64,55,"外包47.15");
+dimV(keyboard,15.95,55,-8,0,"外包39.05");
+dimH(keyboard,18.1,37.15,7,25.95,"中心距19.05");
+dimH(keyboard,0,8.1,74,55,"错位8.10");
+dimV(keyboard,25.95,45,55,47.15,"排距19.05");
+rect(keyboard,73,20,20,20,colors.opening);
+rect(keyboard,74,21,18,18,colors.pcb);
+dimH(keyboard,73,93,14,20,"开口20");
+dimV(keyboard,20,40,101,93,"开口20");
+dimH(keyboard,74,92,47,39,"键帽18");
+label(keyboard,71,57,"四边各留1");
+label(keyboard,6,-4,"阶梯连通孔 / 不加工成外包矩形");
+
+const mic=document.querySelector("#microphone-detail"),micY=z=>40-z;
+rect(mic,-18,micY(10.6),36,1.6,colors.pcb,"PCB");
+rect(mic,-3.81,micY(19.3),7.62,8.7,"#e8a12e");
+rect(mic,-7,micY(26.8),14,7.5,colors.pcb);
+for(const x of [-10.4,8])rect(mic,x,micY(31),2.4,12.4,colors.shell);
+for(const x of [-10.4,3])rect(mic,x,micY(31),7.4,3,colors.shell);
+rect(mic,-18,micY(21.6),10,3,colors.shell);
+rect(mic,8,micY(21.6),10,3,colors.shell);
+line(mic,0,5,0,32,true);
+dimH(mic,-8,8,3,12,"内径16");
+dimH(mic,-7,7,35,13.2,"模块圆板14");
+dimV(mic,9,18.4,23,10.4,"抬起9.4");
+dimV(mic,9,12,-20,-10.4,"顶厚3");
+line(mic,-8,12,-14,12);line(mic,-7,13.2,-14,13.2);
+label(mic,-21,17,"顶隙1.2");
+label(mic,-9,25,"排母8.7");
+label(mic,-9,39,"模块上方厚7.5");
+label(mic,-18,44,"轴心剖面 / Z从外壳底面起算");
+for(const [r,color] of [[10.4,colors.shell],[8,colors.opening],[7,colors.pcb],[3,colors.opening]])
+  circle(mic,53,17,r,color);
+line(mic,41,17,65,17,true);line(mic,53,5,53,29,true);
+dimH(mic,42.6,63.4,33,17,"外径20.8");
+dimH(mic,50,56,1,17,"声孔6");
+label(mic,41,39,"径向余量1");
+label(mic,41,44,"侧壁2.4");
+
+const grille=document.querySelector("#grille-detail");
+circle(grille,0,0,11.75,colors.shell);
+let grilleCount=0;
+for(let row=-2;row<=2;row++)for(let col=0;col<4-Math.abs(row);col++){
+  const count=4-Math.abs(row),x=6*(col-(count-1)/2),y=4.5*row;
+  circle(grille,x,y,1.9,colors.opening,colors.opening);grilleCount++;
+}
+dimH(grille,-11.75,11.75,17,0,"参考区域Ø23.5");
+dimV(grille,-9,-4.5,-15,0,"排距4.5");
+label(grille,-12,25,`${grilleCount}个圆孔`);
+circle(grille,35,0,7.6,colors.opening,colors.opening);
+circle(grille,59,0,7.6,colors.opening,colors.opening);
+line(grille,35,-10,35,10,true);line(grille,59,-10,59,10,true);
+dimH(grille,35,59,-13,0,"左右中心距6");
+dimH(grille,27.4,42.6,12,0,"孔径3.8");
+dimH(grille,42.6,51.4,23,0,"左右实体2.2");
+label(grille,31,33,"局部放大4倍");
+label(grille,-12,33,"2 / 3 / 4 / 3 / 2");
+console.assert(grilleCount===14,"Unexpected grille vent count");
+
+const height=document.querySelector("#height-detail"),heightY=z=>40-z;
+rect(height,0,heightY(4),58,4,colors.shell,"底板");
+rect(height,10,heightY(9),7,5,colors.shell);
+rect(height,0,heightY(10.6),58,1.6,colors.pcb,"PCB");
+rect(height,0,heightY(21.6),28,3,colors.shell,"操作台");
+rect(height,28,heightY(31),2.4,12.4,colors.shell);
+rect(height,46.4,heightY(31),2.4,12.4,colors.shell);
+rect(height,28,heightY(31),7.4,3,colors.shell);
+rect(height,41.4,heightY(31),7.4,3,colors.shell);
+rect(height,31.4,heightY(26.8),14,7.5,colors.pcb);
+rect(height,34.59,heightY(19.3),7.62,8.7,"#e8a12e");
+dimV(height,heightY(21.6),heightY(10.6),-7,0,"板顶到平盖11");
+dimV(height,heightY(31),heightY(21.6),57,48.8,"凸起9.4");
+dimV(height,heightY(21.6),heightY(18.6),66,28,"盖厚3");
+for(const z of [31,28,21.6,18.6,10.6,9,4,0]){
+  line(height,70,heightY(z),73,heightY(z));
+  label(height,75,heightY(z)+1,`Z=${z}`);
+}
+label(height,1,45,"底板4 + 支柱5 + PCB1.6");
+label(height,1,50,"麦克风最高26.8 / 内顶28");
+
+const fastener=document.querySelector("#fastener-detail"),fastY=z=>29-z;
+rect(fastener,-8,fastY(21.6),16,3,colors.shell);
+rect(fastener,-6.8,fastY(18.6),13.6,14.6,colors.shell);
+rect(fastener,-2.25,fastY(21.6),4.5,1.4,"white");
+rect(fastener,-1.5,fastY(20.2),3,1.6,"white");
+rect(fastener,-2.35,fastY(18.6),4.7,5.2,"white");
+rect(fastener,-1.4,fastY(13.4),2.8,3.6,"white");
+line(fastener,0,3,0,27,true);
+dimH(fastener,-2.25,2.25,2,7.4,"沉孔Ø4.5");
+dimH(fastener,-2.35,2.35,30,10.4,"嵌件孔Ø4.7");
+dimV(fastener,10.4,15.6,14,6.8,"嵌件深5.2");
+dimV(fastener,10.4,19.2,24,6.8,"尾孔深8.8");
+label(fastener,29,8,"盖顶Z=21.6");
+label(fastener,29,13,"沉孔深1.4 / 通孔Ø3");
+label(fastener,29,18,"剩余盖厚1.6");
+label(fastener,29,23,"尾孔Ø2.8 / 底Z=9.8");
+label(fastener,-9,36,"M2.5×10合盖 / 胶粘圆柱嵌件");
+
+const carrier=document.querySelector("#carrier-detail");
+node(carrier,"rect",{x:0,y:0,width:94.5,height:117,rx:5,fill:colors.pcb,
+  "fill-opacity":.15,stroke:colors.pcb,"stroke-width":.4});
+for(const x of [5,89.5])for(const y of [5,112]){
+  circle(carrier,x,y,3.5,colors.shell);circle(carrier,x,y,1.5,colors.dimension);
+  line(carrier,x-4,y,x+4,y,true);line(carrier,x,y-4,x,y+4,true);
+}
+dimH(carrier,0,94.5,127,117,"板宽94.5");
+dimV(carrier,0,117,103,94.5,"板长117");
+dimH(carrier,5,89.5,-8,5,"孔中心距84.5");
+dimV(carrier,5,112,-8,5,"孔中心距107");
+label(carrier,17,24,"圆角R5 / 孔Ø3 / 柱Ø7");
+label(carrier,17,36,"孔中心距板边5");
+label(carrier,17,48,"PCB厚1.6 / 支柱高5");
+label(carrier,17,60,"安装面Z=9 / 板顶Z=10.6");
+label(carrier,17,78,"H1/H2：后排");
+label(carrier,17,90,"H3/H4：前排");
+
+const screen=document.querySelector("#screen-detail");
+rect(screen,0,0,108.04,61.74,colors.pcb);
+node(screen,"rect",{x:9,y:2.03,width:85.52,height:57.68,rx:6,fill:colors.opening,
+  "fill-opacity":.2,stroke:colors.opening,"stroke-width":.4});
+for(const [x,y] of [[3.07,3.42],[3.07,58.32],[104.97,58.32]]){
+  circle(screen,x,y,4,colors.shell);circle(screen,x,y,2.35,colors.dimension);
+}
+line(screen,102.97,1.42,106.97,5.42);line(screen,102.97,5.42,106.97,1.42);
+label(screen,68,-13,"右上支撑删除");
+dimH(screen,3.07,104.97,-7,3.42,"孔距101.9");
+dimH(screen,0,108.04,73,61.74,"PCB宽108.04");
+dimH(screen,9,94.52,87,59.71,"窗口宽85.52");
+dimV(screen,0,61.74,-9,0,"PCB高61.74");
+dimV(screen,3.42,58.32,114,104.97,"孔距54.9");
+dimV(screen,2.03,59.71,125,94.52,"窗口高57.68");
+label(screen,18,25,"窗口R6 / 中心左移2.26");
+label(screen,18,36,"有效显示83.52×55.68");
+label(screen,18,47,"PCB厚2 + 屏体3 + 前隙1");
+label(screen,8,97,"沿原80°斜面基准安装，屏幕位置不变");
+const screenStack=document.querySelector("#screen-stack-detail");
+rect(screenStack,0,0,36,3,colors.shell);
+rect(screenStack,0,3,36,1,"#e8a12e");
+rect(screenStack,0,4,36,3,colors.opening);
+rect(screenStack,0,7,36,2,colors.pcb);
+dimV(screenStack,3,9,-9,0,"内面到承托面6");
+dimV(screenStack,4,9,46,36,"模组总厚5");
+for(const [y,end,text] of [[1.5,0,"盖板3"],[3.5,5,"保护膜空间≥1"],
+  [5.5,10,"屏体3"],[8,15,"PCB2"]]){
+  line(screenStack,36,y,54,y);line(screenStack,54,y,59,end);
+  label(screenStack,61,end+1,text);
+}
+label(screenStack,1,-5,"盖板外面 n=0");
+label(screenStack,1,19,"PCB承托面 n=−9");
+label(screenStack,-9,29,"沿80°屏幕法线剖面 / 数字单位mm");
+
+const speaker=document.querySelector("#speaker-detail");
+rect(speaker,0,0,27.5,27.5,"#8e5dbb");
+node(speaker,"circle",{cx:13.75,cy:13.75,r:13.75,fill:"none",
+  stroke:"#8e5dbb","stroke-width":.25,"stroke-dasharray":"1 .7"});
+circle(speaker,13.75,13.75,11.75,colors.opening);
+for(const x of [2.25,25.25])for(const y of [2.25,25.25]){
+  circle(speaker,x,y,3.7,colors.shell);circle(speaker,x,y,1.5,colors.dimension);
+}
+dimH(speaker,2.25,25.25,-8,2.25,"孔距23");
+dimV(speaker,2.25,25.25,-9,2.25,"孔距23");
+dimH(speaker,0,27.5,36,27.5,"方腔27.5±0.2");
+dimV(speaker,0,27.5,37,27.5,"方腔27.5");
+label(speaker,-1,44,"四孔Ø3 / 四柱Ø7.4");
+rect(speaker,56,0,27.5,3,colors.shell);
+rect(speaker,65.3,3,7.4,10,colors.shell);
+rect(speaker,56,13,27.5,13,"#8e5dbb");
+rect(speaker,66.65,7.8,4.7,5.2,"white");
+rect(speaker,67.6,4.2,2.8,3.6,"white");
+line(speaker,69,-3,69,29,true);
+dimV(speaker,0,3,89,83.5,"盖厚3");
+dimV(speaker,3,13,100,72.7,"柱长10");
+dimV(speaker,13,26,89,83.5,"方腔厚13");
+label(speaker,55,36,"旧预览 / 未定稿");
+label(speaker,49,45,"旧M2.5×20 / 非定稿");
+label(speaker,0,56,"嵌件孔Ø4.7深5.2 / 尾孔深8.8 / 留实体底1.2");
+
+const typec=document.querySelector("#typec-detail");
+rect(typec,6,-10,48,20,colors.shell);
+for(const x of [20,40]){
+  circle(typec,x,0,6,colors.opening);circle(typec,x,0,6.9,colors.dimension);
+  node(typec,"circle",{cx:x,cy:0,r:14/(2*Math.cos(Math.PI/6)),fill:"none",
+    stroke:colors.pcb,"stroke-width":.25,"stroke-dasharray":"1 .7"});
+  line(typec,x,-10,x,10,true);
+}
+dimH(typec,20,40,-14,0,"中心距20");
+dimH(typec,14,26,19,0,"开孔Ø12");
+label(typec,3,30,"中心X=28 / 48");
+label(typec,3,38,"中心Z≈75.573");
+label(typec,3,46,"后壁Y=136");
+rect(typec,65,-9,2.4,18,colors.shell);
+rect(typec,65,-5.25,14.5,10.5,colors.opening);
+rect(typec,63,-6.9,2,13.8,colors.dimension);
+rect(typec,67.4,-8.0829,3,16.1658,colors.pcb);
+dimH(typec,65,79.5,16,5.25,"螺纹长14.5");
+dimV(typec,-5.25,5.25,89,79.5,"螺纹Ø10.5");
+label(typec,59,28,"外头Ø13.8×2");
+label(typec,59,36,"壁2.4 / 螺母厚3");
+label(typec,59,44,"螺母包络Ø16.17");
+const ears=document.querySelector("#speaker-ear-detail");
+rect(ears,10,0,25,13,colors.pcb);
+rect(ears,4,10,6,1.5,colors.pcb);
+rect(ears,35,10,6,1.5,colors.pcb);
+rect(ears,0,13,45,3,colors.shell);
+rect(ears,4,11.5,6,1.5,colors.shell);
+rect(ears,35,11.5,6,1.5,colors.shell);
+rect(ears,6.7,10,.6,1.5,"white");
+rect(ears,6.8,9.8,.4,2.7,colors.dimension);
+rect(ears,6,9.6,2,.4,colors.dimension);
+dimV(ears,0,13,-7,10,"本体整体13");
+dimV(ears,10,11.5,51,41,"耳厚待测");
+dimV(ears,11.5,13,65,41,"柱高待定");
+dimV(ears,0,10,81,41,"耳至背面待测");
+label(ears,12,-4,"背面 / 朝壳内");
+label(ears,10,22,"正面朝下 / 贴盖板内面");
+label(ears,-7,30,"耳位置和厚度为示意，不按比例加工");
+label(ears,-7,38,"柱高 + 耳厚 + 耳至背面距离 = 13");
+label(ears,-7,46,"螺母柱不穿耳板；螺丝只穿耳板后拧入柱");
+label(ears,-7,54,"两项耳板尺寸未测，不能确定柱高与螺丝长度");
 const first=new Map();
 for(const svg of [topSvg,side,slope])svg.addEventListener("click",e=>{
   const point=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());

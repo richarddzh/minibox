@@ -114,7 +114,8 @@ if (stage == "all" || stage == "strength")
                         cylinder(d=6.8,h=insert_depth-2*eps);
                         translate([0,0,-eps]) cylinder(d=4.8,h=insert_depth);
                     }
-                translate([x,11,11.62]) cylinder(d=4.7,h=7.56);
+                translate([x,11,floor_thickness+eps])
+                    cylinder(d=4.7,h=deck_height-panel_thickness-screw_tip_depth-floor_thickness-2*eps);
             }
         }
         shell_mesh();

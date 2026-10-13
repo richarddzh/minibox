@@ -16,6 +16,8 @@ a{color:#17649b}.legend{font-size:14px;color:#506079}.route{margin-top:18px}
 </style>
 <h1>为什么“装好不碰”，但“水平直落会卡住”？</h1>
 <p>板子最终在低处；装入时必须先经过高处的窄口。<strong>终点无干涉，不代表中途路径无干涉。</strong></p>
+<p>新版操作台顶面Z=21.6，麦克风圆罩单独升到Z=31；后平台和屏幕支撑位置不变。
+前合盖孔尾孔底降到Z=9.8，仍保留孔周围与孔下方实体。</p>
 <p><a href="fit-review.html">返回外壳尺寸与渲染图</a> · <a href="module-dimensions.md">完整尺寸与装配说明</a></p>
 <div class="grid">
 <section>
@@ -129,7 +131,9 @@ function draw(){
  poly(s,points,t>=4?green:blue);label(s,14,5,`倾角 ${roll.toFixed(1)}° / 中心底面 Z=${z.toFixed(1)}`);
  label(s,16,200,"从前方看：左侧抬高，右侧先下");
  const v=document.querySelector("#route-side");v.replaceChildren();
- poly(v,[[0,190],[136,190],[136,190-height],[52+122*Math.cos(80*Math.PI/180),190-height],[52,159],[0,159]],grey,.2);
+ const transition=52-(31-21.6)/Math.tan(80*Math.PI/180);
+ poly(v,[[0,190],[136,190],[136,190-height],[52+122*Math.cos(80*Math.PI/180),190-height],
+   [transition,190-21.6],[0,190-21.6]],grey,.2);
  line(v,136,190,136,190-height);line(v,0,186,136,186);
  const half=47.25*Math.sin(a);
  rect(v,12+dy,190-z-half-1.6*Math.cos(a),117,2*half+1.6*Math.cos(a),t>=4?green:blue,.8);

@@ -15,7 +15,8 @@ $fn = 32;
 case_width = 120;
 case_depth = 136;
 deck_depth = 52;
-deck_height = 31;
+deck_height = 21.6; // 11 mm above the carrier PCB top
+slope_base_height = 31; // Keep the screen, speaker and switch at their existing positions
 slope_angle = 80;
 slope_length = 122;
 wall = 2.4;
@@ -25,6 +26,7 @@ joint_clearance = 0.5;
 lid_corner_radius = 6;
 support_lip_width = 1.5;
 support_lip_thickness = 1.5;
+minimum_print_wall = 1.2;
 
 /* [Rounded corners] */
 bottom_radius = 12;
@@ -65,7 +67,7 @@ joystick_motion_diameter = 34; // Acceptance envelope for the purchased cap over
 joystick_body_height = 12.4;
 joystick_total_height = 30; // Acceptance envelope including the unselected thumb cap
 keycap_size = 18; // PCB acceptance limit, not an identified keycap
-keycap_lateral_clearance = 0.6;
+keycap_lateral_clearance = 1;
 keycap_vertical_clearance = 1;
 key_travel = 4.3; // Rated 4 mm travel plus 0.3 mm design allowance
 key_window_size = keycap_size + 2 * keycap_lateral_clearance;
@@ -116,15 +118,24 @@ speaker_size = [27.5, 27.5, 13];
 speaker_tolerance = 0.2;
 speaker_hole_spacing = [23, 23];
 speaker_grille_diameter = 23.5;
-speaker_grille_hole_diameter = 2.4; // Hexagonal vent width across flats
-speaker_grille_pitch = 3.6;
+speaker_grille_hole_diameter = 3.8;
+speaker_grille_pitch = 6;
+speaker_grille_row_pitch = 4.5;
+speaker_grille_row_counts = [2, 3, 4, 3, 2];
 speaker_center = [26, 30];
-speaker_post_depth = 10;
-speaker_post_diameter = 7.4;
-speaker_screw_length = 20;
-speaker_screw_head_depth = 2;
-microphone_hole_diameter = 5;
-microphone_diameter = 19.5;
+speaker_ear_thickness = 3.2; // Proportional drawing estimate, not a dimensioned specification
+speaker_ear_back_distance = 6.6;
+speaker_post_depth = speaker_size[2] - speaker_ear_thickness - speaker_ear_back_distance;
+speaker_post_diameter = 4.5; // Metal round nut, not a printed pillar
+speaker_nut_length = 5;
+speaker_nut_embed_depth = speaker_nut_length - speaker_post_depth;
+speaker_screw_length = 6;
+speaker_screw_head_diameter = 5;
+speaker_screw_head_depth = 2.5;
+microphone_hole_diameter = 6;
+microphone_diameter = 14;
+microphone_cover_inner_diameter = 16;
+microphone_cover_top = 31;
 
 /* [Rear panel Type-C sockets] */
 typec_hole_diameter = 12;
@@ -146,7 +157,8 @@ cable_opening_z = 10;
 eps = 0.02;
 screen_top_y = deck_depth + cos(slope_angle) * slope_length;
 rear_ledge = case_depth - screen_top_y;
-rear_height = deck_height + sin(slope_angle) * slope_length;
+rear_height = slope_base_height + sin(slope_angle) * slope_length;
+deck_transition_y = deck_depth - (slope_base_height - deck_height) / tan(slope_angle);
 typec_center_z = rear_height / 2;
 // Conservative envelope if the quoted hex size is across flats rather than corners.
 typec_nut_envelope = typec_nut_outer_size / cos(30);
@@ -180,17 +192,16 @@ joystick_center = pcb_point([16.8, 95.5]);
 microphone_center = pcb_point([44.455, 90.25]);
 screen_mounts = [[-1, -1], [-1, 1], [1, -1]];
 speaker_grille_centers = [
-    for (row = [-3 : 3], column = [-3 : 3])
-        let(p = [speaker_grille_pitch * (column + (abs(row) % 2) / 2),
-                 speaker_grille_pitch * row * sqrt(3) / 2])
-            if (norm(p) <= (speaker_grille_diameter - speaker_grille_hole_diameter / cos(30)) / 2) p
+    for (row = [0 : 4], column = [0 : speaker_grille_row_counts[row] - 1])
+        [speaker_grille_pitch * (column - (speaker_grille_row_counts[row] - 1) / 2),
+         speaker_grille_row_pitch * (row - 2)]
 ];
 shell_hole_x = [9, case_width - 9];
 shell_hole_y = [11, case_depth - 11];
 shell_head_diameter = lid_counterbore_diameter;
 profile_vertices = [
     [0, 0], [case_depth, 0], [case_depth, rear_height],
-    [screen_top_y, rear_height], [deck_depth, deck_height], [0, deck_height]
+    [screen_top_y, rear_height], [deck_transition_y, deck_height], [0, deck_height]
 ];
 profile_radii = [
     bottom_radius, bottom_radius, rim_radius,
@@ -253,8 +264,9 @@ function inner_path(path, depth) = [
     for (i = [0 : len(path) - 1])
         let(n1 = inward_normal(path[max(1, i)] - path[max(0, i - 1)]),
             n2 = inward_normal(path[min(len(path) - 1, i + 1)] -
-                               path[min(len(path) - 2, i)]))
-        path[i] + depth * (n1 + n2) / (1 + n1 * n2)
+                               path[min(len(path) - 2, i)]),
+            p = path[i] + depth * (n1 + n2) / (1 + n1 * n2))
+        [round(p[0] * 1000000) / 1000000, round(p[1] * 1000000) / 1000000]
 ];
 
 // Two front screws and two top/rear screws, all vertical.
@@ -286,7 +298,7 @@ assert(switch_body_depth > 0 && switch_body_diameter > 0,
        "Switch envelope dimensions must be positive.");
 assert(switch_outer_diameter > switch_hole_diameter && switch_outer_height > 0,
        "The switch flange must overlap its bore.");
-assert(deck_height + sin(slope_angle) * (switch_center[1] - switch_outer_diameter / 2) -
+assert(slope_base_height + sin(slope_angle) * (switch_center[1] - switch_outer_diameter / 2) -
        (carrier_top_z + keycap_top_height) >= 8,
        "The external rocker sweep needs at least 8 mm vertically above released keycaps.");
 assert(joystick_center[0] < microphone_center[0] &&
@@ -299,16 +311,29 @@ for (port = [[speaker_center, speaker_size[1] + 2 * speaker_tolerance]])
 assert(speaker_center[0] + speaker_size[0] / 2 + speaker_tolerance + module_clearance <
        switch_center[0] - switch_body_diameter / 2,
        "Speaker and switch must not overlap.");
-assert(speaker_post_depth >= screw_tip_depth + 1.2 &&
-       speaker_screw_length - speaker_size[2] >= insert_depth &&
-       speaker_screw_length - speaker_size[2] <= screw_tip_depth,
-       "Speaker posts and screws must retain blind floors and nut engagement.");
-assert(speaker_post_diameter - insert_diameter >= 2.6, "Speaker nut pockets need >=1.3 mm walls.");
-assert(norm(speaker_hole_spacing / 2) - (speaker_post_diameter + 0.4) / 2 >
-       speaker_grille_diameter / 2,
-       "Speaker posts must not obstruct the sound opening.");
+assert(speaker_post_depth > 0 && speaker_nut_embed_depth > 0 &&
+       panel_thickness - speaker_nut_embed_depth >= minimum_print_wall - eps,
+       "Embedded speaker nuts must retain the minimum printed blind floor.");
+assert(speaker_post_diameter > 3 && speaker_post_diameter < insert_diameter &&
+       speaker_screw_length - speaker_ear_thickness >= 2 &&
+       speaker_screw_length - speaker_ear_thickness <= speaker_nut_length - 0.3,
+       "Speaker nuts must bear on the ears; screws must only engage part of the nut.");
+for (dx = [-speaker_hole_spacing[0] / 2, speaker_hole_spacing[0] / 2],
+     dy = [-speaker_hole_spacing[1] / 2, speaker_hole_spacing[1] / 2],
+     p = speaker_grille_centers)
+    assert(norm([dx,dy] - p) >
+           (insert_diameter + speaker_grille_hole_diameter) / 2,
+           "Speaker posts must not obstruct any grille hole.");
 assert(speaker_grille_pitch - speaker_grille_hole_diameter >= 1.2 - eps &&
        len(speaker_grille_centers) > 0, "The grille needs at least 1.2 mm webs.");
+for (i = [0 : len(speaker_grille_centers) - 2],
+     j = [i + 1 : len(speaker_grille_centers) - 1])
+    assert(norm(speaker_grille_centers[i] - speaker_grille_centers[j]) -
+           speaker_grille_hole_diameter >= 1.2 - eps,
+           "Staggered grille rows need at least 1.2 mm webs.");
+for (p = speaker_grille_centers)
+    assert(norm(p) + speaker_grille_hole_diameter / 2 <= speaker_grille_diameter / 2,
+           "Every grille hole must stay inside the circular area.");
 assert(typec_hole_diameter > typec_thread_diameter &&
        typec_head_diameter > typec_hole_diameter,
        "Type-C thread needs clearance and the flange must overlap the panel hole.");
@@ -325,6 +350,15 @@ assert(typec_center_x < case_width / 2 &&
 assert(lid_corner_radius > joint_clearance && support_lip_width > joint_clearance,
        "The rounded opening and support lip must retain lid clearance and bearing overlap.");
 assert(support_lip_thickness >= 1.5, "Support lip needs sufficient printing thickness.");
+assert(panel_thickness >= minimum_print_wall &&
+       joystick_center[0] - joystick_window_diameter / 2 - wall - joint_clearance >=
+           minimum_print_wall &&
+       case_width - wall - joint_clearance -
+           (keyboard_row_bounds[0][0] + keyboard_row_bounds[0][2] + minimum_print_wall) >=
+           minimum_print_wall &&
+       microphone_center[0] - microphone_cover_inner_diameter / 2 -
+           joystick_center[0] - joystick_window_diameter / 2 >= minimum_print_wall,
+       "Control openings must retain the minimum printed wall and side webs.");
 assert(lid_counterbore_diameter > lid_screw_diameter &&
        lid_counterbore_depth > 0 && panel_thickness - lid_counterbore_depth >= 1.6,
        "Counterbores must leave at least 1.6 mm of lid under the screw head.");
@@ -346,12 +380,16 @@ assert(joystick_window_diameter > 0 &&
        joystick_center[0] - joystick_window_diameter / 2 > wall + joint_clearance &&
        joystick_center[1] - joystick_window_diameter / 2 > rim_radius + joint_clearance,
        "Joystick circular opening overlaps the lid boundary.");
-assert(keycap_lateral_clearance >= 0.6 && keycap_vertical_clearance >= 1 && key_travel >= 4,
-       "Keycaps need full-travel clearance, >=0.6 mm laterally and >=1 mm vertically.");
+assert(keycap_lateral_clearance >= 1 && keycap_vertical_clearance >= 1 && key_travel >= 4,
+       "Keycaps need full-travel clearance, >=1 mm laterally and >=1 mm vertically.");
 assert(keyboard_row_bounds[0][1] < keyboard_row_bounds[1][1] + keyboard_row_bounds[1][3],
        "The two staggered row openings must overlap; do not leave a separator or point contact.");
-assert(carrier_top_z + microphone_stack_height + module_clearance <= deck_height - panel_thickness,
-       "The microphone/socket stack hits the lid.");
+assert(microphone_cover_inner_diameter >= microphone_diameter + 2 * module_clearance &&
+       microphone_hole_diameter < microphone_cover_inner_diameter &&
+       microphone_cover_top > deck_height &&
+       carrier_top_z + microphone_stack_height + module_clearance <=
+           microphone_cover_top - panel_thickness,
+       "The microphone needs a raised cover with PCB and stack clearance.");
 assert(screen_front_clearance >= module_clearance, "Insufficient screen-to-lid clearance.");
 assert(screen_pcb_thickness > 0 && screen_stack_above_pcb > 0,
        "Screen PCB and display thicknesses must be positive.");
@@ -523,7 +561,7 @@ module support_lip() {
 
 module on_slope(x, along, normal = 0) {
     translate([x, deck_depth + cos(slope_angle) * along,
-               deck_height + sin(slope_angle) * along])
+               slope_base_height + sin(slope_angle) * along])
         rotate([slope_angle, 0, 0])
             translate([0, 0, normal]) children();
 }
@@ -576,8 +614,11 @@ module shell_mount_columns() {
                             polygon([for (p = profile)
                                 [x < case_width / 2 ? p[0] : -p[0], p[1]]]);
             } else
-                translate([bounds[0], bounds[1], floor_thickness - eps])
-                    cube([width, bounds[3] - bounds[1], top - floor_thickness + eps]);
+                // Match the fractional roof Z directly, without quantizing root + height twice.
+                translate([bounds[0], bounds[1], 0])
+                    extrude_along_y(bounds[3] - bounds[1])
+                        polygon([[0, floor_thickness - eps], [width, floor_thickness - eps],
+                                 [width, top], [0, top]]);
         }
 }
 
@@ -599,7 +640,7 @@ module screen_tabs() {
             base_normal = screen_mount_normal - screen_tab_depth;
             reach = (side < 0 ? x : case_width - x) + module_boss_diameter / 2 - wall;
             base_y = deck_depth + cos(slope_angle) * along - sin(slope_angle) * base_normal;
-            base_z = deck_height + sin(slope_angle) * along + cos(slope_angle) * base_normal;
+            base_z = slope_base_height + sin(slope_angle) * along + cos(slope_angle) * base_normal;
             front_y = deck_depth + cos(slope_angle) * along -
                       sin(slope_angle) * screen_mount_normal -
                       module_boss_diameter / 2 * cos(slope_angle);
@@ -658,27 +699,57 @@ module speaker_fasteners() {
                      -panel_thickness - speaker_post_depth) children();
 }
 
-module speaker_posts() {
+module speaker_posts(inset = 0) {
     speaker_fasteners()
-        cylinder(d1 = speaker_post_diameter, d2 = speaker_post_diameter + 0.4,
-                 h = speaker_post_depth + 1.5, $fn = 24);
+        translate([0,0,inset])
+            difference() {
+                cylinder(d = speaker_post_diameter - 2 * inset,
+                         h = speaker_nut_length - 2 * inset);
+                translate([0,0,-eps])
+                    cylinder(d = 2.5 + 2 * inset,
+                             h = speaker_nut_length + 2 * eps);
+            }
+}
+
+module speaker_nut_pockets() {
+    speaker_fasteners()
+        translate([0,0,speaker_post_depth - 1])
+            cylinder(d = insert_diameter, h = speaker_nut_embed_depth + 1);
+}
+
+module speaker_body_envelope(inset = 0) {
+    rear = -panel_thickness - speaker_size[2] - speaker_tolerance;
+    ear_front = -panel_thickness - speaker_post_depth;
+    ear_back = ear_front - speaker_ear_thickness;
+    size = speaker_size[0] + 2 * (speaker_tolerance - inset);
+    difference() {
+        union() {
+            on_slope(speaker_center[0] - size / 2,
+                     speaker_center[1] - size / 2, rear + inset)
+                cube([size, size, ear_front - rear - 2 * inset]);
+            on_slope(speaker_center[0], speaker_center[1], ear_front + inset)
+                cylinder(d = size, h = speaker_post_depth - 2 * inset);
+        }
+        // Rear corner wells expose the front ears; only the ear plate has a 3 mm screw bore.
+        speaker_fasteners() {
+            translate([0,0,rear - ear_front - 1])
+                cylinder(d = 6 + 2 * inset, h = ear_back - rear + 1 + inset);
+            translate([0,0,-speaker_ear_thickness - eps])
+                cylinder(d = 3 + 2 * inset, h = speaker_ear_thickness + 2 * eps);
+        }
+    }
 }
 
 module speaker_envelope(inset = 0) {
-    on_slope(speaker_center[0] - speaker_size[0] / 2 - speaker_tolerance + inset,
-             speaker_center[1] - speaker_size[1] / 2 - speaker_tolerance + inset,
-             -panel_thickness - speaker_post_depth - speaker_size[2] -
-                 speaker_tolerance + inset)
-        cube([speaker_size[0] + 2 * (speaker_tolerance - inset),
-              speaker_size[1] + 2 * (speaker_tolerance - inset),
-              speaker_size[2] + speaker_tolerance - 2 * inset]);
+    speaker_body_envelope(inset);
     speaker_fasteners()
-        translate([0, 0, -speaker_size[2] - speaker_screw_head_depth + inset])
-            cylinder(d = 5 - 2 * inset, h = speaker_screw_head_depth - 2 * inset);
+        translate([0, 0, -speaker_ear_thickness - speaker_screw_head_depth + inset])
+            cylinder(d = speaker_screw_head_diameter - 2 * inset,
+                     h = speaker_screw_head_depth - 2 * inset);
     // Lead exits to the right; reserve its first 10 mm before routing to the amplifier.
     on_slope(speaker_center[0] + speaker_size[0] / 2,
              speaker_center[1] - 3 + inset,
-             -panel_thickness - speaker_post_depth - speaker_size[2] + inset)
+             -panel_thickness - speaker_size[2] - speaker_tolerance + inset)
         cube([10, 6 - 2 * inset, 6 - 2 * inset]);
 }
 
@@ -727,12 +798,24 @@ module keyboard_opening_profile() {
             translate([row[0], row[1]]) square([row[2], row[3]]);
 }
 
+module control_slope_relief() {
+    // Perpendicular rear edges retain the full panel thickness instead of sharp curved fins.
+    for (bounds = [[joystick_center[0] - joystick_motion_diameter / 2,
+                    joystick_motion_diameter],
+                   [keyboard_row_bounds[0][0] - minimum_print_wall,
+                    keyboard_row_bounds[0][2] + 2 * minimum_print_wall]])
+        on_slope(bounds[0], -14, -panel_thickness - 1)
+            cube([bounds[1], 26, panel_thickness + 1 + bend_radius]);
+}
+
 module lid_openings() {
         for (p = speaker_grille_centers)
-            on_slope(speaker_center[0] + p[0], speaker_center[1] + p[1], -panel_thickness - eps)
-                rotate([0,0,30])
-                    cylinder(d = speaker_grille_hole_diameter / cos(30),
-                             h = panel_thickness + 2 * eps, $fn = 6);
+            // Keep cutter cap diagonals away from the panel faces to avoid micron-scale slivers.
+            on_slope(speaker_center[0] + p[0], speaker_center[1] + p[1], -panel_thickness - 1)
+                // Mirror circle phases and avoid alignment with the panel's long facet diagonals.
+                rotate([0,0,sign(p[0]) * (3 +
+                       (abs(p[0]) + abs(p[1])) / speaker_grille_pitch * 180 / $fn / 2)])
+                    cylinder(d = speaker_grille_hole_diameter, h = panel_thickness + 2);
         on_slope(switch_center[0], switch_center[1], -panel_thickness - eps)
             cylinder(d = switch_hole_diameter, h = panel_thickness + 2 * eps);
         translate([0, 0, deck_height - panel_thickness - eps])
@@ -741,11 +824,16 @@ module lid_openings() {
                 keyboard_opening_profile();
         translate([microphone_center[0], microphone_center[1],
                    deck_height - panel_thickness - eps])
+            cylinder(d = microphone_cover_inner_diameter,
+                     h = microphone_cover_top - deck_height + eps);
+        translate([microphone_center[0], microphone_center[1],
+                   microphone_cover_top - panel_thickness - eps])
             cylinder(d = microphone_hole_diameter, h = panel_thickness + 2 * eps);
         translate([joystick_center[0], joystick_center[1],
                    deck_height - panel_thickness - eps])
             cylinder(d = joystick_window_diameter,
                      h = rear_height - deck_height + panel_thickness + 2 * eps);
+        control_slope_relief();
         on_slope(tft_center[0] + screen_window_offset[0] -
                      (tft_view[0] + tft_window_clearance) / 2,
                  tft_center[1] + screen_window_offset[1] -
@@ -762,14 +850,23 @@ module lid_openings() {
                 cylinder(d = lid_counterbore_diameter, h = lid_counterbore_depth + eps);
 }
 
+module microphone_cover() {
+    radius = microphone_cover_inner_diameter / 2 + wall;
+    translate([microphone_center[0], microphone_center[1], 0])
+        rotate_extrude(convexity = 10)
+            polygon([[0, deck_height - panel_thickness],
+                     [radius, deck_height - panel_thickness],
+                     [radius, microphone_cover_top], [0, microphone_cover_top]]);
+}
+
 module lid() {
     difference() {
         union() {
             lid_blank();
-            speaker_posts();
+            microphone_cover();
         }
         lid_openings();
-        speaker_fasteners() rotate([180, 0, 0]) insert_socket();
+        speaker_nut_pockets();
     }
 }
 
@@ -931,8 +1028,10 @@ if (part == "bottom") {
         rotate([-90, 0, 0]) printable_lid();
 } else if (part == "assembly" || part == "exploded") {
     color([0.82, 0.82, 0.84]) bottom_shell();
-    translate([0, 0, part == "exploded" ? explode_height : 0])
+    translate([0, 0, part == "exploded" ? explode_height : 0]) {
         color([0.95, 0.68, 0.2]) lid();
+        color([0.75,0.55,0.16]) speaker_posts();
+    }
     if (show_modules) {
         %module_envelopes();
         %typec_envelopes();

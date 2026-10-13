@@ -19,7 +19,7 @@ SOURCE = Path(__file__).resolve().parents[1] / "minibox-enclosure.scad"
 CHECKS = Path(__file__).with_name("carrier-clearance.scad")
 INSTALLATION_CHECKS = Path(__file__).with_name("installation-clearance.scad")
 BOARD = SOURCE.parents[1] / "kicad" / "minibox-carrier.kicad_pcb"
-EULER = {"bottom": -2, "lid": -78, "lid-print": -78}
+EULER = {"bottom": -2, "lid": -44, "lid-print": -44}
 
 
 def render(executable, source, output, definitions=(), empty=False):
@@ -281,8 +281,11 @@ def main():
     parser.add_argument("--openscad", default=shutil.which("openscad"))
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--checks-only", action="store_true")
+    parser.add_argument("--export-only", action="store_true",
+                        help="Skip assembly/insertion checks; keep all printable-mesh checks.")
     parser.add_argument("--3mf-only", action="store_true", dest="three_mf_only")
     args = parser.parse_args()
+    assert not (args.checks_only and args.export_only), "Choose checks-only or export-only."
     assert args.openscad, "Pass --openscad with the path to openscad.com."
     args.output.mkdir(parents=True, exist_ok=True)
     sources = (SOURCE, CHECKS, INSTALLATION_CHECKS, BOARD)
@@ -290,7 +293,9 @@ def main():
     check_board()
     with TemporaryDirectory(prefix="minibox-models-") as temporary:
         work = Path(temporary)
-        if not args.three_mf_only:
+        if args.export_only:
+            print("Export-only: skipping assembly/insertion checks; printable-mesh checks remain enabled.", flush=True)
+        if not args.three_mf_only and not args.export_only:
             check_clearances(args.openscad, work)
         if args.checks_only:
             bottom = work / "bottom.stl"
@@ -307,7 +312,7 @@ def main():
             else:
                 render(args.openscad, SOURCE, path, definitions)
             measurements[part] = mesh_info(path, euler)
-            if part == "bottom" and not args.three_mf_only:
+            if part == "bottom" and not args.three_mf_only and not args.export_only:
                 check_installation(args.openscad, work, path)
             if part != "lid-print":
                 dest = work / f"{part}.3mf"
@@ -335,7 +340,7 @@ def main():
         for path in work.iterdir():
             if path.suffix in extensions and path.stem != "lid-print":
                 shutil.copy2(path, args.output / path.name)
-    print("PASS: two-part carrier enclosure exported. Purchased caps and unknown SKU envelopes still need physical fit checks.")
+    print("PASS: two-part enclosure exported. Proportional speaker-ear dimensions and unselected hardware still need first-sample fit checks.")
 
 
 if __name__ == "__main__":
