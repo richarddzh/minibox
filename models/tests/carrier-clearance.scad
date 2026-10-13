@@ -257,6 +257,15 @@ difference() {
     microphone_cover();
 }
 // The rear control edges are perpendicular to the slope and retain the complete panel.
+// The flat-to-curved junction must not retain the old cutter's tapered top membrane.
+intersection() {
+    lid();
+    for (bounds = control_relief_bounds)
+        translate([bounds[0] + eps, control_relief_front_y + eps,
+                   deck_height - panel_thickness + eps])
+            cube([bounds[1] - 2 * eps, minimum_print_wall - 2 * eps,
+                  panel_thickness - 2 * eps]);
+}
 intersection() {
     lid();
     for (bounds = [[7.65,33.8],[67.5,41.25]])

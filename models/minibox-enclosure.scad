@@ -232,6 +232,19 @@ function corner_angle(i) =
     acos(max(-1, min(1, u * v)));
 function tangent_length(i) = profile_radii[i] / tan(corner_angle(i) / 2);
 
+control_relief_front_y = deck_transition_y - tangent_length(4) - minimum_print_wall;
+control_relief_bounds = [
+    [joystick_center[0] - joystick_motion_diameter / 2, joystick_motion_diameter],
+    [keyboard_row_bounds[0][0] - minimum_print_wall,
+     keyboard_row_bounds[0][2] + 2 * minimum_print_wall]
+];
+assert(control_relief_front_y > joystick_center[1] &&
+       control_relief_front_y < joystick_center[1] + joystick_window_diameter / 2 &&
+       joystick_motion_diameter / 2 -
+           sqrt(pow(joystick_window_diameter / 2, 2) -
+                pow(control_relief_front_y - joystick_center[1], 2)) >= minimum_print_wall,
+       "The joystick relief must retain printable shoulders at its circular junction.");
+
 function corner_points(i) =
     let(p = profile_vertices[i],
         u = unit(profile_vertices[(i + 5) % 6] - p),
@@ -799,13 +812,14 @@ module keyboard_opening_profile() {
 }
 
 module control_slope_relief() {
-    // Perpendicular rear edges retain the full panel thickness instead of sharp curved fins.
-    for (bounds = [[joystick_center[0] - joystick_motion_diameter / 2,
-                    joystick_motion_diameter],
-                   [keyboard_row_bounds[0][0] - minimum_print_wall,
-                    keyboard_row_bounds[0][2] + 2 * minimum_print_wall]])
-        on_slope(bounds[0], -14, -panel_thickness - 1)
-            cube([bounds[1], 26, panel_thickness + 1 + bend_radius]);
+    // Clip a through-cutter at the flat deck; its old sloped cap left a tapered membrane.
+    intersection() {
+        for (bounds = control_relief_bounds)
+            on_slope(bounds[0], -14, -panel_thickness - 1)
+                cube([bounds[1], 26, 2 * panel_thickness + 1 + bend_radius]);
+        translate([0, control_relief_front_y, 0])
+            cube([case_width, case_depth - control_relief_front_y, rear_height + eps]);
+    }
 }
 
 module lid_openings() {

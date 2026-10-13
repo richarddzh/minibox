@@ -17,7 +17,8 @@ VIEWS = {
     "bottom": {"isometric": (55, 0, 35), "top": (0, 0, 0),
                "rear": (90, 0, 180), "side": (90, 0, 90)},
     "lid": {"isometric": (55, 0, 35), "top": (0, 0, 0), "front": (90, 0, 0),
-            "inside": (135, 0, 215), "side": (90, 0, 90)},
+            "inside": (135, 0, 215), "side": (90, 0, 90),
+            "controls": (55, 0, 20), "controls-inside": (125, 0, 200)},
     "assembly": {"isometric": (55, 0, 35), "top": (0, 0, 0),
                  "front": (90, 0, 0), "side": (90, 0, 90)},
 }
@@ -77,11 +78,13 @@ translate(-preview_center) {{
             part, view, rotation = job
             name = f"{part}-{view}.png"
             image = work / name
-            camera = ",".join(map(str, (0, 0, 0, *rotation, distances[part])))
+            detail = view.startswith("controls")
+            center = [60, 40, 25] if detail else centers[part]
+            camera = ",".join(map(str, (0, 0, 0, *rotation, 205 if detail else distances[part])))
             command = [str(args.openscad), "-o", str(image), "--imgsize=1200,900",
                        "--projection=o", "--camera", camera,
                        "--colorscheme=Tomorrow", "-D", 'part="none"', "-D", f'preview_part="{part}"',
-                       "-D", f"preview_center={json.dumps(centers[part])}", str(source)]
+                       "-D", f"preview_center={json.dumps(center)}", str(source)]
             result = subprocess.run(command, capture_output=True, text=True,
                                     timeout=300, env=environment)
             log = result.stdout + result.stderr

@@ -25,7 +25,7 @@ button{padding:6px 12px}a{color:#1265a8}
 麦克风圆罩顶Z=31、内径Ø16、声孔Ø6。屏幕、开关、后平台及PCB位置不变；
 喇叭按前置耳重定位，正面贴近盖板内面。
 点击下方三个总览视图中的两个点可量取该投影平面距离。</p>
-<nav><a href="#details">尺寸详图</a><a href="#top">位置总览</a><a href="#side">叠高与开关外侧</a><a href="pcb-installation.html">PCB装入路径示意</a><a href="#files">打印文件</a><a href="#gallery">13 张多视角渲染</a><a href="../hardware_references/enclosure-hardware-specs.md">归档硬件规格</a></nav>
+<nav><a href="#details">尺寸详图</a><a href="#top">位置总览</a><a href="#side">叠高与开关外侧</a><a href="pcb-installation.html">PCB装入路径示意</a><a href="#files">打印文件</a><a href="#gallery">15 张多视角渲染（含开孔放大）</a><a href="../hardware_references/enclosure-hardware-specs.md">归档硬件规格</a></nav>
 <p class="note">这是包络复核图，不是精确元件 CAD。侧视图叠加了不同 X 截面的投影，投影重叠不一定代表三维碰撞。
 最终数字结论以 <code>tests\carrier-clearance.scad</code> 为准。开关、插接模块和功放上层端子仍需实物复核。</p>
 <p class="note"><strong>喇叭耳板尺寸按用户要求从图量取：</strong>以13 mm总厚度为标尺，
@@ -44,10 +44,13 @@ button{padding:6px 12px}a{color:#1265a8}
 同排节距19.05，因此20宽开口会重叠0.95，不保留细梁；两排也重叠0.95。
 外包47.15×39.05不能代替阶梯形开孔。PCB孔位与轴体位置不动。</p></section>
 <section><h2>操作开口薄边清除：后缘保留完整面板</h2>
-<svg id="control-edge-detail" viewBox="-17 -12 78 46" aria-label="操作开口沿斜面法线切齐，后缘完整厚3毫米，打印实体最低1.2毫米"></svg>
 <p>保留摇杆Ø35与每键20×20的平面基础开口，另沿斜面方向去掉尖薄边。
 摇杆尾部避让宽34，键盘尾部避让宽41.45；后缘位于沿面坐标12，按法线切齐，
-不再留下弯折处的尖鳍。盖板标称厚3，保留实体不小于1.2；最窄侧框仍大于该值。</p></section>
+不再留下弯折处的尖鳍。原切刀的斜顶面未贯穿水平面，会留下逐渐变薄的膜；
+现在从Y≈44.108起贯穿面板切除，摇杆接圆孔的两侧肩宽约1.240，键盘侧肩宽1.2。
+盖板标称厚3；1.2是本模型的设计下限，不代表所有打印工艺都适用。</p>
+<a href="renders/lid-controls.png" target="_blank" rel="noopener"><img src="renders/lid-controls.png" alt="盖板开孔与斜面交接处的正面放大渲染" style="width:100%"></a>
+<a href="renders/lid-controls-inside.png" target="_blank" rel="noopener"><img src="renders/lid-controls-inside.png" alt="盖板开孔与斜面交接处的背面放大渲染" style="width:100%"></a></section>
 <section><h2>麦克风：轴心剖面与顶部孔径</h2>
 <svg id="microphone-detail" viewBox="-27 -9 107 56" aria-label="麦克风圆罩内径16、板径14、声孔6及完整高度剖面"></svg>
 <p>剖面穿过麦克风轴心：圆罩外径20.8、侧壁2.4、内径16，Ø14模块名义每侧留1。
@@ -271,7 +274,7 @@ label(slope,76,114,"开关 Ø21（待核实）");
 label(slope,17,130,"独立沿面中心：喇叭30 / 开关34");
 const views={
   bottom:{name:"底壳",items:{isometric:"立体 / 三点屏幕支撑",top:"俯视 / 载板四柱",rear:"后视 / Type-C",side:"侧视 / 连续轮廓"}},
-  lid:{name:"盖板",items:{isometric:"立体 / 低操作台与麦克风圆罩",top:"俯视 / 圆罩与阶梯键孔",front:"正面 / 各开孔",inside:"背面 / 扬声器四柱",side:"侧视 / 80°"}},
+  lid:{name:"盖板",items:{isometric:"立体 / 低操作台与麦克风圆罩",top:"俯视 / 圆罩与阶梯键孔",front:"正面 / 各开孔",inside:"背面 / 扬声器四柱",side:"侧视 / 80°",controls:"开孔放大 / 切除相切薄膜", "controls-inside":"开孔背面放大 / 保留完整厚度"}},
   assembly:{name:"整机",items:{isometric:"装配立体",top:"装配俯视",front:"装配正面",side:"装配侧面"}}
 };
 for(const [part,spec] of Object.entries(views))for(const [view,title] of Object.entries(spec.items)){
