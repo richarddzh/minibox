@@ -123,12 +123,18 @@ speaker_grille_pitch = 6;
 speaker_grille_row_pitch = 4.5;
 speaker_grille_row_counts = [2, 3, 4, 3, 2];
 speaker_center = [26, 30];
-speaker_ear_thickness = 3.2; // Proportional drawing estimate, not a dimensioned specification
+// Archived side view: 13 mm spans ~118 px; front offset/ear thickness span ~28/29 px.
+speaker_ear_thickness = 3.2; // Rounded image estimate, not a dimensioned specification
 speaker_ear_back_distance = 6.6;
-speaker_post_depth = speaker_size[2] - speaker_ear_thickness - speaker_ear_back_distance;
+speaker_front_clearance = 0.2;
+speaker_front_offset = speaker_size[2] - speaker_ear_thickness - speaker_ear_back_distance;
+speaker_post_depth = speaker_front_offset + speaker_front_clearance;
 speaker_post_diameter = 4.5; // Metal round nut, not a printed pillar
+speaker_sleeve_diameter = insert_diameter + 2 * minimum_print_wall;
+speaker_frame_clearance = 0.1;
+speaker_sleeve_relief_angle = 50;
 speaker_nut_length = 5;
-speaker_nut_embed_depth = speaker_nut_length - speaker_post_depth;
+speaker_nut_embed_depth = insert_depth - speaker_post_depth;
 speaker_screw_length = 6;
 speaker_screw_head_diameter = 5;
 speaker_screw_head_depth = 2.5;
@@ -313,11 +319,19 @@ assert(speaker_center[0] + speaker_size[0] / 2 + speaker_tolerance + module_clea
        "Speaker and switch must not overlap.");
 assert(speaker_post_depth > 0 && speaker_nut_embed_depth > 0 &&
        panel_thickness - speaker_nut_embed_depth >= minimum_print_wall - eps,
-       "Embedded speaker nuts must retain the minimum printed blind floor.");
+       "Speaker insert pockets must retain the minimum printed blind floor.");
 assert(speaker_post_diameter > 3 && speaker_post_diameter < insert_diameter &&
        speaker_screw_length - speaker_ear_thickness >= 2 &&
        speaker_screw_length - speaker_ear_thickness <= speaker_nut_length - 0.3,
-       "Speaker nuts must bear on the ears; screws must only engage part of the nut.");
+       "Speaker inserts must fit the sleeves; screws must only engage part of the nut.");
+assert(speaker_sleeve_diameter >= insert_diameter + 2 * minimum_print_wall &&
+       speaker_sleeve_relief_angle > 0 && speaker_sleeve_relief_angle < 90,
+       "Speaker sleeves need thick walls and an inward-facing relief.");
+assert(sqrt(pow(norm(speaker_hole_spacing / 2), 2) + pow(speaker_sleeve_diameter / 2, 2) -
+            2 * norm(speaker_hole_spacing / 2) * speaker_sleeve_diameter / 2 *
+            cos(speaker_sleeve_relief_angle)) -
+       (speaker_size[0] / 2 + speaker_tolerance) >= speaker_frame_clearance,
+       "The sleeve relief must clear the complete round speaker frame.");
 for (dx = [-speaker_hole_spacing[0] / 2, speaker_hole_spacing[0] / 2],
      dy = [-speaker_hole_spacing[1] / 2, speaker_hole_spacing[1] / 2],
      p = speaker_grille_centers)
@@ -713,12 +727,32 @@ module speaker_posts(inset = 0) {
 
 module speaker_nut_pockets() {
     speaker_fasteners()
-        translate([0,0,speaker_post_depth - 1])
-            cylinder(d = insert_diameter, h = speaker_nut_embed_depth + 1);
+        rotate([180,0,180 / $fn])
+            insert_socket(insert_depth);
+}
+
+module speaker_sleeves() {
+    for (dx = [-speaker_hole_spacing[0] / 2, speaker_hole_spacing[0] / 2],
+         dy = [-speaker_hole_spacing[1] / 2, speaker_hole_spacing[1] / 2])
+        on_slope(speaker_center[0] + dx, speaker_center[1] + dy,
+                 -panel_thickness - speaker_post_depth)
+            difference() {
+                rotate([0,0,3])
+                    cylinder(d = speaker_sleeve_diameter, h = speaker_post_depth + eps);
+                // A sector relief avoids thin tapered tips left by a circular frame cut.
+                rotate([0,0,atan2(-dy,-dx)])
+                    translate([0,0,-eps])
+                        linear_extrude(height = speaker_post_depth + 3 * eps)
+                            polygon([[0,0],
+                                     [10*cos(speaker_sleeve_relief_angle),
+                                      10*sin(speaker_sleeve_relief_angle)],
+                                     [10*cos(speaker_sleeve_relief_angle),
+                                      -10*sin(speaker_sleeve_relief_angle)]]);
+            }
 }
 
 module speaker_body_envelope(inset = 0) {
-    rear = -panel_thickness - speaker_size[2] - speaker_tolerance;
+    rear = -panel_thickness - speaker_front_clearance - speaker_size[2] - speaker_tolerance;
     ear_front = -panel_thickness - speaker_post_depth;
     ear_back = ear_front - speaker_ear_thickness;
     size = speaker_size[0] + 2 * (speaker_tolerance - inset);
@@ -728,7 +762,7 @@ module speaker_body_envelope(inset = 0) {
                      speaker_center[1] - size / 2, rear + inset)
                 cube([size, size, ear_front - rear - 2 * inset]);
             on_slope(speaker_center[0], speaker_center[1], ear_front + inset)
-                cylinder(d = size, h = speaker_post_depth - 2 * inset);
+                cylinder(d = size, h = speaker_front_offset - 2 * inset);
         }
         // Rear corner wells expose the front ears; only the ear plate has a 3 mm screw bore.
         speaker_fasteners() {
@@ -749,7 +783,7 @@ module speaker_envelope(inset = 0) {
     // Lead exits to the right; reserve its first 10 mm before routing to the amplifier.
     on_slope(speaker_center[0] + speaker_size[0] / 2,
              speaker_center[1] - 3 + inset,
-             -panel_thickness - speaker_size[2] - speaker_tolerance + inset)
+             -panel_thickness - speaker_front_clearance - speaker_size[2] - speaker_tolerance + inset)
         cube([10, 6 - 2 * inset, 6 - 2 * inset]);
 }
 
@@ -828,11 +862,13 @@ module control_thin_edge_cleanup() {
                                     intersection() {
                                         translate([0, -panel_thickness])
                                             square([case_width, norm(v) + 2 * panel_thickness]);
-                                        projection(cut = true)
-                                            translate([0, 0, depth])
-                                                rotate([-angle, 0, 0])
-                                                    translate([0, -path[i][0], -path[i][1]])
-                                                        control_vertical_openings();
+                                        // Allow eps on both cut surfaces, only inside the inner-wall band.
+                                        offset(delta = 2 * eps)
+                                            projection(cut = true)
+                                                translate([0, 0, depth])
+                                                    rotate([-angle, 0, 0])
+                                                        translate([0, -path[i][0], -path[i][1]])
+                                                            control_vertical_openings();
                                     }
     }
 }
@@ -886,6 +922,7 @@ module lid() {
         union() {
             lid_blank();
             microphone_cover();
+            speaker_sleeves();
         }
         lid_openings();
         speaker_nut_pockets();
@@ -1051,8 +1088,7 @@ if (part == "bottom") {
 } else if (part == "assembly" || part == "exploded") {
     color([0.82, 0.82, 0.84]) bottom_shell();
     translate([0, 0, part == "exploded" ? explode_height : 0]) {
-        color([0.95, 0.68, 0.2]) lid();
-        color([0.75,0.55,0.16]) speaker_posts();
+        color([0.82, 0.82, 0.84]) lid();
     }
     if (show_modules) {
         %module_envelopes();

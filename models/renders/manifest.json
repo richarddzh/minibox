@@ -1,25 +1,45 @@
 {
-  "description": "Exported meshes plus four metal speaker nuts (gold). Front-ear offsets are proportional drawing estimates; other hardware is not rendered.",
+  "description": "Exported meshes only. Four hollow speaker sleeves are integral to the lid and use the same color. No metal nuts or other hardware are rendered.",
   "source_sha256": {
-    "bottom.stl": "59b397d7671a15f8018497352cc038eae7043e840329a3949496f359ae826f51",
-    "lid.stl": "b77d3e3c5ffe685532c71c8ab035f9f6a2096bb772720db3d8a77d6c3f94037b",
-    "minibox-enclosure.scad": "4e6b2505a1bbee869d77d35fd42a9de8323c9df40e69ab65541a24a721f25eea"
+    "bottom.stl": "c5b118c059f8a4fef657f7d8ec763fab2912de1046f8734468349f6395b1a367",
+    "lid.stl": "2dc6488e517c4e7f6c5f8b63f1fa80423775c3ee0ef9f31bf80c8b6951fa48c1",
+    "minibox-enclosure.scad": "12865600830942c75d14d3be3586935b8dd7e7c2179486cd051abe042aec1744"
+  },
+  "speaker_mount_mm": {
+    "metal_nut_diameter": 4.5,
+    "metal_nut_length": 5,
+    "printed_sleeve_height": 3.4,
+    "printed_sleeve_outer_diameter": 7.1,
+    "nut_pocket_depth": 5.2,
+    "pocket_diameter": 4.7,
+    "speaker_front_clearance": 0.2,
+    "frame_relief_clearance": 0.1,
+    "sleeve_relief_sector_angle": 100,
+    "blind_floor": 1.2,
+    "hole_spacing": [
+      23,
+      23
+    ],
+    "ear_thickness_estimate": 3.2,
+    "screw_length": 6
   },
   "images": {
-    "bottom-isometric.png": "bd3f5fd840b7840a34349447bb84221db52c603e0e0dc11d23713fcace08d6b7",
+    "bottom-isometric.png": "81061d7bd643a20b038ca4775cf08e5147017866dc9c976fac84123577b02ac4",
     "bottom-top.png": "77225a12315b02ff4e2635892d6588f500efd724cb5356215e36a3e1ef9f3892",
     "bottom-rear.png": "5e67fefd538c3d789cf926d950bbfdec92d05e364ded8c07b185182c617b91d6",
     "bottom-side.png": "15870c416bc5c92692d41c0d96762d612f56572a1141854c2aaa8450d2c3b75c",
-    "lid-isometric.png": "95df21f1b140192b22016e8748eebbd814f3d47982225a11e48eeb97fbfa2fb5",
-    "lid-top.png": "db28d7694c8a17086338a2ae2ae6d4cccdc62cac3f610be7b721a43baab0601f",
-    "lid-front.png": "36d3a10590120b48094e95d0d29fb33089a6c21c6f54fcfcd2891fed573cfff7",
-    "lid-inside.png": "2167ab0e8d00bfb1cb09e83e5c36d35b5e66839bf0491cbb160492bea801e0ff",
-    "lid-side.png": "0cad5228849bb054b6d09535e4b6d67a0c78989691346770a3cf0646d98943f6",
-    "lid-controls.png": "988b916e3c417deeae8468a0078946e6b483cc44d4ea1c379673c9360fb124ac",
-    "lid-controls-inside.png": "e4fce1996fa720882edbb79fa98b1742da5ec497773bac4a7189a63a1d6af389",
-    "assembly-isometric.png": "f6894e179c60390d19d6a46a78c8f9b36b91f4300476a4fa55ae5452d09b1a66",
-    "assembly-top.png": "91d52b8a946bb508886989c92dc4c66739cd0e1da1d8f5b9141f6c9b32436995",
-    "assembly-front.png": "5f5563010021c748ae60d7a7701dffd8f0e25d5297b76d6f4a6b0fbced52b84d",
-    "assembly-side.png": "17c86900664ef51a7c682a93a0b289661525464c6370d4208cd36738e19bcfe6"
+    "lid-isometric.png": "f40a777020b65f9d983bbc4d49af19a022754f8f2a13a08b22bbcd477c574461",
+    "lid-top.png": "4d6007f4a773ad7be4d6d105b263a8f47daee2de1014c7bde0fb43ba38f05944",
+    "lid-front.png": "81e85a3335d1f6779dc5fe2b367c5b9529357f9b6ff7e01e8be27e82a28161e6",
+    "lid-inside.png": "b2f3395fa07a0511aab8c39c6cdc6b7f5f7187c7c5a46cbc1889459e8e9267f1",
+    "lid-side.png": "5c23d35f31c965322f361ef21c04b19d48697bebf08fb1d85bdfca8c0f46fe63",
+    "lid-controls.png": "aa699f9f4d737c336a4206357605c4ae88fd9594a11ed60b393ce0ff50a60b06",
+    "lid-controls-inside.png": "f598e83cc01216e85296a71c898d12ce80915ff85a51fda849f151e7a40d3b1c",
+    "lid-speaker.png": "b7f196f893a77782798ec4c1e832a1974805832d359f611cadff3f802c0b0fe4",
+    "lid-speaker-pockets.png": "481649b9454c8cbea79dfb8d9abca47dba6e6599377afeb28ce739d4c5990f9c",
+    "assembly-isometric.png": "1ae3e794cd5b39c3bfd0edb7b49b0379c8256867074470e76607d452d6212367",
+    "assembly-top.png": "b74a3de03b235b0d937f02000595471e48459b4058164f96c8c16dba7c58043d",
+    "assembly-front.png": "60ff4f352f88e2eb99a52d229480a63df16fd7f8688ce1320dd790830dbca99d",
+    "assembly-side.png": "041850e442382ec46979b97ee96ac3ad0cd29a7a1326654ad27b16b0c6231510"
   }
 }

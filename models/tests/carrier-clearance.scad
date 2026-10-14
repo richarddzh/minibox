@@ -16,7 +16,8 @@ assert(speaker_grille_pitch == 6 && speaker_grille_row_pitch == 4.5 &&
        len(speaker_grille_centers) == 14);
 assert(speaker_grille_row_counts == [2,3,4,3,2]);
 assert(abs(speaker_grille_pitch - speaker_grille_hole_diameter - 2.2) < 0.001);
-assert(abs(speaker_post_depth - 3.2) < 0.001 && speaker_ear_thickness == 3.2);
+assert(abs(speaker_post_depth - 3.4) < 0.001 && speaker_ear_thickness == 3.2);
+assert(abs(speaker_sleeve_diameter - 7.1) < 0.001 && speaker_front_clearance == 0.2);
 assert(abs(speaker_nut_embed_depth - 1.8) < 0.001 &&
        speaker_post_diameter == 4.5 && speaker_screw_length == 6);
 assert(minimum_print_wall == 1.2);
@@ -206,7 +207,7 @@ difference() {
     union() {
         speaker_fasteners() translate([2.8, -0.1, speaker_post_depth + 0.1])
             cube([0.2, 0.2, 1.4]);
-        speaker_fasteners() translate([-0.4, -0.4, speaker_nut_length + eps])
+        speaker_fasteners() translate([-0.4, -0.4, insert_depth + eps])
             cube([0.8, 0.8, 1.2 - 2 * eps]);
     }
     lid();
@@ -250,11 +251,12 @@ assert(joystick_motion_diameter == 34 && joystick_total_height == 30);
 assert(joystick_window_diameter - joystick_motion_diameter >= 1);
 
 // CHECK_GROUP shell
-// Only the microphone cover may leave the shared printed panel band.
+// Only the microphone cover and integral speaker sleeves may leave the panel band.
 difference() {
     lid();
     extrude_along_x(case_width) panel_band(-eps, panel_thickness + eps);
     microphone_cover();
+    speaker_sleeves();
 }
 // Cleanup is confined to the inner 1.2 mm, with no new exterior aperture.
 difference() {

@@ -276,6 +276,80 @@ def check_installation(executable, output, bottom_mesh):
     print("PASS: continuous insertion route and retained front-seat material.", flush=True)
 
 
+def check_speaker_mounts(executable, output, lid_mesh):
+    print("Checking exported integral speaker sleeves and nut cavities...", flush=True)
+    probes = output / "speaker-mounts.scad"
+    probes.write_text(f"""
+include <{SOURCE.as_posix()}>
+module reference_mounts() {{
+    for (x = [14.5, 37.5], along = [18.5, 41.5])
+        translate([x, 52 + cos(80) * along, 31 + sin(80) * along])
+            rotate([80, 0, 0]) children();
+}}
+module lid_mesh() {{ import({json.dumps(str(lid_mesh))}); }}
+module nut_ring(d, bore, h) {{
+    difference() {{
+        cylinder(d = d, h = h, $fn = 32);
+        translate([0,0,-0.02]) cylinder(d = bore, h = h + 0.04, $fn = 32);
+    }}
+}}
+// Independent nominal coordinates; 0.02 mm avoids float32/contact noise.
+intersection() {{
+    lid_mesh();
+    reference_mounts() translate([0,0,-2.98]) cylinder(d = 4.66, h = 1.76, $fn = 32);
+}}
+intersection() {{
+    lid_mesh();
+    reference_mounts() translate([0,0,-6.38]) cylinder(d = 4.66, h = 5.16, $fn = 32);
+}}
+intersection() {{
+    lid_mesh();
+    reference_mounts() {{
+        translate([0,0,-6.52]) cylinder(d=8.2,h=0.1,$fn=32);
+        translate([0,0,-6.38]) nut_ring(8.2,7.16,3.36);
+    }}
+}}
+difference() {{
+    reference_mounts() {{
+        translate([0,0,-1.18]) cylinder(d = 4.4, h = 1.16, $fn = 32);
+        translate([0,0,-2.98]) nut_ring(5.7, 4.9, 1.76);
+    }}
+    lid_mesh();
+}}
+difference() {{
+    difference() {{
+        reference_mounts() translate([0,0,-6.38]) nut_ring(6.94, 4.9, 3.36);
+        for (x=[14.5,37.5],along=[18.5,41.5])
+            translate([x,52+cos(80)*along,31+sin(80)*along])
+                rotate([80,0,0]) translate([0,0,-6.5])
+                    rotate([0,0,atan2(30-along,26-x)])
+                        linear_extrude(height=3.7)
+                            polygon([[0,0],[10*cos(51),10*sin(51)],[10*cos(51),-10*sin(51)]]);
+    }}
+    lid_mesh();
+}}
+intersection() {{
+    lid_mesh();
+    translate([26,52 + cos(80)*30,31 + sin(80)*30])
+        rotate([80,0,0]) translate([0,0,-6.38])
+            cylinder(d=28.1,h=3.16,$fn=128);
+}}
+difference() {{
+    reference_mounts() translate([0,0,-6.38]) nut_ring(4.46, 2.54, 4.96);
+    speaker_posts();
+}}
+difference() {{
+    speaker_posts();
+    reference_mounts() translate([0,0,-6.42]) nut_ring(4.54, 2.46, 5.04);
+}}
+""", encoding="utf-8")
+    render(executable, probes, output / "errors-speaker-mounts.stl",
+           ['part="none"'], empty=True)
+    print("PASS: four integral 7.1 x 3.4 hollow sleeves, coaxial 4.7 x 5.2 nut cavities, "
+          "1.2 blind floors, ear-seat height and round-frame relief (0.02 mm probe tolerance).",
+          flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--openscad", default=shutil.which("openscad"))
@@ -302,6 +376,10 @@ def main():
             render(args.openscad, SOURCE, bottom, ['part="bottom"'])
             mesh_info(bottom, EULER["bottom"])
             check_installation(args.openscad, work, bottom)
+            lid = work / "lid.stl"
+            render(args.openscad, SOURCE, lid, ['part="lid"'])
+            mesh_info(lid, EULER["lid"])
+            check_speaker_mounts(args.openscad, work, lid)
             return
         measurements = {}
         for part, euler in EULER.items():
@@ -312,6 +390,8 @@ def main():
             else:
                 render(args.openscad, SOURCE, path, definitions)
             measurements[part] = mesh_info(path, euler)
+            if part == "lid":
+                check_speaker_mounts(args.openscad, work, path)
             if part == "bottom" and not args.three_mf_only and not args.export_only:
                 check_installation(args.openscad, work, path)
             if part != "lid-print":

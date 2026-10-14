@@ -18,7 +18,8 @@ VIEWS = {
                "rear": (90, 0, 180), "side": (90, 0, 90)},
     "lid": {"isometric": (55, 0, 35), "top": (0, 0, 0), "front": (90, 0, 0),
             "inside": (135, 0, 215), "side": (90, 0, 90),
-            "controls": (55, 0, 20), "controls-inside": (125, 0, 200)},
+            "controls": (55, 0, 20), "controls-inside": (125, 0, 200),
+            "speaker": (145, 0, 195), "speaker-pockets": (135, 0, 215)},
     "assembly": {"isometric": (55, 0, 35), "top": (0, 0, 0),
                  "front": (90, 0, 0), "side": (90, 0, 90)},
 }
@@ -57,12 +58,10 @@ translate(-preview_center) {{
     if (preview_part == "bottom") bottom_mesh();
     else if (preview_part == "lid") {{
         lid_mesh();
-        color([0.75,0.55,0.16]) speaker_posts();
     }}
     else {{
         bottom_mesh();
         lid_mesh();
-        color([0.75,0.55,0.16]) speaker_posts();
     }}
 }}
 """
@@ -78,9 +77,11 @@ translate(-preview_center) {{
             part, view, rotation = job
             name = f"{part}-{view}.png"
             image = work / name
-            detail = view.startswith("controls")
-            center = [60, 40, 25] if detail else centers[part]
-            camera = ",".join(map(str, (0, 0, 0, *rotation, 205 if detail else distances[part])))
+            controls = view.startswith("controls")
+            speaker = view.startswith("speaker")
+            center = [26, 60, 60] if speaker else [60, 40, 25] if controls else centers[part]
+            distance = 105 if speaker else 205 if controls else distances[part]
+            camera = ",".join(map(str, (0, 0, 0, *rotation, distance)))
             command = [str(args.openscad), "-o", str(image), "--imgsize=1200,900",
                        "--projection=o", "--camera", camera,
                        "--colorscheme=Tomorrow", "-D", 'part="none"', "-D", f'preview_part="{part}"',
@@ -104,8 +105,15 @@ translate(-preview_center) {{
         for name in names:
             shutil.copy2(work / name, output / name)
         manifest = {
-            "description": "Exported meshes plus four metal speaker nuts (gold). Front-ear offsets are proportional drawing estimates; other hardware is not rendered.",
+            "description": "Exported meshes only. Four hollow speaker sleeves are integral to the lid and use the same color. No metal nuts or other hardware are rendered.",
             "source_sha256": hashes,
+            "speaker_mount_mm": {"metal_nut_diameter": 4.5, "metal_nut_length": 5,
+                                 "printed_sleeve_height": 3.4, "printed_sleeve_outer_diameter": 7.1,
+                                 "nut_pocket_depth": 5.2, "pocket_diameter": 4.7,
+                                 "speaker_front_clearance": 0.2, "frame_relief_clearance": 0.1,
+                                 "sleeve_relief_sector_angle": 100,
+                                 "blind_floor": 1.2, "hole_spacing": [23, 23],
+                                 "ear_thickness_estimate": 3.2, "screw_length": 6},
             "images": {name: hashlib.sha256((output / name).read_bytes()).hexdigest() for name in names},
         }
         (output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
