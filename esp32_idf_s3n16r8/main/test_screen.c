@@ -2,6 +2,7 @@
 #include "app_config.h"
 #include "st7796.h"
 #include "bitmap_font.h"
+#include "radio_stream.h"
 
 #include <inttypes.h>
 #include <stdio.h>
@@ -132,10 +133,58 @@ esp_err_t test_screen_init(void) {
         rect(16 + i * 74, 46, 72, 26, colors[i]);
         text(43 + i * 74, 44, labels[i], i == 1 || i == 3 || i == 5 ? BLACK : WHITE);
     }
-    text(16, 288, "\u4e2d\u6587 ABC 123 - \u6447\u6746\u6d4b\u8bd5", WHITE);
+#ifdef CONFIG_MINIBOX_RADIO_TEST
+    text(16, 288, "DONGGAN 101 - SPEAKER TEST", WHITE);
+#else
+    text(16, 288, "HOLD GPIO5: RECORD / RELEASE: PLAY", WHITE);
+#endif
     ESP_RETURN_ON_ERROR(st7796_draw_rows(0, LCD_HEIGHT, s_frame), TAG, "initial frame");
     memcpy(s_sent, s_frame, LCD_WIDTH * LCD_HEIGHT * 2);
     return st7796_backlight_on();
+}
+
+esp_err_t test_screen_hardware_update(const bool pressed[BUTTON_COUNT],
+                                     const joystick_state_t *stick, esp_err_t stick_error,
+                                     const rtc_test_state_t *rtc, esp_err_t rtc_error,
+                                     audio_phase_t audio) {
+    rect(1, 80, LCD_WIDTH - 2, 208, BLACK);
+    const int pins[] = {BUTTON_1_PIN, RECORD_BUTTON_PIN, BUTTON_3_PIN, BUTTON_4_PIN};
+    char line[64];
+    for (int i = 0; i < BUTTON_COUNT; ++i) {
+        int x = 16 + (i % 2) * 232, y = 82 + (i / 2) * 30;
+        rect(x, y + 3, 18, 18, pressed[i] ? GREEN : GRAY);
+        snprintf(line, sizeof(line), "KEY%d G%d %s", i + 1, pins[i],
+                 pressed[i] ? "DOWN" : "UP");
+        text(x + 25, y, line, pressed[i] ? YELLOW : WHITE);
+    }
+    if (stick_error == ESP_OK) {
+        snprintf(line, sizeof(line), "JOY X:%4d Y:%4d", stick->raw_x, stick->raw_y);
+        text(16, 146, line, WHITE);
+        snprintf(line, sizeof(line), "X:%+4d%% Y:%+4d%%", stick->percent_x, stick->percent_y);
+        text(16, 176, line, CYAN);
+    } else {
+        text(16, 146, "JOYSTICK ERROR - RESET AT CENTER", YELLOW);
+    }
+    if (rtc_error == ESP_OK) {
+        snprintf(line, sizeof(line), "RTC %02d:%02d:%02d %s", rtc->hour, rtc->minute,
+                 rtc->second, rtc->ticking ? "TICK OK" : "WAIT");
+        text(16, 210, line, rtc->ticking ? GREEN : CYAN);
+    } else {
+        snprintf(line, sizeof(line), "RTC ERROR: %s", esp_err_to_name(rtc_error));
+        text(16, 210, line, YELLOW);
+    }
+#ifdef CONFIG_MINIBOX_RADIO_TEST
+    text(16, 248, radio_stream_status(), CYAN);
+#else
+    const char *status = audio == AUDIO_RECORDING ? "MIC RECORDING (MAX 3s)" :
+                         audio == AUDIO_WAIT_RELEASE ? "RECORD FULL - RELEASE KEY2" :
+                         audio == AUDIO_PLAYING ? "SPEAKER PLAYING" :
+                         audio == AUDIO_ERROR ? "AUDIO ERROR - SEE SERIAL" :
+                         audio == AUDIO_WAIT_RESET ? "PLAY DONE - RELEASE KEY2" :
+                         "AUDIO READY - HOLD KEY2";
+    text(16, 248, status, audio == AUDIO_ERROR ? YELLOW : CYAN);
+#endif
+    return flush_dynamic();
 }
 
 esp_err_t test_screen_audio_init(void) {

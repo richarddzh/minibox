@@ -1,6 +1,9 @@
 #include "app_config.h"
 #include "audio_test.h"
 #include "joystick_logic.h"
+#include "joystick.h"
+#include "rtc_test.h"
+#include "radio_stream.h"
 #include "st7796.h"
 #include "test_screen.h"
 
@@ -75,7 +78,9 @@ static void sample_buttons(void *arg) {
                 ESP_LOGI(TAG, "GPIO%d %s", pins[i], buttons[i].pressed ? "pressed" : "released");
             }
         }
+#ifndef CONFIG_MINIBOX_RADIO_TEST
         audio_test_submit(&buttons[1]);
+#endif
         xQueueOverwrite(s_button_states, &snapshot);
         xTaskDelayUntil(&last_wake, pdMS_TO_TICKS(10));
     }
@@ -83,10 +88,10 @@ static void sample_buttons(void *arg) {
 
 void app_main(void) {
     onboard_led_off();
-    ESP_LOGI(TAG, "ESP32-S3 N16R8 microphone test; PSRAM=%u bytes",
+    ESP_LOGI(TAG, "ESP32-S3 N16R8 six-device PCB test; PSRAM=%u bytes",
              (unsigned)esp_psram_get_size());
     ESP_ERROR_CHECK(st7796_init());
-    ESP_ERROR_CHECK(test_screen_audio_init());
+    ESP_ERROR_CHECK(test_screen_init());
     const gpio_config_t inputs = {
         .pin_bit_mask = (1ULL << BUTTON_1_PIN) |
                         (1ULL << RECORD_BUTTON_PIN) |
@@ -102,12 +107,35 @@ void app_main(void) {
     ESP_ERROR_CHECK(gpio_config(&inputs));
     s_button_states = xQueueCreate(1, sizeof(button_snapshot_t));
     ESP_ERROR_CHECK(s_button_states ? ESP_OK : ESP_ERR_NO_MEM);
+#ifndef CONFIG_MINIBOX_RADIO_TEST
     ESP_ERROR_CHECK(audio_test_start());
+#endif
     BaseType_t created = xTaskCreate(sample_buttons, "buttons", 4096,
                                      NULL, 5, NULL);
     ESP_ERROR_CHECK(created == pdPASS ? ESP_OK : ESP_ERR_NO_MEM);
-    ESP_LOGI(TAG, "Buttons " BUTTON_GPIO_LABELS " ready; hold " RECORD_GPIO_LABEL
-             " to record (max 3s)");
+    ESP_LOGI(TAG, "Buttons " BUTTON_GPIO_LABELS " ready");
+    joystick_state_t stick = {0};
+    esp_err_t stick_error = joystick_init(&stick);
+    if (stick_error != ESP_OK) {
+        ESP_LOGE(TAG, "Joystick initialization failed: %s; center stick and reset",
+                 esp_err_to_name(stick_error));
+    }
+    rtc_test_state_t rtc = {0};
+    esp_err_t rtc_error = rtc_test_init();
+    if (rtc_error != ESP_OK) {
+        ESP_LOGE(TAG, "RTC initialization failed: %s", esp_err_to_name(rtc_error));
+    }
+#ifdef CONFIG_MINIBOX_RADIO_TEST
+    ESP_ERROR_CHECK(radio_stream_start());
+#else
+    ESP_LOGI(TAG, "Hold " RECORD_GPIO_LABEL " to record (max 3s)");
+#endif
+    int64_t next_rtc_us = 0, next_log_us = 0;
+    int64_t rtc_changed_us = 0;
+    uint32_t previous_seconds = 0;
+    bool rtc_seen = false;
+    bool rtc_ready = rtc_error == ESP_OK;
+    TickType_t last_wake = xTaskGetTickCount();
     for (;;) {
         button_snapshot_t snapshot;
         if (xQueueReceive(s_button_states, &snapshot, pdMS_TO_TICKS(1000)) != pdTRUE) {
@@ -115,6 +143,44 @@ void app_main(void) {
             ESP_ERROR_CHECK(test_screen_message("BUTTON ERROR", "CHECK " BUTTON_GPIO_LABELS));
             return;
         }
-        ESP_ERROR_CHECK(test_screen_audio_update(snapshot.pressed, audio_test_phase()));
+        int64_t now = esp_timer_get_time();
+        if (stick_error == ESP_OK) {
+            stick_error = joystick_read(&stick);
+        }
+        if (rtc_ready && now >= next_rtc_us) {
+            next_rtc_us = now + 1000000;
+            rtc_error = rtc_test_read(&rtc);
+            if (rtc_error == ESP_OK) {
+                if (!rtc_seen) {
+                    rtc_seen = true;
+                    rtc_changed_us = now;
+                } else if (rtc.seconds_of_day != previous_seconds) {
+                    rtc_changed_us = now;
+                    rtc.ticking = true;
+                } else if (now - rtc_changed_us > 2500000) {
+                    rtc.ticking = false;
+                    rtc_error = ESP_ERR_INVALID_STATE;
+                    ESP_LOGE(TAG, "RTC seconds are not advancing");
+                }
+                previous_seconds = rtc.seconds_of_day;
+            } else {
+                rtc.ticking = false;
+            }
+        }
+        if (now >= next_log_us) {
+            next_log_us = now + 2000000;
+            if (stick_error == ESP_OK) {
+                ESP_LOGI(TAG, "Joystick X=%d (%+d%%) Y=%d (%+d%%)",
+                         stick.raw_x, stick.percent_x, stick.raw_y, stick.percent_y);
+            }
+            if (rtc_error == ESP_OK) {
+                ESP_LOGI(TAG, "RTC %04d-%02d-%02d %02d:%02d:%02d %s",
+                         rtc.year, rtc.month, rtc.day, rtc.hour, rtc.minute, rtc.second,
+                         rtc.ticking ? "TICK OK" : "waiting for tick");
+            }
+        }
+        ESP_ERROR_CHECK(test_screen_hardware_update(snapshot.pressed, &stick, stick_error,
+                                                     &rtc, rtc_error, audio_test_phase()));
+        xTaskDelayUntil(&last_wake, pdMS_TO_TICKS(100));
     }
 }

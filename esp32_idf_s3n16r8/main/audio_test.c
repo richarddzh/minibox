@@ -176,13 +176,59 @@ static esp_err_t play_recording(size_t frames) {
     return error;
 }
 
+static esp_err_t startup_audio_test(void) {
+    set_phase(AUDIO_PLAYING);
+    ESP_LOGI(TAG, "Speaker test: quiet 440 Hz tone for 250 ms");
+    for (size_t i = 0; i < AUDIO_SAMPLE_RATE / 4; ++i) {
+        int phase = (i * 440 % AUDIO_SAMPLE_RATE) * 4 * 1500 / AUDIO_SAMPLE_RATE;
+        s_recording[i] = phase < 3000 ? phase - 1500 : 4500 - phase;
+    }
+    ESP_RETURN_ON_ERROR(play_recording(AUDIO_SAMPLE_RATE / 4), TAG, "startup tone");
+    i2s_chan_handle_t mic = NULL;
+    ESP_RETURN_ON_ERROR(open_channel(true, &mic), TAG, "startup microphone");
+    set_phase(AUDIO_RECORDING);
+    ESP_LOGI(TAG, "Startup microphone test: recording 1 second, then playback");
+    size_t frames = 0;
+    esp_err_t error = ESP_OK;
+    while (frames < AUDIO_SAMPLE_RATE && error == ESP_OK) {
+        int32_t raw[AUDIO_BLOCK_FRAMES];
+        size_t count = AUDIO_SAMPLE_RATE - frames;
+        if (count > AUDIO_BLOCK_FRAMES) count = AUDIO_BLOCK_FRAMES;
+        size_t bytes = 0;
+        error = i2s_channel_read(mic, raw, count * sizeof(int32_t), &bytes, 100);
+        if (error == ESP_OK && (bytes == 0 || bytes % sizeof(int32_t) != 0)) {
+            error = ESP_ERR_INVALID_SIZE;
+        }
+        if (error == ESP_OK) {
+            for (size_t i = 0; i < bytes / sizeof(int32_t); ++i) {
+                s_recording[frames++] = raw[i] >> 16;
+            }
+        }
+    }
+    esp_err_t closed = close_channel(&mic);
+    ESP_RETURN_ON_ERROR(error, TAG, "startup capture");
+    ESP_RETURN_ON_ERROR(closed, TAG, "startup capture cleanup");
+    log_recording_levels(frames);
+    set_phase(AUDIO_PLAYING);
+    ESP_LOGI(TAG, "Startup playback: %u samples", (unsigned)frames);
+    ESP_RETURN_ON_ERROR(play_recording(frames), TAG, "startup playback");
+    ESP_LOGI(TAG, "Startup audio I/O complete; confirm sound by listening");
+    return ESP_OK;
+}
+
 static void audio_task(void *arg) {
     (void)arg;
-    audio_test_logic_t logic = {0};
+    audio_test_logic_t logic = {.phase = AUDIO_WAIT_RESET};
     joystick_button_t button = {0};
     i2s_chan_handle_t mic = NULL;
     size_t frames = 0;
-    esp_err_t error = ESP_OK;
+    esp_err_t error = startup_audio_test();
+    if (error != ESP_OK) {
+        ESP_LOGE(TAG, "Startup audio test stopped: %s", esp_err_to_name(error));
+        set_phase(AUDIO_ERROR);
+        vTaskDelete(NULL);
+        return;
+    }
     for (;;) {
         joystick_button_t latest;
         TickType_t wait = logic.phase == AUDIO_RECORDING ? 0 : pdMS_TO_TICKS(20);

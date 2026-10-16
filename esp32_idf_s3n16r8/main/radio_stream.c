@@ -3,7 +3,9 @@
 
 #include <inttypes.h>
 #include <stdint.h>
+#include <stdatomic.h>
 #include <stdlib.h>
+#include <string.h>
 #include "driver/gpio.h"
 #include "driver/i2s_std.h"
 #include "esp_audio_dec_default.h"
@@ -12,12 +14,43 @@
 #include "esp_check.h"
 #include "esp_crt_bundle.h"
 #include "esp_http_client.h"
+#include "esp_event.h"
+#include "esp_netif.h"
+#include "esp_netif_sntp.h"
+#include "esp_wifi.h"
+#include "freertos/event_groups.h"
+#include "freertos/task.h"
+#include "nvs_flash.h"
 
 #define RADIO_URL "https://lhttp.qtfm.cn/live/274/64k.mp3"
 #define INPUT_BYTES 2048
 #define OUTPUT_BYTES 8192
 
 static const char *TAG = "radio";
+static EventGroupHandle_t s_network;
+#define WIFI_CONNECTED BIT0
+
+typedef enum {
+    RADIO_CONNECTING_WIFI,
+    RADIO_SYNCING_TIME,
+    RADIO_CONNECTING_STREAM,
+    RADIO_PLAYING,
+    RADIO_RETRYING,
+    RADIO_ERROR,
+} radio_state_t;
+
+static atomic_int s_state = RADIO_CONNECTING_WIFI;
+
+const char *radio_stream_status(void) {
+    switch (atomic_load(&s_state)) {
+    case RADIO_CONNECTING_WIFI: return "101: CONNECTING WIFI";
+    case RADIO_SYNCING_TIME: return "101: SYNCING TIME";
+    case RADIO_CONNECTING_STREAM: return "101: CONNECTING STREAM";
+    case RADIO_PLAYING: return "101: PLAYING DONGGAN";
+    case RADIO_RETRYING: return "101: RETRY IN 5s";
+    default: return "101: ERROR - SEE SERIAL";
+    }
+}
 
 static esp_err_t speaker_stop(i2s_chan_handle_t *channel) {
     esp_err_t error = gpio_set_level(SPEAKER_SD_MODE_PIN, 0);
@@ -117,8 +150,7 @@ static esp_err_t play_pcm(i2s_chan_handle_t channel, const uint8_t *pcm,
     }
     size_t bytes = frames * 2 * sizeof(int16_t);
     size_t written = 0;
-    esp_err_t error = i2s_channel_write(channel, stereo, bytes, &written,
-                                         pdMS_TO_TICKS(2000));
+    esp_err_t error = i2s_channel_write(channel, stereo, bytes, &written, 2000);
     if (error != ESP_OK) return error;
     return written == bytes ? ESP_OK : ESP_ERR_TIMEOUT;
 }
@@ -206,6 +238,7 @@ static esp_err_t decode_stream(esp_http_client_handle_t client) {
                     ESP_LOGE(TAG, "I2S write: %s", esp_err_to_name(result));
                     break;
                 }
+                atomic_store(&s_state, RADIO_PLAYING);
                 size_t bytes = frame.decoded_size * 2 / channels;
                 if (played_bytes == 0 || played_bytes / (1024 * 1024) !=
                                          (played_bytes + bytes) / (1024 * 1024)) {
@@ -253,12 +286,111 @@ esp_err_t radio_stream_play(void) {
     if (result == ESP_OK) result = esp_http_client_set_header(client, "Icy-MetaData", "0");
     if (result == ESP_OK) result = esp_http_client_open(client, 0);
     if (result == ESP_OK) {
-        esp_http_client_fetch_headers(client);
-        int status = esp_http_client_get_status_code(client);
-        ESP_LOGI(TAG, "Donggan 101 HTTP %d", status);
-        result = status == 200 || status == 206 ? decode_stream(client) : ESP_ERR_INVALID_RESPONSE;
+        int64_t headers = esp_http_client_fetch_headers(client);
+        if (headers < 0) {
+            ESP_LOGE(TAG, "Donggan 101 response headers failed: %" PRId64, headers);
+            result = ESP_ERR_INVALID_RESPONSE;
+        } else {
+            int status = esp_http_client_get_status_code(client);
+            ESP_LOGI(TAG, "Donggan 101 HTTP %d", status);
+            result = status == 200 || status == 206 ? decode_stream(client) :
+                                                     ESP_ERR_INVALID_RESPONSE;
+        }
     }
     esp_http_client_close(client);
     esp_http_client_cleanup(client);
     return result;
+}
+
+static void wifi_event(void *arg, esp_event_base_t base, int32_t id, void *data) {
+    (void)arg;
+    if (base == WIFI_EVENT &&
+        (id == WIFI_EVENT_STA_START || id == WIFI_EVENT_STA_DISCONNECTED)) {
+        xEventGroupClearBits(s_network, WIFI_CONNECTED);
+        atomic_store(&s_state, RADIO_CONNECTING_WIFI);
+        if (id == WIFI_EVENT_STA_DISCONNECTED) {
+            const wifi_event_sta_disconnected_t *event = data;
+            ESP_LOGW(TAG, "Wi-Fi disconnected (reason %u); reconnecting", event->reason);
+        }
+        esp_err_t error = esp_wifi_connect();
+        if (error != ESP_OK) {
+            ESP_LOGE(TAG, "Wi-Fi connect: %s", esp_err_to_name(error));
+            atomic_store(&s_state, RADIO_ERROR);
+        }
+    } else if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
+        const ip_event_got_ip_t *event = data;
+        ESP_LOGI(TAG, "Wi-Fi connected, IP " IPSTR, IP2STR(&event->ip_info.ip));
+        xEventGroupSetBits(s_network, WIFI_CONNECTED);
+    }
+}
+
+static void radio_task(void *arg) {
+    (void)arg;
+    bool clock_synced = false;
+    for (;;) {
+        xEventGroupWaitBits(s_network, WIFI_CONNECTED, pdFALSE, pdTRUE, portMAX_DELAY);
+        if (!clock_synced) {
+            atomic_store(&s_state, RADIO_SYNCING_TIME);
+            esp_err_t error = esp_netif_sntp_start();
+            if (error == ESP_OK) {
+                error = esp_netif_sntp_sync_wait(pdMS_TO_TICKS(15000));
+            }
+            if (error != ESP_OK) {
+                ESP_LOGW(TAG, "Waiting for network time: %s", esp_err_to_name(error));
+                vTaskDelay(pdMS_TO_TICKS(1000));
+                continue;
+            }
+            clock_synced = true;
+            ESP_LOGI(TAG, "Network clock synchronized for HTTPS");
+        }
+        atomic_store(&s_state, RADIO_CONNECTING_STREAM);
+        ESP_LOGI(TAG, "Opening Donggan 101: " RADIO_URL);
+        esp_err_t error = radio_stream_play();
+        ESP_LOGE(TAG, "Donggan 101 stream stopped: %s; retrying in 5s",
+                 esp_err_to_name(error));
+        atomic_store(&s_state, RADIO_RETRYING);
+        vTaskDelay(pdMS_TO_TICKS(5000));
+        if (!(xEventGroupGetBits(s_network) & WIFI_CONNECTED)) {
+            atomic_store(&s_state, RADIO_CONNECTING_WIFI);
+        }
+    }
+}
+
+esp_err_t radio_stream_start(void) {
+    ESP_RETURN_ON_FALSE(strlen(CONFIG_MINIBOX_WIFI_SSID) > 0 &&
+                        strlen(CONFIG_MINIBOX_WIFI_SSID) <= 32 &&
+                        strlen(CONFIG_MINIBOX_WIFI_PASSWORD) >= 8 &&
+                        strlen(CONFIG_MINIBOX_WIFI_PASSWORD) <= 63,
+                        ESP_ERR_INVALID_ARG, TAG, "configure Wi-Fi SSID and WPA password locally");
+    ESP_RETURN_ON_ERROR(radio_stream_init(), TAG, "initialize radio audio");
+    ESP_RETURN_ON_ERROR(nvs_flash_init(), TAG, "initialize NVS");
+    ESP_RETURN_ON_ERROR(esp_netif_init(), TAG, "initialize network");
+    ESP_RETURN_ON_ERROR(esp_event_loop_create_default(), TAG, "create event loop");
+    ESP_RETURN_ON_FALSE(esp_netif_create_default_wifi_sta(), ESP_ERR_NO_MEM,
+                        TAG, "create Wi-Fi station");
+    s_network = xEventGroupCreate();
+    ESP_RETURN_ON_FALSE(s_network, ESP_ERR_NO_MEM, TAG, "create Wi-Fi event group");
+    const wifi_init_config_t init = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_RETURN_ON_ERROR(esp_wifi_init(&init), TAG, "initialize Wi-Fi");
+    ESP_RETURN_ON_ERROR(esp_wifi_set_storage(WIFI_STORAGE_RAM), TAG, "Wi-Fi RAM config");
+    ESP_RETURN_ON_ERROR(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID,
+                                                   wifi_event, NULL), TAG, "Wi-Fi events");
+    ESP_RETURN_ON_ERROR(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP,
+                                                   wifi_event, NULL), TAG, "IP event");
+    wifi_config_t config = {.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK};
+    memcpy(config.sta.ssid, CONFIG_MINIBOX_WIFI_SSID, strlen(CONFIG_MINIBOX_WIFI_SSID));
+    memcpy(config.sta.password, CONFIG_MINIBOX_WIFI_PASSWORD,
+           strlen(CONFIG_MINIBOX_WIFI_PASSWORD));
+    ESP_RETURN_ON_ERROR(esp_wifi_set_mode(WIFI_MODE_STA), TAG, "Wi-Fi station mode");
+    ESP_RETURN_ON_ERROR(esp_wifi_set_config(WIFI_IF_STA, &config), TAG, "Wi-Fi credentials");
+    esp_sntp_config_t time_config = ESP_NETIF_SNTP_DEFAULT_CONFIG("ntp.aliyun.com");
+    time_config.start = false;
+    ESP_RETURN_ON_ERROR(esp_netif_sntp_init(&time_config), TAG, "initialize network clock");
+    ESP_RETURN_ON_ERROR(esp_wifi_start(), TAG, "start Wi-Fi");
+    BaseType_t created = xTaskCreate(radio_task, "radio", 12288, NULL, 4, NULL);
+    ESP_RETURN_ON_FALSE(created == pdPASS, ESP_ERR_NO_MEM, TAG, "start radio task");
+    ESP_LOGI(TAG, "Donggan 101 only; microphone disabled; BCLK=%d WS=%d DIN=%d SD=%d GAIN=%d",
+             AUDIO_BCLK_PIN, AUDIO_WS_PIN, SPEAKER_DIN_PIN,
+             SPEAKER_SD_MODE_PIN, SPEAKER_GAIN_PIN);
+    return ESP_OK;
 }

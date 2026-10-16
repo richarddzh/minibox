@@ -8,6 +8,14 @@ config MINIBOX_BUTTON_ACTIVE_LOW
         Each switch shorts its GPIO to common ground when pressed.
         Disable for modules that output a high level when pressed.
 
+config MINIBOX_RADIO_TEST
+    bool "Speaker test: play Donggan 101 instead of microphone recording"
+    default n
+    help
+        Connect to the configured Wi-Fi and continuously play Donggan 101.
+        Microphone recording is disabled to avoid sharing the I2S clocks.
+        Buttons, joystick, RTC and display remain active.
+
 config MINIBOX_WIFI_SSID
     string "Radio Wi-Fi SSID"
     default "MiaoHome"

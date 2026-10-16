@@ -78,10 +78,21 @@ keep them checked in. Normal builds do not need a font download or conversion.
 The first build needs network access to resolve the official LCD component;
 later builds reuse the component manager cache.
 Keep `sdkconfig.defaults` ASCII-only.
-For hardware verification, inspect ST7796 initialization and the displayed
-GPIO4/5/6 button states. GPIO5 starts microphone recording while held
+For hardware verification, inspect ST7796 initialization, RGB color bars and the displayed
+GPIO4/5/6/7 button states. Keep the joystick centered during the approximately
+640 ms startup calibration; observe GPIO1/2 raw ADC values and percentages.
+PCF8563 uses I2C address 0x51 on SDA15/SCL16; verify advancing seconds and
+`TICK OK`. Only a stopped/voltage-low RTC is initialized to local build time.
+Startup plays a quiet 250 ms tone, then records and plays 1 second of microphone audio.
+GPIO5 starts microphone recording while held
 (maximum 3 seconds) and plays the recording after release. Buttons default
 to active-low with internal pull-ups; use menuconfig for active-high modules.
 GPIO48 should receive the black/off RGB command at startup.
 Report build, flash and hardware observations separately; serial logs alone
 cannot prove the visible display or all physical inputs work.
+
+For the optional `MINIBOX_RADIO_TEST` mode, configure Wi-Fi only in the ignored
+local `sdkconfig`. It plays Donggan 101 only and disables startup/manual microphone
+tests to avoid I2S clock conflicts. Verify IP acquisition, network time sync,
+HTTP 200, MP3 format and increasing I2S output; confirm audible sound separately.
+Never commit credentials or share firmware binaries containing them.
