@@ -168,7 +168,7 @@ static void render_chat(const gui_model_t *model, int focused_item) {
     if (count == 0) {
         chat_message_t greeting = {
             .from_user = false,
-            .text = "你好！GPIO4 短按闲聊，GPIO5 按住说话，松开发送。",
+            .text = "你好！A 短按闲聊，B 按住说话，松开发送。",
         };
         draw_bubble(45, &greeting);
     } else {
@@ -186,7 +186,7 @@ static void render_chat(const gui_model_t *model, int focused_item) {
                  focused_item == 0 ? UI_COLOR_PRIMARY_DARK : UI_COLOR_PANEL_ALT);
     ui_draw_rect(44, 174, 232, 28, focused_item == 0 ? 3 : 1,
                  focused_item == 0 ? UI_COLOR_FOCUS : UI_COLOR_MUTED);
-    centered_text(180, s_recording ? "松开发送 · GPIO6 结束" : "GPIO5 按住说话 · 上下翻记录", 1,
+    centered_text(180, s_recording ? "松开发送 · X 结束" : "B 按住说话 · 上下翻记录", 1,
                   focused_item == 0 ? UI_COLOR_FOCUS : UI_COLOR_TEXT);
 }
 

@@ -264,7 +264,7 @@ static void render_keyboard(void) {
     const bool password = s_keyboard_purpose == KEYBOARD_PASSWORD;
     ui_draw_text(10, 5, password ? "输入 WiFi 密码" : "输入 WiFi 名称",
                  1, UI_COLOR_TEXT);
-    ui_draw_text(158, 5, s_keyboard_error[0] ? s_keyboard_error : "GPIO6 取消",
+    ui_draw_text(158, 5, s_keyboard_error[0] ? s_keyboard_error : "X 取消",
                  1, s_keyboard_error[0] ? UI_COLOR_DANGER : UI_COLOR_MUTED);
 
     char visible[33] = {0};

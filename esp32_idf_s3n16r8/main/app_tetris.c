@@ -201,8 +201,8 @@ static void render(const gui_model_t *model, int focused_item) {
     ui_draw_text(140, 96, "下一个", 1, UI_COLOR_MUTED);
     draw_piece_preview(s_next, 204, 127);
     ui_draw_text(139, 157, s_paused ? "已暂停" : "摇杆移动/加速", 1, UI_COLOR_CYAN);
-    ui_draw_text(139, 174, "GPIO4 旋转", 1, UI_COLOR_MUTED);
-    ui_draw_text(139, 190, "GPIO7 暂停/继续", 1, UI_COLOR_MUTED);
+    ui_draw_text(139, 174, "A 旋转", 1, UI_COLOR_MUTED);
+    ui_draw_text(139, 190, "Y 暂停/继续", 1, UI_COLOR_MUTED);
 
     ui_fill_round_rect(239, 5, 74, 28, 5,
                        focused_item == 0 ? UI_COLOR_PRIMARY_DARK

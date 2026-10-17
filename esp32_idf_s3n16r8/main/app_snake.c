@@ -253,7 +253,7 @@ static void render(const gui_model_t *model, int focused_item) {
     snprintf(score, sizeof(score), "%d", s_score / 10);
     ui_draw_text(244, 60, score, 2, UI_COLOR_FOCUS);
     ui_draw_text(240, 92, s_paused ? "已暂停" : "摇杆移动", 1, UI_COLOR_MUTED);
-    ui_draw_text(240, 112, "GPIO7", 1, UI_COLOR_CYAN);
+    ui_draw_text(240, 112, "Y", 1, UI_COLOR_CYAN);
     ui_draw_text(240, 129, "暂停/继续", 1, UI_COLOR_MUTED);
     ui_fill_round_rect(239, 5, 74, 28, 5,
                        focused_item == 0 ? UI_COLOR_PRIMARY_DARK

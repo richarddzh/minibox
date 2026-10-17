@@ -135,7 +135,7 @@ static void render(const gui_model_t *model, int focused_item) {
                  (unsigned)(first + visible),
                  (unsigned)radio_station_count());
     } else {
-        snprintf(format, sizeof(format), "GPIO4 播放/停止  %u-%u/%u",
+        snprintf(format, sizeof(format), "A 播放/停止  %u-%u/%u",
                  (unsigned)(station_count ? first + 1 : 0),
                  (unsigned)(first + visible),
                  (unsigned)radio_station_count());

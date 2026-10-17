@@ -140,7 +140,7 @@ void app_main(void) {
         button_snapshot_t snapshot;
         if (xQueueReceive(s_button_states, &snapshot, pdMS_TO_TICKS(1000)) != pdTRUE) {
             ESP_LOGE(TAG, "Button sampling stopped");
-            ESP_ERROR_CHECK(test_screen_message("BUTTON ERROR", "CHECK " BUTTON_GPIO_LABELS));
+            ESP_ERROR_CHECK(test_screen_message("BUTTON ERROR", "CHECK A / B / X / Y"));
             return;
         }
         int64_t now = esp_timer_get_time();

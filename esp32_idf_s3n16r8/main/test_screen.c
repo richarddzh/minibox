@@ -136,7 +136,7 @@ esp_err_t test_screen_init(void) {
 #ifdef CONFIG_MINIBOX_RADIO_TEST
     text(16, 288, "DONGGAN 101 - SPEAKER TEST", WHITE);
 #else
-    text(16, 288, "HOLD GPIO5: RECORD / RELEASE: PLAY", WHITE);
+    text(16, 288, "HOLD B: RECORD / RELEASE: PLAY", WHITE);
 #endif
     ESP_RETURN_ON_ERROR(st7796_draw_rows(0, LCD_HEIGHT, s_frame), TAG, "initial frame");
     memcpy(s_sent, s_frame, LCD_WIDTH * LCD_HEIGHT * 2);
@@ -148,12 +148,12 @@ esp_err_t test_screen_hardware_update(const bool pressed[BUTTON_COUNT],
                                      const rtc_test_state_t *rtc, esp_err_t rtc_error,
                                      audio_phase_t audio) {
     rect(1, 80, LCD_WIDTH - 2, 208, BLACK);
-    const int pins[] = {BUTTON_1_PIN, RECORD_BUTTON_PIN, BUTTON_3_PIN, BUTTON_4_PIN};
+    const char *labels[] = {"A", "B", "X", "Y"};
     char line[64];
     for (int i = 0; i < BUTTON_COUNT; ++i) {
         int x = 16 + (i % 2) * 232, y = 82 + (i / 2) * 30;
         rect(x, y + 3, 18, 18, pressed[i] ? GREEN : GRAY);
-        snprintf(line, sizeof(line), "KEY%d G%d %s", i + 1, pins[i],
+        snprintf(line, sizeof(line), "%s %s", labels[i],
                  pressed[i] ? "DOWN" : "UP");
         text(x + 25, y, line, pressed[i] ? YELLOW : WHITE);
     }
@@ -177,11 +177,11 @@ esp_err_t test_screen_hardware_update(const bool pressed[BUTTON_COUNT],
     text(16, 248, radio_stream_status(), CYAN);
 #else
     const char *status = audio == AUDIO_RECORDING ? "MIC RECORDING (MAX 3s)" :
-                         audio == AUDIO_WAIT_RELEASE ? "RECORD FULL - RELEASE KEY2" :
+                         audio == AUDIO_WAIT_RELEASE ? "RECORD FULL - RELEASE B" :
                          audio == AUDIO_PLAYING ? "SPEAKER PLAYING" :
                          audio == AUDIO_ERROR ? "AUDIO ERROR - SEE SERIAL" :
-                         audio == AUDIO_WAIT_RESET ? "PLAY DONE - RELEASE KEY2" :
-                         "AUDIO READY - HOLD KEY2";
+                         audio == AUDIO_WAIT_RESET ? "PLAY DONE - RELEASE B" :
+                         "AUDIO READY - HOLD B";
     text(16, 248, status, audio == AUDIO_ERROR ? YELLOW : CYAN);
 #endif
     return flush_dynamic();
@@ -194,8 +194,8 @@ esp_err_t test_screen_audio_init(void) {
     rect(0, 0, 1, LCD_HEIGHT, WHITE);
     rect(LCD_WIDTH - 1, 0, 1, LCD_HEIGHT, WHITE);
     text(16, 14, "Minibox MIC TEST", WHITE);
-    text(16, 48, BUTTON_GPIO_LABELS, CYAN);
-    text(16, 288, "HOLD " RECORD_GPIO_LABEL " TO RECORD", WHITE);
+    text(16, 48, "A / B / X / Y", CYAN);
+    text(16, 288, "HOLD B TO RECORD", WHITE);
     ESP_RETURN_ON_ERROR(st7796_draw_rows(0, LCD_HEIGHT, s_frame), TAG, "initial frame");
     memcpy(s_sent, s_frame, LCD_WIDTH * LCD_HEIGHT * 2);
     s_audio_valid = false;
@@ -208,22 +208,22 @@ esp_err_t test_screen_audio_update(const bool pressed[BUTTON_COUNT], audio_phase
         return ESP_OK;
     }
     rect(1, 80, LCD_WIDTH - 2, 208, BLACK);
-    const int pins[BUTTON_COUNT] = {BUTTON_1_PIN, RECORD_BUTTON_PIN, BUTTON_3_PIN, BUTTON_4_PIN};
+    const char *labels[BUTTON_COUNT] = {"A", "B", "X", "Y"};
     for (int i = 0; i < BUTTON_COUNT; ++i) {
         int y = 86 + i * 35;
         rect(16, y, 25, 25, pressed[i] ? GREEN : GRAY);
         char label[48];
-        snprintf(label, sizeof(label), "GPIO%d %s%s", pins[i],
+        snprintf(label, sizeof(label), "%s %s%s", labels[i],
                  i == 1 ? "REC " : "",
                  pressed[i] ? "PRESSED" : "RELEASED");
         text(55, y, label, pressed[i] ? YELLOW : WHITE);
     }
     const char *status = audio == AUDIO_RECORDING ? "RECORDING (MAX 3s)" :
-                         audio == AUDIO_WAIT_RELEASE ? "FULL - RELEASE " RECORD_GPIO_LABEL :
+                         audio == AUDIO_WAIT_RELEASE ? "FULL - RELEASE B" :
                          audio == AUDIO_PLAYING ? "PLAYING RECORDING" :
                          audio == AUDIO_ERROR ? "AUDIO ERROR - SEE SERIAL" :
                          audio == AUDIO_WAIT_RESET ? "PLAY DONE - RELEASE" :
-                         "PRESS " RECORD_GPIO_LABEL " TO RECORD";
+                         "PRESS B TO RECORD";
     text(16, 247, status, audio == AUDIO_ERROR ? YELLOW : CYAN);
     ESP_RETURN_ON_ERROR(flush_dynamic(), TAG, "audio status");
     memcpy(s_audio_buttons, pressed, sizeof(s_audio_buttons));

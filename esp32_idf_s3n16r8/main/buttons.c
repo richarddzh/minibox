@@ -56,7 +56,7 @@ static void input_task(void *arg) {
             }
         }
         ESP_ERROR_CHECK(joystick_read(&s_stick));
-        int directions[] = {s_stick.direction_x, s_stick.direction_y};
+        int directions[] = {-s_stick.direction_x, s_stick.direction_y};
         int *previous[] = {&previous_x, &previous_y};
         int64_t *repeat[] = {&repeat_x, &repeat_y};
         for (unsigned axis = 0; axis < 2; ++axis) {

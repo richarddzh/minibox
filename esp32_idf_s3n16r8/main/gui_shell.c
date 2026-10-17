@@ -55,7 +55,7 @@ static void draw_status_bar(const gui_model_t *model) {
     char hhmm[6] = "--:--";
     if (time && strlen(time) >= 5) memcpy(hhmm, time, 5);
     ui_draw_text(224, STATUS_Y + 7, hhmm, 2, UI_COLOR_TEXT);
-    ui_draw_text(89, STATUS_Y + 9, "GPIO6 返回/首页", 1, UI_COLOR_MUTED);
+    ui_draw_text(89, STATUS_Y + 9, "X 返回/首页", 1, UI_COLOR_MUTED);
     draw_wifi_icon(294, STATUS_Y + 5,
                    model->wifi_connected || model->setup_mode);
 }
@@ -63,7 +63,7 @@ static void draw_status_bar(const gui_model_t *model) {
 static void render_launcher(void) {
     ui_fill_rect(0, 0, APP_UI_W, 32, UI_COLOR_NAVY);
     ui_draw_text(12, 8, "应用", 2, UI_COLOR_TEXT);
-    ui_draw_text(12, 34, "摇杆选择 · GPIO4 确认", 1, UI_COLOR_MUTED);
+    ui_draw_text(12, 34, "摇杆选择 · A 确认", 1, UI_COLOR_MUTED);
 
     const int card_w = 94;
     const int card_h = 70;
