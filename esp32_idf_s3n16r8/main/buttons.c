@@ -65,7 +65,7 @@ static void input_task(void *arg) {
             if (direction && (changed || now >= *repeat[axis])) {
                 /* Reserve queue capacity for key releases during network waits. */
                 if (uxQueueMessagesWaiting(s_events) < 16) {
-                    emit(axis == 0 ? (direction < 0 ? APP_INPUT_LEFT : APP_INPUT_RIGHT)
+                    emit(axis == 1 ? (direction < 0 ? APP_INPUT_LEFT : APP_INPUT_RIGHT)
                                    : (direction < 0 ? APP_INPUT_UP : APP_INPUT_DOWN));
                 }
                 *repeat[axis] = now + (changed ? 350 : 140);
