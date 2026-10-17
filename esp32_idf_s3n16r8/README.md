@@ -1,4 +1,53 @@
-# ESP32-S3 N16R8 PCB hardware test
+# Minibox ESP32-S3 N16R8
+
+默认运行从 Talking Alarm 迁移的完整应用：闲聊闹钟（豆包 ASR → Agent → TTS、
+聊天记录、手动闲聊、整点播报、安静模式）、24 个网络电台、Wi-Fi 扫描与密码输入、
+API 设置门户、SNTP 校时、俄罗斯方块和贪吃蛇。界面使用 **LVGL 8.4**，
+输出到原有 **ST7796 480×320**；硬件接线、屏幕驱动、PCF8563、
+INMP441/MAX98357、Flash/PSRAM 配置不变，不依赖参考目录。
+参考版本随机闲聊次数为 0，迁移后同样默认关闭，保留调度逻辑。
+
+## 默认应用操作
+
+摇杆仅负责上下左右导航，开机约 640 ms 内保持居中；不使用摇杆按压。
+GPIO4 短按确认，在闲聊中长按录音、松开发送；GPIO5 在闲聊中按住即可录音，
+松开发送，最长 10 秒。GPIO6 返回/主页，GPIO7 辅助确认（闲聊动作卡可请求闲聊）。
+音频使用 Core 1，网络和应用使用 Core 0。录音和播放严格半双工，
+64 KiB 软件音频环形缓冲放在 PSRAM，保留内部 RAM 给 I2S DMA，
+避免电台解码与 HTTPS 同时运行时出现 DMA 分配失败。
+释放当前 I2S0 通道后才切换方向，共用 GPIO39/40；GPIO47 仅播放时拉高，
+GPIO42 保留默认高阻。原始录放音回声测试仍可通过诊断模式使用。
+
+## 本地文件配置分区
+
+私密配置只放在 Git 忽略的 `config_data` 中，**不写入 C 头文件或默认配置**：
+
+| 文件 | 格式 |
+|---|---|
+| `config_data\wifi_config.txt` | 第 1 行 SSID，第 2 行 Wi-Fi 密码，末尾换行 |
+| `config_data\app_secrets.txt` | ASR、Agent、TTS API key 各一行，按此顺序，末尾换行 |
+
+从全新检出构建时，先自行创建这些文件；留空也可构建，启动后在设备设置中配置
+Wi-Fi，并进入 API 设置模式，连接 `Minibox-Setup`（接入密码 `minibox-setup`），
+浏览 `http://192.168.4.1/`。此门户仅手动启用，完成后在设备上退出。
+API URL、资源 ID、Bot ID 和音色在 `main\app_config.h` 中固定；
+ASR WebSocket 的固定主机和路径在 `doubao_asr_client.c`。
+HTTPS/WSS 使用证书包校验，不沿用参考工程的跳过证书验证设置。
+没有迁移参考工程的具体位置资料。
+
+配置使用独立 `storage` SPIFFS 分区（0xC10000，0x3F0000 字节），挂载到
+`/spiffs`；原 `fonts` 分区及应用分区地址不变。构建自动生成
+`build\storage.bin`；用户明确要求后执行 `idf.py -p COM8 flash` 才写入设备。
+**完整 flash 会覆盖设备上已保存的 Wi-Fi/API 配置，恢复为本地配置文件的内容**。
+仅更新应用、不覆盖配置时使用 `idf.py -p COM8 app-flash`（仍需明确授权烧录）。
+配置和镜像包含明文凭据；不要提交或分享 `config_data` 私密文件、`storage.bin`
+或包含配置的整包固件。普通 `idf.py build` 不会访问豆包服务或消费 API 配额。
+
+## 可选原始硬件诊断
+
+在 `idf.py menuconfig` → `Minibox` 启用
+`Boot the original hardware diagnostics instead of the LVGL apps`。
+以下测试说明仅适用于该模式；默认应用不会执行开机录放音或显示测试色条。
 
 当前固件配套 2026-10-09 载板改版，测试按钮、摇杆、麦克风、扬声器、
 PCF8563 RTC 和 ST7796 屏幕。开机显示 RGB/W/K/Y 色条、四键状态、
@@ -15,11 +64,11 @@ GPIO6、GPIO7 只显示按键状态，不触发录音。
 
 ## 动感101网络电台测试
 
-在 `idf.py menuconfig` → `Minibox hardware test` 启用
+在 `idf.py menuconfig` → `Minibox` 的硬件诊断模式中启用
 `Speaker test: play Donggan 101 instead of microphone recording`，
 并在同一菜单本地设置 Wi-Fi 名称和密码。密码只保存在 Git 忽略的
 `sdkconfig` 和构建产物中，不写入源码、默认配置或文档，不分享带凭据的固件。
-当前本地已启用此模式；新检出的默认配置仍为麦克风测试。
+该选项只影响硬件诊断，不影响默认应用的电台或语音功能。
 
 该模式只播放动感101，固定流地址为
 `https://lhttp.qtfm.cn/live/274/64k.mp3`，不切换其他电台。
@@ -52,7 +101,7 @@ INMP441 正面视角左列从上到下为 L/R、WS、SCK，右列为 GND、VCC�
 此处描述信号位置，不改变模块物理焊盘编号。
 
 直焊机械轴按下接地，必须使用 GPIO 内部上拉及低有效配置。若改接高有效模块，
-先在 `idf.py menuconfig` → `Minibox hardware test` 关闭
+先在 `idf.py menuconfig` → `Minibox` 关闭
 `GPIO4/5/6/7 buttons pressed at low level`，再构建烧录。不要让按钮
 OUT 超过 3.3 V；四路按钮共地。录音和回放共用 GPIO40/39 时钟线，
 固件先释放麦克风 I2S 通道再启用放大器。GPIO47 在回放时使能放大器；
@@ -93,6 +142,7 @@ idf.py build
 明确准备覆盖板上固件时才执行 `idf.py -p COM8 flash`，之后可执行
 `idf.py -p COM8 monitor` 查看串口（`Ctrl+]` 退出）。烧录会同时写入
 SPIFFS 字体分区；屏幕缺字或初始化失败时核对字体镜像、GPIO9 背光和
-供电。电台模式曾在 Wi-Fi 启动时触发欠压复位，本测试不启动 Wi-Fi；
+供电。电台模式曾在 Wi-Fi 启动时触发欠压复位；默认应用会启动 Wi-Fi，
+只有未启用电台测试的硬件诊断不启动 Wi-Fi。
 如仍发生 brownout，请先检查 USB 线、供电和外设负载，而非关闭欠压保护。
 构建或串口日志不能代替现场检查屏幕、麦克风和扬声器。

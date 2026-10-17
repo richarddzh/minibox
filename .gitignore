@@ -4,4 +4,5 @@
 **/managed_components/
 **/__pycache__/
 **/.playwright-mcp
-
+esp32_idf_s3n16r8/config_data/*
+!esp32_idf_s3n16r8/config_data/.gitkeep

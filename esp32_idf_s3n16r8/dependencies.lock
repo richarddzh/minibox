@@ -43,9 +43,17 @@ dependencies:
     source:
       type: idf
     version: 5.3.5
+  lvgl/lvgl:
+    component_hash: d7c1ac037ae6e85d94897f807d6e7ba0946a83e720074fc95a4f6241da9f9f53
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 8.4.0
 direct_dependencies:
 - espressif/esp_audio_codec
 - espressif/esp_lcd_st7796
-manifest_hash: cfa9a36445439d6320678e58a576281bff1ef5f95ba98b3a2836324ce6259c96
+- lvgl/lvgl
+manifest_hash: bdd28e1706c85dc2ae262e6e0453bac64a2eadd5f3bcede20ca8ac87e62f60ef
 target: esp32s3
 version: 2.0.0

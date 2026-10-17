@@ -11,4 +11,5 @@ typedef struct {
 } rtc_test_state_t;
 
 esp_err_t rtc_test_init(void);
+esp_err_t rtc_test_set(int year, int month, int day, int hour, int minute, int second);
 esp_err_t rtc_test_read(rtc_test_state_t *state);

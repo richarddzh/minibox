@@ -1,4 +1,11 @@
-menu "Minibox hardware test"
+menu "Minibox"
+
+config MINIBOX_HARDWARE_TEST
+    bool "Boot the original hardware diagnostics instead of the LVGL apps"
+    default n
+    help
+        Run the original screen, keys, joystick, PCF8563 and microphone test.
+        Leave disabled for chat, radio, settings and games.
 
 config MINIBOX_BUTTON_ACTIVE_LOW
     bool "GPIO4/5/6/7 buttons pressed at low level (internal pull-ups)"

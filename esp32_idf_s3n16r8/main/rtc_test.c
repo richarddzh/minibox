@@ -57,26 +57,42 @@ esp_err_t rtc_test_init(void) {
         const char *month = strstr(months, month_name);
         ESP_RETURN_ON_FALSE(month, ESP_ERR_INVALID_STATE, TAG, "parse build month");
         int month_number = (month - months) / 3 + 1;
-        static const int weekday_offsets[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
-        int weekday_year = year - (month_number < 3);
-        int weekday = (weekday_year + weekday_year / 4 - weekday_year / 100 +
-                       weekday_year / 400 + weekday_offsets[month_number - 1] + day) % 7;
-        uint8_t stop[] = {0, (data[0] & ~0x80) | 0x20};
-        ESP_RETURN_ON_ERROR(i2c_master_transmit(s_device, stop, sizeof(stop), 100),
-                            TAG, "stop RTC for setting");
-        const uint8_t time[] = {
-            2, encode_bcd(second), encode_bcd(minute), encode_bcd(hour),
-            encode_bcd(day), weekday, encode_bcd(month_number),
-            encode_bcd(year % 100),
-        };
-        ESP_RETURN_ON_ERROR(i2c_master_transmit(s_device, time, sizeof(time), 100),
+        ESP_RETURN_ON_ERROR(rtc_test_set(year, month_number, day, hour, minute, second),
                             TAG, "write RTC build time");
-        const uint8_t start[] = {0, data[0] & ~(0x20 | 0x80)};
-        ESP_RETURN_ON_ERROR(i2c_master_transmit(s_device, start, sizeof(start), 100),
-                            TAG, "start RTC");
     }
     ESP_LOGI(TAG, "PCF8563 at 0x51, SDA=%d SCL=%d; checking calendar and ticking",
              RTC_SDA_PIN, RTC_SCL_PIN);
+    return ESP_OK;
+}
+
+esp_err_t rtc_test_set(int year, int month, int day, int hour, int minute, int second) {
+    static const int days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    ESP_RETURN_ON_FALSE(s_device, ESP_ERR_INVALID_STATE, TAG, "RTC not initialized");
+    ESP_RETURN_ON_FALSE(year >= 1900 && year <= 2099 && month >= 1 && month <= 12 &&
+                        day >= 1 && hour >= 0 && hour < 24 && minute >= 0 && minute < 60 &&
+                        second >= 0 && second < 60,
+                        ESP_ERR_INVALID_ARG, TAG, "invalid calendar fields");
+    bool leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    ESP_RETURN_ON_FALSE(day <= days[month - 1] + (month == 2 && leap),
+                        ESP_ERR_INVALID_ARG, TAG, "invalid calendar date");
+    uint8_t data[9];
+    ESP_RETURN_ON_ERROR(read_registers(data), TAG, "read control before setting");
+    static const int offsets[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+    int y = year - (month < 3);
+    int weekday = (y + y / 4 - y / 100 + y / 400 + offsets[month - 1] + day) % 7;
+    const uint8_t stop[] = {0, (data[0] & ~0x80) | 0x20};
+    ESP_RETURN_ON_ERROR(i2c_master_transmit(s_device, stop, sizeof(stop), 100),
+                        TAG, "stop RTC for setting");
+    const uint8_t calendar[] = {
+        2, encode_bcd(second), encode_bcd(minute), encode_bcd(hour),
+        encode_bcd(day), weekday, encode_bcd(month) | (year < 2000 ? 0x80 : 0),
+        encode_bcd(year % 100),
+    };
+    esp_err_t written = i2c_master_transmit(s_device, calendar, sizeof(calendar), 100);
+    const uint8_t start[] = {0, data[0] & ~(0x20 | 0x80)};
+    ESP_RETURN_ON_ERROR(i2c_master_transmit(s_device, start, sizeof(start), 100),
+                        TAG, "restart RTC");
+    ESP_RETURN_ON_ERROR(written, TAG, "write calendar");
     return ESP_OK;
 }
 

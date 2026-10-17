@@ -8,6 +8,15 @@ disable-model-invocation: false
 
 # Build and flash Minibox
 
+Default firmware now runs the LVGL chat alarm, radio, settings and games.
+The original hardware test is selected with `CONFIG_MINIBOX_HARDWARE_TEST`.
+Hardware and wiring remain unchanged. Normal app credentials are local ignored
+`config_data/wifi_config.txt` (SSID, password) and `config_data/app_secrets.txt`
+(ASR, Agent, TTS keys), packed into a separate `storage` SPIFFS partition.
+API endpoints remain hardcoded. Do not print, commit or share private files/images.
+Full `idf.py flash` also overwrites saved device settings with `storage.bin`;
+`idf.py app-flash` updates only the application, after explicit flash authorization.
+
 Adapted from the `talking-alarm` build skill. Keep the workflow simple:
 use standard ESP-IDF commands, without extra build scripts or Python tests.
 
@@ -70,6 +79,7 @@ for routine changes. Use `idf.py reconfigure` only when configuration needs it.
 - `build\minibox_hardware_test.bin`
 - `build\minibox_hardware_test.elf`
 - `build\fonts.bin` (SPIFFS image; included automatically in `idf.py flash`)
+- `build\storage.bin` (private SPIFFS configuration; included in full flash)
 - Bootloader and partition data are flashed by `idf.py`; do not hand-code offsets.
 
 Keep generated outputs and local logs out of Git.
@@ -78,7 +88,7 @@ keep them checked in. Normal builds do not need a font download or conversion.
 The first build needs network access to resolve the official LCD component;
 later builds reuse the component manager cache.
 Keep `sdkconfig.defaults` ASCII-only.
-For hardware verification, inspect ST7796 initialization, RGB color bars and the displayed
+In hardware-test mode, inspect ST7796 initialization, RGB color bars and the displayed
 GPIO4/5/6/7 button states. Keep the joystick centered during the approximately
 640 ms startup calibration; observe GPIO1/2 raw ADC values and percentages.
 PCF8563 uses I2C address 0x51 on SDA15/SCL16; verify advancing seconds and

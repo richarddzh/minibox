@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sdkconfig.h"
+#include <stdint.h>
 
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 320
@@ -84,3 +85,45 @@ _Static_assert(JOYSTICK_K_PIN != AUDIO_BCLK_PIN &&
                JOYSTICK_K_PIN != RTC_SDA_PIN &&
                JOYSTICK_K_PIN != RTC_SCL_PIN,
                "Joystick button must not share I2S or RTC pins");
+
+/* Business logic uses the same physical peripherals as hardware diagnostics. */
+#define APP_UI_W 320
+#define APP_UI_H 240
+#define APP_ONBOARD_RGB_PIN ONBOARD_LED_PIN
+#define APP_BUTTON_DEBOUNCE_MS 30
+#define APP_BUTTON_LONG_PRESS_MS 800
+#define APP_MIC_BCLK_PIN AUDIO_BCLK_PIN
+#define APP_MIC_LRCK_PIN AUDIO_WS_PIN
+#define APP_MIC_DATA_PIN MIC_SD_PIN
+#define APP_SPK_BCLK_PIN AUDIO_BCLK_PIN
+#define APP_SPK_LRCK_PIN AUDIO_WS_PIN
+#define APP_SPK_DATA_PIN SPEAKER_DIN_PIN
+#define APP_VOICE_SAMPLE_RATE 16000U
+#define APP_MIC_CAPTURE_RATE 16000U
+#define APP_MIC_DIGITAL_GAIN 1
+#define APP_VOICE_MAX_RECORD_MS 10000U
+#define APP_AUDIO_ARENA_BYTES (64 * 1024)
+#define APP_WIFI_CONNECT_TIMEOUT_MS 20000U
+#define APP_WIFI_RETRY_MS 5000U
+#define APP_TIME_REFRESH_MS 86400000U
+
+#define APP_DOUBAO_ASR_URL \
+    "wss://openspeech.bytedance.com/api/v3/sauc/bigmodel_nostream"
+#define APP_DOUBAO_ASR_RESOURCE_ID "volc.seedasr.sauc.duration"
+#define APP_DOUBAO_AGENT_URL \
+    "https://open.feedcoopapi.com/agent_api/agent/chat/completion"
+#define APP_DOUBAO_AGENT_BOT_ID "7647087216547694086"
+#define APP_DOUBAO_TTS_URL \
+    "https://openspeech.bytedance.com/api/v3/tts/unidirectional"
+#define APP_DOUBAO_TTS_RESOURCE_ID "seed-icl-2.0"
+#define APP_DOUBAO_TTS_SPEAKER "S_yOMisdm22"
+#define APP_DOUBAO_TTS_SAMPLE_RATE APP_VOICE_SAMPLE_RATE
+
+#define APP_SPIFFS_BASE_PATH "/spiffs"
+#define APP_WIFI_CONFIG_PATH "/spiffs/wifi_config.txt"
+#define APP_WIFI_PROFILES_PATH "/spiffs/wifi_profiles.bin"
+#define APP_SECRETS_CONFIG_PATH "/spiffs/app_secrets.txt"
+#define APP_PROVISION_AP_SSID "Minibox-Setup"
+#define APP_PROVISION_AP_PASSWORD "minibox-setup"
+#define APP_PROVISION_AP_CHANNEL 1
+#define APP_PROVISION_AP_MAX_CONN 4

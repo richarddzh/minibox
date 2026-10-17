@@ -40,9 +40,13 @@
   MAX98357 DIN=GPIO41、LRC=GPIO39、BCLK=GPIO40、SD/MODE=GPIO47、
   GAIN=GPIO42。GPIO47 播放时为高、其余时间为低，GPIO42 默认高阻；
   两模块半双工共用时钟，先释放当前 I2S 通道再切换；
-  GPIO5 按住录音（最多 3 秒）、松开回放。
+  默认运行 LVGL 应用：GPIO4 确认/闲聊长按录音，GPIO5 闲聊按住录音
+  （最多 10 秒）后松开发送，GPIO6 返回，GPIO7 辅助确认。
+  `MINIBOX_HARDWARE_TEST` 保留原 GPIO5 最多 3 秒录音后松开回放。
   `MINIBOX_RADIO_TEST` 可改为只播放动感101，禁用麦克风以免争用 I2S；
-  Wi-Fi 密码仅放 Git 忽略的本地 `sdkconfig`，不写入源码或默认配置。
+  诊断电台的 Wi-Fi 密码仅放 Git 忽略的本地 `sdkconfig`。
+  默认应用的 Wi-Fi/API key 放 Git 忽略的 `config_data` 文件，
+  打包为独立 storage SPIFFS 分区；API URL 在源码固定，不提交凭据。
 - GPIO48 控制板载 WS2812 RGB LED；启动时发送黑色数据熄灯。
   不要只拉低引脚，也不要误关 GPIO9 的屏幕背光。
 - 逻辑电平及摇杆供电为 3.3 V，所有模块共地；屏幕 VCC 和背光驱动须遵守模块规格。

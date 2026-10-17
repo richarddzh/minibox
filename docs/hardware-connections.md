@@ -3,6 +3,13 @@
 本文集中维护 Minibox 的实际模块接线。修改硬件时同步更新本文和固件配置，
 避免文档与接线不一致。
 
+默认固件现为 LVGL 应用，**本文所有 GPIO 和电气连接保持不变**。
+GPIO4 确认/闲聊长按录音，GPIO5 闲聊按住录音后松开发送，GPIO6 返回，
+GPIO7 辅助确认；摇杆仅作方向导航，按压触点仍为 NC。
+下文的色条、按钮状态、开机录放音和 `TICK OK` 等测试操作适用于
+菜单 `Minibox` → `Boot the original hardware diagnostics instead of the LVGL apps`；
+应用模式的设置、文件配置分区和操作详见[固件说明](../esp32_idf_s3n16r8/README.md)。
+
 ## 主控：ESP32-S3 N16R8
 
 | 参数 | 值 |
@@ -165,7 +172,7 @@ R1/R2 各为 5.1 kΩ、0402、1%，独立从各 CC 拉到 GND，不得短接 CC1
 屏幕接线常量位于
 [`main/app_config.h`](../esp32_idf_s3n16r8/main/app_config.h)。
 SPI 时钟、色序、反色和背光极性位于
-`idf.py menuconfig` → `Minibox hardware test`。
+`idf.py menuconfig` → `Minibox`。
 
 ## 四个直焊机械键盘轴
 
@@ -249,7 +256,7 @@ SD 是麦克风输出，不能与放大器 DIN 相接。
 VIN 和 GND 必须有正确供电，确认 SD/MODE 没有被拉低（关断）。
 GPIO47 控制 SD/MODE，只在播放 I2S 数据时拉高；GPIO42 控制 GAIN，
 默认高阻，不对模块施加 3.3 V；如需提高增益，可在
-`idf.py menuconfig` → `Minibox hardware test` 启用 12 dB 设置。
+`idf.py menuconfig` → `Minibox` 启用 12 dB 设置。
 这两个引脚不能再用作摇杆输入；不应同时将 SD/MODE 硬接 3.3 V 或 GND。
 若实际模块并非 MAX98357A，请先核对其 SD/MODE 与 GAIN 的电气定义。
 供电和扬声器阻抗须符合模块额定值；不要直接由 ESP32 GPIO 驱动扬声器。
