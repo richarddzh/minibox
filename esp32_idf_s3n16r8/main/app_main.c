@@ -22,6 +22,7 @@
 #include "app_radio.h"
 #include "app_tetris.h"
 #include "app_snake.h"
+#include "app_nes.h"
 #include "wifi_creds.h"
 #include "wifi_provision.h"
 #include "wifi_time.h"
@@ -87,7 +88,7 @@ static void render_home(void);
 static void set_setup_ap(bool on);
 
 static bool audio_activity_busy(void) {
-    return voice_chat_busy() || chime_player_busy() || radio_player_busy() ||
+    return app_nes_busy() || voice_chat_busy() || chime_player_busy() || radio_player_busy() ||
            audio_io_phase() != AUDIO_PHASE_IDLE;
 }
 
@@ -122,6 +123,7 @@ static bool voice_face_visible(void) {
 }
 
 static void render_home(void) {
+    if (app_nes_busy()) return;
     voice_face_t f = voice_face_for(voice_chat_status());
     gui_model_t model = {
         .date = s_last_time.ok ? s_last_time.date : "",
@@ -362,8 +364,7 @@ static void poll_rtc_time(void) {
 }
 
 static bool trigger_chime(const char *reason, const char *time_arg) {
-    if (voice_chat_busy() || chime_player_busy() || radio_player_busy() ||
-        audio_io_phase() != AUDIO_PHASE_IDLE) {
+    if (audio_activity_busy()) {
         return false;
     }
     if (!wifi_time_has_credentials()) {
@@ -583,6 +584,11 @@ static void dispatch_gui_action(gui_action_t action) {
 }
 
 static void handle_input_event(app_input_event_t event) {
+    if (app_nes_captures_input()) {
+        s_button_press_ms = 0;
+        s_button_long_handled = false;
+        return;
+    }
     switch (event) {
     case APP_INPUT_LEFT:
         dispatch_gui_action(gui_shell_handle_input(GUI_INPUT_LEFT));
@@ -632,6 +638,7 @@ static void handle_input_event(app_input_event_t event) {
 }
 
 static void handle_button_long_press(void) {
+    if (app_nes_captures_input()) return;
     if (!buttons_pressed() || s_button_press_ms == 0 ||
         s_button_long_handled ||
         (uint32_t)(now_ms() - s_button_press_ms) <
@@ -705,6 +712,7 @@ static void initialise(void) {
         app_settings_descriptor(),
         app_tetris_descriptor(),
         app_snake_descriptor(),
+        app_nes_descriptor(),
     };
     gui_shell_init(apps, sizeof(apps) / sizeof(apps[0]), 0);
 
@@ -730,7 +738,7 @@ void app_main(void) {
     for (;;) {
         ui_task_handler();
         app_input_event_t ev;
-        if (buttons_poll(&ev)) {
+        while (buttons_poll(&ev)) {
             snprintf(s_btn_msg, sizeof(s_btn_msg), "%s",
                      buttons_event_name(ev));
             ESP_LOGI(TAG, "%s", s_btn_msg);

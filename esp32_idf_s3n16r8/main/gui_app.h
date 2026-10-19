@@ -9,6 +9,7 @@ typedef enum {
     GUI_ICON_RADIO,
     GUI_ICON_TETRIS,
     GUI_ICON_SNAKE,
+    GUI_ICON_NES,
 } gui_icon_t;
 
 typedef enum {

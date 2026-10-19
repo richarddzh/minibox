@@ -12,6 +12,10 @@
 不依赖该目录；默认启动 LVGL 应用，保留 GPIO4/5/6/7 四键及 GPIO1/2 摇杆。
 GPIO4 确认，闲聊中长按录音；GPIO5 在闲聊中按住录音、松开发送，
 GPIO6 返回，GPIO7 辅助确认。原录放音自检通过菜单切换。
+新增 [NES 模拟器](esp32_idf_s3n16r8/README.md#nes-游戏)，从本地 SPIFFS
+加载用户自备的 `.nes` 游戏；游戏内 A/B 为动作键、X/Y 为 Select/Start，
+同时长按 X+Y 退出，复用当前摇杆、ST7796 屏幕与 MAX98357 音频。
+实现取舍与验收边界见 [NES 详细计划](docs/nes-implementation-plan.md)。
 当前接线为 RTC SDA=GPIO15、SCL=GPIO16，INMP441 SD=GPIO21，
 MAX98357 GAIN=GPIO42、SD/MODE=GPIO47；GPIO17 悬空 NC，
 摇杆按压焊脚保持 NC，GPIO42 不用于摇杆按压。

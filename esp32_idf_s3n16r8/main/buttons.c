@@ -1,6 +1,7 @@
 #include "buttons.h"
 #include "app_config.h"
 #include "joystick.h"
+#include <stdatomic.h>
 
 #include "driver/gpio.h"
 #include "esp_check.h"
@@ -13,6 +14,7 @@ static const char *TAG = "buttons";
 static QueueHandle_t s_events;
 static joystick_state_t s_stick;
 static volatile bool s_main_pressed;
+static atomic_uchar s_gamepad;
 
 static void emit(app_input_event_t event) {
     if (xQueueSend(s_events, &event, 0) != pdTRUE) {
@@ -24,6 +26,8 @@ static void input_task(void *arg) {
     (void)arg;
     const int pins[] = {BUTTON_1_PIN, RECORD_BUTTON_PIN, BUTTON_3_PIN, BUTTON_4_PIN};
     joystick_button_t buttons[BUTTON_COUNT] = {0};
+    joystick_directions_t navigation = {0};
+    joystick_directions_t gameplay = {0};
     int previous_x = 0, previous_y = 0;
     int64_t repeat_x = 0, repeat_y = 0;
     TickType_t wake = xTaskGetTickCount();
@@ -56,7 +60,20 @@ static void input_task(void *arg) {
             }
         }
         ESP_ERROR_CHECK(joystick_read(&s_stick));
-        int directions[] = {-s_stick.direction_x, s_stick.direction_y};
+        navigation = joystick_screen_directions(s_stick.percent_x, s_stick.percent_y,
+                                                navigation, false);
+        gameplay = joystick_screen_directions(s_stick.percent_x, s_stick.percent_y,
+                                              gameplay, true);
+        int directions[] = {navigation.y, navigation.x};
+        uint8_t pad = 0;
+        for (unsigned i = 0; i < BUTTON_COUNT; ++i) {
+            if (buttons[i].pressed) pad |= 1U << i;
+        }
+        if (gameplay.y < 0) pad |= BUTTON_PAD_UP;
+        if (gameplay.y > 0) pad |= BUTTON_PAD_DOWN;
+        if (gameplay.x < 0) pad |= BUTTON_PAD_LEFT;
+        if (gameplay.x > 0) pad |= BUTTON_PAD_RIGHT;
+        atomic_store(&s_gamepad, pad);
         int *previous[] = {&previous_x, &previous_y};
         int64_t *repeat[] = {&repeat_x, &repeat_y};
         for (unsigned axis = 0; axis < 2; ++axis) {
@@ -101,6 +118,10 @@ bool buttons_poll(app_input_event_t *event) {
 
 bool buttons_pressed(void) {
     return s_main_pressed;
+}
+
+uint8_t buttons_gamepad(void) {
+    return atomic_load(&s_gamepad);
 }
 
 const char *buttons_event_name(app_input_event_t event) {

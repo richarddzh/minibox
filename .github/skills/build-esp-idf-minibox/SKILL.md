@@ -63,6 +63,11 @@ Only when flashing is explicitly requested:
 idf.py -p COM8 flash
 ```
 
+For an explicitly authorized storage-only update, use
+`$env:ESPPORT='COM8'; $env:ESPBAUD='460800'; idf.py storage-flash`.
+This custom target may ignore `idf.py -p`; `ESPPORT` prevents auto-selecting
+another serial device. It replaces all storage files, including settings and saves.
+
 To monitor an already flashed board:
 
 ```powershell

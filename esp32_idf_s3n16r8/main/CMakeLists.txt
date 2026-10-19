@@ -12,7 +12,8 @@ else()
         "radio_stations.c" "radio_player.c" "mem_log.c"
         "ui_screen.c" "ui_font.c" "ui_cat_avatar.c" "gui_shell.c"
         "app_chat_alarm.c" "app_settings.c" "app_radio.c"
-        "app_tetris.c" "app_snake.c")
+        "app_tetris.c" "app_snake.c" "app_nes.c")
+    set(app_requires nofrendo)
 endif()
 
 idf_component_register(
@@ -21,5 +22,5 @@ idf_component_register(
     REQUIRES esp_driver_gpio esp_driver_spi esp_driver_rmt esp_driver_i2s
              esp_driver_i2c esp_lcd esp_lcd_st7796 esp_adc esp_timer esp_psram
              spiffs esp_wifi esp_event esp_netif nvs_flash esp_http_client
-             esp_http_server esp-tls mbedtls esp_audio_codec lvgl
+             esp_http_server esp-tls mbedtls esp_audio_codec lvgl ${app_requires}
 )

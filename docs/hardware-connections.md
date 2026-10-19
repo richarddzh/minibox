@@ -9,6 +9,12 @@ GPIO7 辅助确认；摇杆仅作方向导航，按压触点仍为 NC。
 下文的色条、按钮状态、开机录放音和 `TICK OK` 等测试操作适用于
 菜单 `Minibox` → `Boot the original hardware diagnostics instead of the LVGL apps`；
 应用模式的设置、文件配置分区和操作详见[固件说明](../esp32_idf_s3n16r8/README.md)。
+NES 应用复用全部现有接线，不新增 SD 卡：ROM 存在 storage SPIFFS 中。
+游戏内 GPIO4/5 为 A/B，GPIO6/7 为 Select/Start，GPIO1/2 摇杆支持斜向；
+同时长按 GPIO6+7 一秒退出。NES 通过现有 MAX98357 通道播放 24 kHz 音频，
+不同时启用麦克风；详细文件准备及兼容范围见固件说明的 NES 游戏章节。
+应用摇杆导航使用主轴吸附，菜单不会因偏斜同时输出两个方向；NES 仅在副轴
+推幅足够时进入斜向，并带切换滞回。原始硬件诊断的轴读数不做该方向吸附。
 
 ## 主控：ESP32-S3 N16R8
 

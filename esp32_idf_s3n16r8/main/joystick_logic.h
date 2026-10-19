@@ -10,7 +10,15 @@ typedef struct {
     uint32_t presses;
 } joystick_button_t;
 
+typedef struct {
+    int x;
+    int y;
+} joystick_directions_t;
+
 bool joystick_center_valid(int center);
 int joystick_percent(int raw, int center, bool inverted);
 int joystick_direction(int percent, int previous);
+joystick_directions_t joystick_screen_directions(int percent_x, int percent_y,
+                                                joystick_directions_t previous,
+                                                bool allow_diagonal);
 void joystick_button_update(joystick_button_t *button, bool pressed, int64_t now_ms);
