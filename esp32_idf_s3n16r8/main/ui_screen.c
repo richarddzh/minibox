@@ -5,6 +5,7 @@
 #include "ui_font.h"
 #include "lvgl.h"
 
+#include <stdatomic.h>
 #include <string.h>
 #include "esp_heap_caps.h"
 #include "esp_log.h"
@@ -20,6 +21,7 @@
 #define PANEL_W 480
 #define PANEL_H 320
 #define DRAW_ROWS 24
+#define VIDEO_DIRTY_ROWS 16
 #define MAX_NODES 512
 
 typedef enum { NODE_RECT, NODE_LABEL, NODE_LINE, NODE_TRIANGLE, NODE_IMAGE } node_kind_t;
@@ -66,8 +68,16 @@ static esp_err_t s_transfer_error;
 static lv_obj_t *s_video;
 static lv_img_dsc_t s_video_image;
 static lv_color_t *s_video_pixels;
-static int s_video_width;
+static int s_video_width, s_video_height;
 static uint16_t s_video_x[PANEL_W], s_video_y[PANEL_H];
+static SemaphoreHandle_t s_video_lock;
+static uint8_t *s_video_indexed[2];
+static uint16_t s_video_palette[2][256];
+static unsigned s_video_front, s_video_back;
+static bool s_video_pending;
+static atomic_int s_video_error;
+
+static bool update_video(void);
 
 static int px(int x) { return x * PANEL_W / APP_UI_W; }
 static int py(int y) { return y * PANEL_H / APP_UI_H; }
@@ -89,6 +99,7 @@ static void flush_display(lv_disp_drv_t *driver, const lv_area_t *area,
         (const uint8_t *)pixels, lv_area_get_width(area) * 2);
     if (err != ESP_OK) {
         s_transfer_error = err;
+        if (s_video) atomic_store(&s_video_error, err);
         ESP_LOGE(TAG, "display transfer: %s", esp_err_to_name(err));
     }
 #if !LV_COLOR_16_SWAP
@@ -116,7 +127,9 @@ void ui_task_handler(void) {
             lv_obj_invalidate(s_root);
             s_transfer_error = ESP_OK;
         }
+        bool video_updated = update_video();
         lv_timer_handler();
+        if (video_updated) lv_refr_now(s_display);
     }
     xSemaphoreGiveRecursive(s_lock);
 }
@@ -139,11 +152,12 @@ esp_err_t ui_init(void) {
     err = st7796_init();
     if (err != ESP_OK) return err;
     s_lock = xSemaphoreCreateRecursiveMutex();
+    s_video_lock = xSemaphoreCreateMutex();
     s_nodes = heap_caps_calloc(MAX_NODES, sizeof(*s_nodes),
                               MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     s_pixels = heap_caps_malloc(PANEL_W * DRAW_ROWS * sizeof(lv_color_t),
                                MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
-    if (!s_lock || !s_nodes || !s_pixels) {
+    if (!s_lock || !s_video_lock || !s_nodes || !s_pixels) {
         err = ESP_ERR_NO_MEM;
         goto failed;
     }
@@ -177,6 +191,7 @@ failed:
     s_pixels = NULL;
     s_nodes = NULL;
     if (s_lock) { vSemaphoreDelete(s_lock); s_lock = NULL; }
+    if (s_video_lock) { vSemaphoreDelete(s_video_lock); s_video_lock = NULL; }
     return err;
 }
 
@@ -422,16 +437,23 @@ esp_err_t ui_video_begin(int width, int height, int display_width, int display_h
         xSemaphoreGiveRecursive(s_lock);
         return ESP_ERR_INVALID_STATE;
     }
+    xSemaphoreTake(s_video_lock, portMAX_DELAY);
     size_t bytes = (size_t)display_width * display_height * sizeof(lv_color_t);
     s_video_pixels = heap_caps_calloc(1, bytes, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
-    if (!s_video_pixels) {
-        xSemaphoreGiveRecursive(s_lock);
-        return ESP_ERR_NO_MEM;
+    for (int i = 0; i < 2; ++i) {
+        s_video_indexed[i] = heap_caps_malloc((size_t)width * height,
+                                            MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     }
-    s_video = lv_img_create(s_root);
+    if (s_video_pixels && s_video_indexed[0] && s_video_indexed[1])
+        s_video = lv_img_create(s_root);
     if (!s_video) {
         heap_caps_free(s_video_pixels);
         s_video_pixels = NULL;
+        for (int i = 0; i < 2; ++i) {
+            heap_caps_free(s_video_indexed[i]);
+            s_video_indexed[i] = NULL;
+        }
+        xSemaphoreGive(s_video_lock);
         xSemaphoreGiveRecursive(s_lock);
         return ESP_ERR_NO_MEM;
     }
@@ -442,6 +464,11 @@ esp_err_t ui_video_begin(int width, int height, int display_width, int display_h
     lv_obj_set_style_bg_color(s_root, lv_color_black(), 0);
     lv_obj_remove_style_all(s_video);
     s_video_width = width;
+    s_video_height = height;
+    s_video_front = 0;
+    s_video_back = 1;
+    s_video_pending = false;
+    atomic_store(&s_video_error, ESP_OK);
     /* Pixel-center nearest-neighbor sampling keeps indexed pixel art sharp. */
     for (int x = 0; x < display_width; ++x)
         s_video_x[x] = (2 * x + 1) * width / (2 * display_width);
@@ -453,51 +480,115 @@ esp_err_t ui_video_begin(int width, int height, int display_width, int display_h
     };
     lv_img_set_src(s_video, &s_video_image);
     lv_obj_center(s_video);
+    xSemaphoreGive(s_video_lock);
     xSemaphoreGiveRecursive(s_lock);
     return ESP_OK;
 }
 
+bool ui_video_ready(void) {
+    if (!s_video_lock || xSemaphoreTake(s_video_lock, 0) != pdTRUE) return false;
+    bool ready = s_video && !s_video_pending;
+    xSemaphoreGive(s_video_lock);
+    return ready;
+}
+
 esp_err_t ui_video_present(const uint8_t *pixels, int pitch, const uint16_t *palette) {
     if (!pixels || !palette) return ESP_ERR_INVALID_ARG;
-    if (xSemaphoreTakeRecursive(s_lock, 0) != pdTRUE) return ESP_ERR_NOT_FINISHED;
+    if (!s_video_lock) return ESP_ERR_INVALID_STATE;
+    if (xSemaphoreTake(s_video_lock, 0) != pdTRUE) return ESP_ERR_NOT_FINISHED;
     if (!s_video || pitch < s_video_width) {
-        xSemaphoreGiveRecursive(s_lock);
+        xSemaphoreGive(s_video_lock);
         return ESP_ERR_INVALID_STATE;
     }
-    esp_err_t err = s_transfer_error;
+    esp_err_t err = atomic_load(&s_video_error);
     if (err == ESP_OK) {
-        lv_color_t colors[256];
-        for (int i = 0; i < 256; ++i) {
-            uint16_t rgb = palette[i];
-#if LV_COLOR_16_SWAP
-            rgb = (rgb >> 8) | (rgb << 8);
-#endif
-            colors[i].full = rgb;
+        for (int y = 0; y < s_video_height; ++y) {
+            memcpy(s_video_indexed[s_video_back] + y * s_video_width,
+                   pixels + y * pitch, s_video_width);
         }
-        for (int y = 0; y < s_video_image.header.h; ++y) {
-            const uint8_t *source = pixels + s_video_y[y] * pitch;
-            for (int x = 0; x < s_video_image.header.w; ++x) {
-                s_video_pixels[y * s_video_image.header.w + x] = colors[source[s_video_x[x]]];
+        memcpy(s_video_palette[s_video_back], palette, sizeof(s_video_palette[0]));
+        s_video_pending = true;
+    }
+    xSemaphoreGive(s_video_lock);
+    return err;
+}
+
+/* Only the display task scales pixels. The producer owns the other indexed
+ * buffer, so neither conversion nor SPI transfers hold the mailbox lock. */
+static bool update_video(void) {
+    if (!s_video || xSemaphoreTake(s_video_lock, 0) != pdTRUE) return false;
+    if (!s_video_pending) {
+        xSemaphoreGive(s_video_lock);
+        return false;
+    }
+    unsigned previous = s_video_front;
+    s_video_front = s_video_back;
+    s_video_back = previous;
+    s_video_pending = false;
+    xSemaphoreGive(s_video_lock);
+
+    lv_color_t colors[256];
+    for (int i = 0; i < 256; ++i) {
+        uint16_t rgb = s_video_palette[s_video_front][i];
+#if LV_COLOR_16_SWAP
+        rgb = (rgb >> 8) | (rgb << 8);
+#endif
+        colors[i].full = rgb;
+    }
+    int width = s_video_image.header.w;
+    int height = s_video_image.header.h;
+    lv_area_t bounds;
+    lv_obj_get_coords(s_video, &bounds);
+    bool changed = false;
+    for (int top = 0; top < height; top += VIDEO_DIRTY_ROWS) {
+        int bottom = LV_MIN(top + VIDEO_DIRTY_ROWS, height);
+        int left = width, right = -1;
+        int first = bottom, last = top;
+        for (int y = top; y < bottom; ++y) {
+            const uint8_t *source = s_video_indexed[s_video_front] + s_video_y[y] * s_video_width;
+            lv_color_t *output = s_video_pixels + y * width;
+            for (int x = 0; x < width; ++x) {
+                lv_color_t pixel = colors[source[s_video_x[x]]];
+                if (output[x].full != pixel.full) {
+                    output[x] = pixel;
+                    left = LV_MIN(left, x);
+                    right = LV_MAX(right, x);
+                    first = LV_MIN(first, y);
+                    last = y;
+                }
             }
         }
-        lv_img_cache_invalidate_src(&s_video_image);
-        lv_obj_invalidate(s_video);
+        if (right >= left) {
+            lv_area_t dirty = {
+                .x1 = bounds.x1 + left, .x2 = bounds.x1 + right,
+                .y1 = bounds.y1 + first, .y2 = bounds.y1 + last,
+            };
+            lv_obj_invalidate_area(s_video, &dirty);
+            changed = true;
+        }
     }
-    xSemaphoreGiveRecursive(s_lock);
-    return err;
+    if (changed) lv_img_cache_invalidate_src(&s_video_image);
+    return changed;
 }
 
 void ui_video_end(void) {
     xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
+    xSemaphoreTake(s_video_lock, portMAX_DELAY);
     if (s_video) {
         lv_img_cache_invalidate_src(&s_video_image);
         lv_obj_del(s_video);
         s_video = NULL;
         heap_caps_free(s_video_pixels);
         s_video_pixels = NULL;
+        for (int i = 0; i < 2; ++i) {
+            heap_caps_free(s_video_indexed[i]);
+            s_video_indexed[i] = NULL;
+        }
+        s_video_pending = false;
         memset(&s_video_image, 0, sizeof(s_video_image));
         lv_obj_invalidate(s_root);
     }
+    xSemaphoreGive(s_video_lock);
     xSemaphoreGiveRecursive(s_lock);
 }
 

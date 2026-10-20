@@ -46,10 +46,12 @@ void ui_draw_text_box(int x, int y, int width, int height, const char *text,
 int ui_text_width(const char *text, uint8_t size);
 esp_err_t ui_flush(void);
 void ui_invalidate(void);
-/* Exclusive nearest-neighbor scaled indexed video through the same locked LVGL
- * driver. Call begin/end on the app task, present on the video producer.
- * Present returns ESP_ERR_NOT_FINISHED when LVGL is busy: skip video only. */
+/* Exclusive scaled video through the same LVGL driver. Begin/end on the app
+ * task; ready/present on one producer. Present copies into a bounded indexed
+ * mailbox; scaling and dirty-region refresh run on the display task.
+ * Present never waits for LCD transfer; a busy mailbox returns NOT_FINISHED. */
 esp_err_t ui_video_begin(int width, int height, int display_width, int display_height);
+bool ui_video_ready(void);
 esp_err_t ui_video_present(const uint8_t *pixels, int pitch, const uint16_t *palette);
 void ui_video_end(void);
 esp_err_t ui_draw_rgb565_bitmap(int x, int y, int width, int height,

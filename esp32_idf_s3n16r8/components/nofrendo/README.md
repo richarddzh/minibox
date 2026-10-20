@@ -71,7 +71,14 @@ independent APU task or Arduino driver. NES uses three 256-frame DMA buffers;
 DSN's `vid_flush`-coupled synthesis and zero-timeout I2S writes are deliberately
 not reused. Both local references output native 256x240 images; neither provides
 a 480x320 scaler. Minibox's pixel-center nearest-neighbor 426x320 conversion
-remains in the existing LVGL path, with a 15-fps video cap for 40 MHz SPI.
+remains in the existing LVGL path. The emulator copies only indexed frames
+into a two-buffer mailbox; the Core 0 display task scales and invalidates
+changed 16-row bands. Alternate-frame submissions target up to 30 fps for
+partial updates, not 30 full-screen transfers on a 40 MHz SPI bus.
+The producer skips PPU drawing when the mailbox is pending or less than two
+audio frames remain in the software ring, but still runs CPU/APU and input.
+Startup prefills four frames and the running software watermark is three
+frames; the shared audio driver and its DMA configuration are unchanged.
 
 The legacy APU and mapper implementations remain approximate. Cycle-timed
 register access does not make the envelope/frame sequencer cycle-exact.

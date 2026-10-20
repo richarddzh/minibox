@@ -27,10 +27,13 @@
 #define ROM_NAME_BYTES 25
 #define ROM_ROWS 5
 #define EXIT_HOLD_MS 1000
-#define VIDEO_FRAME_INTERVAL 4
+#define VIDEO_FRAME_INTERVAL 2
 #define VIDEO_DISPLAY_WIDTH 426
 #define VIDEO_DISPLAY_HEIGHT 320
-#define AUDIO_QUEUE_BYTES (2 * NES_FRAME_SAMPLES * sizeof(int16_t))
+#define AUDIO_FRAME_BYTES (NES_FRAME_SAMPLES * sizeof(int16_t))
+#define AUDIO_QUEUE_BYTES (3 * AUDIO_FRAME_BYTES)
+#define AUDIO_DRAW_MIN_BYTES (2 * AUDIO_FRAME_BYTES)
+#define AUDIO_PREFILL_FRAMES 4
 
 static const char *TAG = "nes";
 static char s_roms[ROM_LIMIT][ROM_NAME_BYTES];
@@ -110,6 +113,8 @@ static void emulation_task(void *argument) {
     int16_t samples[NES_FRAME_SAMPLES];
     unsigned frame = 0;
     unsigned submitted = 0, video_busy = 0;
+    unsigned audio_skips = 0;
+    int64_t max_frame_us = 0, max_present_us = 0;
     unsigned last_frame = 0;
     int64_t last_stats = esp_timer_get_time();
     while (!atomic_load(&s_stop)) {
@@ -125,8 +130,16 @@ static void emulation_task(void *argument) {
             }
         }
         uint8_t pad = buttons_gamepad();
-        bool draw = (frame % VIDEO_FRAME_INTERVAL) == 0;
+        bool draw = false;
+        if (audio_started && frame % VIDEO_FRAME_INTERVAL == 0) {
+            if (audio_io_spk_pending() < AUDIO_DRAW_MIN_BYTES) audio_skips++;
+            else if (!ui_video_ready()) video_busy++;
+            else draw = true;
+        }
+        int64_t frame_start = esp_timer_get_time();
         nes_engine_frame(pad, draw, samples);
+        int64_t frame_us = esp_timer_get_time() - frame_start;
+        if (frame_us > max_frame_us) max_frame_us = frame_us;
         for (int i = 0; i < NES_FRAME_SAMPLES; ++i) samples[i] /= 2;
         if (audio_started && audio_io_phase() != AUDIO_PHASE_PLAY) {
             err = ESP_ERR_INVALID_STATE;
@@ -137,7 +150,7 @@ static void emulation_task(void *argument) {
             break;
         }
         /* A short prefill absorbs scheduling jitter without a multi-second ring backlog. */
-        if (!audio_started && frame == 2) {
+        if (!audio_started && frame + 1 == AUDIO_PREFILL_FRAMES) {
             err = audio_io_start_playback(1500);
             if (err != ESP_OK) break;
             audio_started = true;
@@ -145,7 +158,10 @@ static void emulation_task(void *argument) {
         if (draw) {
             int pitch;
             const uint8_t *pixels = nes_engine_pixels(&pitch);
+            int64_t present_start = esp_timer_get_time();
             err = ui_video_present(pixels, pitch, nes_engine_palette());
+            int64_t present_us = esp_timer_get_time() - present_start;
+            if (present_us > max_present_us) max_present_us = present_us;
             if (err == ESP_ERR_NOT_FINISHED) {
                 video_busy++;
                 err = ESP_OK;
@@ -157,12 +173,16 @@ static void emulation_task(void *argument) {
         frame++;
         int64_t now = esp_timer_get_time();
         if (now - last_stats >= 5000000) {
-            ESP_LOGI(TAG, "emulation=%u fps, submitted=%u, video_busy=%u, audio_underrun=%" PRIu32,
+            ESP_LOGI(TAG, "emulation=%u fps, submitted=%u, video_busy=%u, audio_skips=%u, "
+                     "max_frame_us=%" PRId64 ", max_present_us=%" PRId64 ", audio_underrun=%" PRIu32,
                      (unsigned)((frame - last_frame) * 1000000ULL / (now - last_stats)),
-                     submitted, video_busy, audio_io_spk_underrun());
+                     submitted, video_busy, audio_skips, max_frame_us, max_present_us,
+                     audio_io_spk_underrun());
             last_stats = now;
             last_frame = frame;
             submitted = video_busy = 0;
+            audio_skips = 0;
+            max_frame_us = max_present_us = 0;
         }
         /* Let idle service the watchdog even when a ROM cannot keep up. */
         vTaskDelay(1);
