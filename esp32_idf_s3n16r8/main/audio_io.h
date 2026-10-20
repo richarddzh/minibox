@@ -35,6 +35,8 @@ esp_err_t audio_io_start_playback(uint32_t ack_timeout_ms);
 esp_err_t audio_io_stop_playback(uint32_t ack_timeout_ms);
 void      audio_io_abort(uint32_t timeout_ms);
 esp_err_t audio_io_prepare_speaker(uint32_t sample_rate, uint8_t channels);
+/* Small DMA queue for an interactive producer; radio/TTS retain the default. */
+esp_err_t audio_io_prepare_realtime_speaker(uint32_t sample_rate, uint8_t channels);
 
 // Main-side I/O. Block up to timeout_ms (0 = non-blocking).
 size_t audio_io_read_mic(uint8_t *dst, size_t maxlen, uint32_t timeout_ms);
@@ -49,3 +51,4 @@ uint32_t  audio_io_mic_overflow(void);
 uint32_t  audio_io_spk_underrun(void);
 size_t    audio_io_mic_available(void);
 size_t    audio_io_spk_free(void);
+size_t    audio_io_spk_pending(void);

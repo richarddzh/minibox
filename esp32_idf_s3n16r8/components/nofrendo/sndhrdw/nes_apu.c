@@ -24,6 +24,7 @@
 */
 
 #include <string.h>
+#include <stdint.h>
 #include <noftypes.h>
 #include <log.h>
 #include <nes_apu.h>
@@ -43,6 +44,43 @@
 
 /* active APU */
 static apu_t apu;
+static uint8 *frame_buffer;
+static int frame_samples, frame_position;
+static uint32 frame_start, frame_cycles;
+
+void apu_begin_frame(void *buffer, int num_samples, uint32 cpu_cycles)
+{
+   frame_buffer = buffer;
+   frame_samples = num_samples;
+   frame_position = 0;
+   frame_start = nes6502_getcycles(false);
+   frame_cycles = cpu_cycles;
+}
+
+void apu_sync(void)
+{
+   if (NULL == frame_buffer)
+      return;
+
+   /* Unsigned subtraction also handles the CPU cycle counter wrapping. */
+   uint32 elapsed = nes6502_getcycles(false) - frame_start;
+   int target = elapsed >= frame_cycles ? frame_samples
+      : (int) ((uint64_t) elapsed * frame_samples / frame_cycles);
+   if (target > frame_position)
+   {
+      apu_process(frame_buffer + frame_position * (apu.sample_bits / 8),
+                  target - frame_position);
+      frame_position = target;
+   }
+}
+
+void apu_end_frame(void)
+{
+   if (NULL != frame_buffer && frame_position < frame_samples)
+      apu_process(frame_buffer + frame_position * (apu.sample_bits / 8),
+                  frame_samples - frame_position);
+   frame_buffer = NULL;
+}
 
 /* look up table madness */
 static int32 decay_lut[16];
@@ -612,6 +650,7 @@ void apu_write(uint32 address, uint8 value)
 {  
    int chan;
 
+   apu_sync();
    switch (address)
    {
    /* rectangles */
@@ -829,6 +868,7 @@ uint8 apu_read(uint32 address)
 {
    uint8 value;
 
+   apu_sync();
    switch (address)
    {
    case APU_SMASK:
@@ -874,8 +914,6 @@ uint8 apu_read(uint32 address)
 
 void apu_process(void *buffer, int num_samples)
 {
-   static int32 prev_sample = 0;
-
    int16 *buf16;
    uint8 *buf8;
 
@@ -911,13 +949,13 @@ void apu_process(void *buffer, int num_samples)
 
             if (APU_FILTER_LOWPASS == apu.filter_type)
             {
-               accum += prev_sample;
+               accum += apu.prev_sample;
                accum >>= 1;
             }
             else
-               accum = (accum + accum + accum + prev_sample) >> 2;
+               accum = (accum + accum + accum + apu.prev_sample) >> 2;
 
-            prev_sample = next_sample;
+            apu.prev_sample = next_sample;
          }
 
          /* do clipping */
@@ -942,6 +980,8 @@ void apu_reset(void)
 {
    uint32 address;
 
+   frame_buffer = NULL;
+   apu.prev_sample = 0;
    /* initialize all channel members */
    for (address = 0x4000; address <= 0x4013; address++)
       apu_write(address, 0);

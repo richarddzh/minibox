@@ -51,7 +51,10 @@ GNU Library General Public License version 2 (COPYING.LIB).
 - 8 KiB battery RAM load/save keyed by full-ROM CRC32, with a temporary file
   and retained backup (not compatible with Anemoia's full-state format).
 - 24 kHz audio generated for every emulated frame, including frames not drawn.
-  Hardware audio, timing and LVGL output live in `main/app_nes.c`.
+  CPU-cycle synchronization before APU register reads/writes and at scanline
+  boundaries preserves intra-frame changes instead of synthesizing only the
+  final register state. Filter history belongs to the APU context and resets.
+  Hardware audio, buffer-paced timing and LVGL output live in `main/app_nes.c`.
 - Bytewise CPU word fetches for alignment, zero-page wrap, bank crossings
   and mirrored RAM; latched controller reads and high-strobe handling.
 - Correct partial-initialization cleanup, initial PPU nametable pointers,
@@ -61,7 +64,18 @@ GNU Library General Public License version 2 (COPYING.LIB).
   PRG/CHR banks when the mapping mode changes. MMC1 PRG is limited to 512 KiB;
   board variants needing more than the supported 8 KiB RAM are not covered.
 
-The legacy mapper implementations remain approximate. PAL, NES 2.0, VS/FDS,
+The audio adapter also borrows the small-DMA, complete-buffer blocking-output
+strategy observed in Anemoia's `setupI2SDAC` and `Apu2A03::writeBuffer`, not its
+independent APU task or Arduino driver. NES uses three 256-frame DMA buffers;
+400-sample frame remainders stay in the software ring until a block is complete.
+DSN's `vid_flush`-coupled synthesis and zero-timeout I2S writes are deliberately
+not reused. Both local references output native 256x240 images; neither provides
+a 480x320 scaler. Minibox's pixel-center nearest-neighbor 426x320 conversion
+remains in the existing LVGL path, with a 15-fps video cap for 40 MHz SPI.
+
+The legacy APU and mapper implementations remain approximate. Cycle-timed
+register access does not make the envelope/frame sequencer cycle-exact.
+PAL, NES 2.0, VS/FDS,
 SNSS save states and nonstandard RAM sizes are deliberately rejected or
 unavailable, rather than advertised as compatible.
 
@@ -69,6 +83,7 @@ The standalone C regression is `tests/test_nes_engine.c`, with host-only
 ESP error/log shims in `tests/nes_host`. Compile it with this component's
 CMake-listed C sources and private include directories using a native C
 compiler; run in an empty temporary directory. It generates its own original
-test cartridge, checks core output and file lifecycle, and removes generated
+test cartridge, checks core output, mid-frame audio register timing, buffer
+bounds and file lifecycle, and removes generated
 ROM/save files on success. It does not test LCD/I2S hardware or commercial games.
 The ordinary firmware build remains `idf.py build`, with no new build wrapper.

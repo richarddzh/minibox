@@ -52,6 +52,10 @@ static volatile uint32_t s_mic_overflow_chunks = 0;
 static volatile uint32_t s_spk_underrun = 0;
 static volatile uint32_t s_spk_sample_rate = APP_VOICE_SAMPLE_RATE;
 static volatile uint8_t  s_spk_channels = 1;
+static bool s_spk_realtime;
+
+#define REALTIME_DMA_DESCRIPTORS 3
+#define REALTIME_DMA_FRAMES 256
 
 // --- Reusable scratch buffers (kept off the task stack) -----------------
 // 与下面 install_mic / install_speaker 的 dma_frame_num 对齐：每次
@@ -158,8 +162,8 @@ static esp_err_t install_speaker(void) {
     uint32_t sample_rate = s_spk_sample_rate;
     i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(SPK_PORT, I2S_ROLE_MASTER);
     // Eight 512-frame descriptors retain about 93 ms at 44.1 kHz stereo.
-    chan_cfg.dma_desc_num = 8;
-    chan_cfg.dma_frame_num = 512;
+    chan_cfg.dma_desc_num = s_spk_realtime ? REALTIME_DMA_DESCRIPTORS : 8;
+    chan_cfg.dma_frame_num = s_spk_realtime ? REALTIME_DMA_FRAMES : 512;
     chan_cfg.auto_clear = true;
     esp_err_t err = i2s_new_channel(&chan_cfg, &s_spk_chan, NULL);
     if (err != ESP_OK) { ESP_LOGE(TAG, "spk new_channel: %s", esp_err_to_name(err)); return err; }
@@ -296,6 +300,9 @@ static esp_err_t write_speaker_chunk(size_t bytes, size_t *total) {
 static size_t read_speaker_chunk(size_t capacity) {
     size_t frame_bytes = s_spk_channels * sizeof(int16_t);
     size_t available = ring_available(&s_ring);
+    /* Preserve the remainder between NES frames until a DMA block is full.
+     * A partial block can be reclaimed by I2S before the next frame arrives. */
+    if (s_spk_realtime && !s_req_stop && available < capacity) return 0;
     if (available > capacity) available = capacity;
     return ring_read(&s_ring, s_i2s_write_buf, available - available % frame_bytes);
 }
@@ -318,6 +325,10 @@ static void do_playback(void) {
     int64_t last_data_ms = now_ms();
     size_t  total_bytes = 0;
     size_t chunk_size = sizeof(s_i2s_write_buf) / (s_spk_channels == 1 ? 2 : 1);
+    if (s_spk_realtime) chunk_size = REALTIME_DMA_FRAMES * s_spk_channels * sizeof(int16_t);
+    uint32_t starvation_ms = s_spk_realtime
+        ? (REALTIME_DMA_DESCRIPTORS * REALTIME_DMA_FRAMES * 1000U +
+           s_spk_sample_rate - 1) / s_spk_sample_rate : 5;
 
     while (!s_req_abort) {
         size_t got = read_speaker_chunk(chunk_size);
@@ -338,7 +349,7 @@ static void do_playback(void) {
             }
             break;
         }
-        if (now_ms() - last_data_ms > 5) {
+        if (now_ms() - last_data_ms > starvation_ms) {
             s_spk_underrun++;
             last_data_ms = now_ms();
         }
@@ -503,10 +514,17 @@ esp_err_t audio_io_prepare_speaker(uint32_t sample_rate, uint8_t channels) {
     }
     s_spk_sample_rate = sample_rate;
     s_spk_channels = channels;
+    s_spk_realtime = false;
     ring_reset(&s_ring);
     s_ring_role = RING_ROLE_SPK;
     __sync_synchronize();
     return ESP_OK;
+}
+
+esp_err_t audio_io_prepare_realtime_speaker(uint32_t sample_rate, uint8_t channels) {
+    esp_err_t err = audio_io_prepare_speaker(sample_rate, channels);
+    if (err == ESP_OK) s_spk_realtime = true;
+    return err;
 }
 
 size_t audio_io_read_mic(uint8_t *dst, size_t maxlen, uint32_t timeout_ms) {
@@ -575,4 +593,7 @@ size_t audio_io_mic_available(void) {
 }
 size_t audio_io_spk_free(void) {
     return s_ring_role == RING_ROLE_SPK ? ring_free_space(&s_ring) : 0;
+}
+size_t audio_io_spk_pending(void) {
+    return s_ring_role == RING_ROLE_SPK ? ring_available(&s_ring) : 0;
 }

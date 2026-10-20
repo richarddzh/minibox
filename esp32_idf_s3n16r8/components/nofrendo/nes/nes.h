@@ -106,7 +106,7 @@ extern void nes_setfiq(uint8 state);
 extern void nes_nmi(void);
 extern void nes_irq(void);
 extern void nes_emulate(void);
-extern void nes_renderframe(bool draw_flag);
+extern void nes_renderframe(bool draw_flag, void *samples, int num_samples);
 
 extern void nes_reset(int reset_type);
 

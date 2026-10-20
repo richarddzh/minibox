@@ -27,6 +27,10 @@
 #define ROM_NAME_BYTES 25
 #define ROM_ROWS 5
 #define EXIT_HOLD_MS 1000
+#define VIDEO_FRAME_INTERVAL 4
+#define VIDEO_DISPLAY_WIDTH 426
+#define VIDEO_DISPLAY_HEIGHT 320
+#define AUDIO_QUEUE_BYTES (2 * NES_FRAME_SAMPLES * sizeof(int16_t))
 
 static const char *TAG = "nes";
 static char s_roms[ROM_LIMIT][ROM_NAME_BYTES];
@@ -100,20 +104,28 @@ static void emulation_task(void *argument) {
         snprintf(s_worker_error, sizeof(s_worker_error), "%s", nes_engine_error());
         goto finished;
     }
-    err = audio_io_prepare_speaker(NES_AUDIO_RATE, 1);
+    err = audio_io_prepare_realtime_speaker(NES_AUDIO_RATE, 1);
     if (err != ESP_OK) goto finished;
     audio_prepared = true;
     int16_t samples[NES_FRAME_SAMPLES];
-    int64_t deadline = esp_timer_get_time();
     unsigned frame = 0;
-    unsigned remainder = 0;
     unsigned submitted = 0, video_busy = 0;
     unsigned last_frame = 0;
-    int64_t last_stats = deadline;
-    bool warned_slow = false;
+    int64_t last_stats = esp_timer_get_time();
     while (!atomic_load(&s_stop)) {
+        /* Let I2S be the clock: a wall-clock sleep can slowly drain the queue. */
+        if (audio_started) {
+            if (audio_io_phase() != AUDIO_PHASE_PLAY) {
+                err = ESP_ERR_INVALID_STATE;
+                break;
+            }
+            if (audio_io_spk_pending() >= AUDIO_QUEUE_BYTES) {
+                vTaskDelay(1);
+                continue;
+            }
+        }
         uint8_t pad = buttons_gamepad();
-        bool draw = (frame % 2) == 0;
+        bool draw = (frame % VIDEO_FRAME_INTERVAL) == 0;
         nes_engine_frame(pad, draw, samples);
         for (int i = 0; i < NES_FRAME_SAMPLES; ++i) samples[i] /= 2;
         if (audio_started && audio_io_phase() != AUDIO_PHASE_PLAY) {
@@ -152,19 +164,8 @@ static void emulation_task(void *argument) {
             last_frame = frame;
             submitted = video_busy = 0;
         }
-        deadline += 16666;
-        remainder += 40;
-        if (remainder >= 60) { deadline++; remainder -= 60; }
-        int64_t remaining = deadline - esp_timer_get_time();
-        if (remaining < -100000) {
-            if (!warned_slow) {
-                ESP_LOGW(TAG, "Emulation below real time; no unbounded frame catch-up");
-                warned_slow = true;
-            }
-            deadline = esp_timer_get_time();
-        }
-        TickType_t delay = remaining > 1000 ? pdMS_TO_TICKS(remaining / 1000) : 1;
-        vTaskDelay(delay ? delay : 1);
+        /* Let idle service the watchdog even when a ROM cannot keep up. */
+        vTaskDelay(1);
     }
 finished:
     if (audio_prepared) {
@@ -196,7 +197,8 @@ static void start_game(void) {
     }
     if (!s_done) s_done = xSemaphoreCreateBinary();
     if (!s_done) { report("Not enough memory for NES task"); return; }
-    esp_err_t err = ui_video_begin(NES_VIDEO_WIDTH, NES_VIDEO_HEIGHT);
+    esp_err_t err = ui_video_begin(NES_VIDEO_WIDTH, NES_VIDEO_HEIGHT,
+                                  VIDEO_DISPLAY_WIDTH, VIDEO_DISPLAY_HEIGHT);
     if (err != ESP_OK) { report(esp_err_to_name(err)); return; }
     snprintf(s_path, sizeof(s_path), "%s/%s", APP_SPIFFS_BASE_PATH, s_roms[s_selected]);
     s_worker_error[0] = 0;

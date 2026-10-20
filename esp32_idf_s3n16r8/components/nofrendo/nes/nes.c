@@ -292,12 +292,13 @@ void nes_nmi(void)
    nes6502_nmi();
 }
 
-void nes_renderframe(bool draw_flag)
+void nes_renderframe(bool draw_flag, void *samples, int num_samples)
 {
    int elapsed_cycles;
    mapintf_t *mapintf = nes.mmc->intf;
    int in_vblank = 0;
 
+   apu_begin_frame(samples, num_samples, (uint32) (262 * NES_SCANLINE_CYCLES));
    while (262 != nes.scanline)
    {
       ppu_scanline(nes.vidbuf, nes.scanline, draw_flag);
@@ -308,6 +309,7 @@ void nes_renderframe(bool draw_flag)
          elapsed_cycles = nes6502_execute(7);
          nes.scanline_cycles -= elapsed_cycles;
          nes_checkfiq(elapsed_cycles);
+         apu_sync();
 
          ppu_checknmi();
 
@@ -323,12 +325,14 @@ void nes_renderframe(bool draw_flag)
       elapsed_cycles = nes6502_execute((int) nes.scanline_cycles);
       nes.scanline_cycles -= (float) elapsed_cycles;
       nes_checkfiq(elapsed_cycles);
+      apu_sync();
 
       ppu_endscanline(nes.scanline);
       nes.scanline++;
    }
 
    nes.scanline = 0;
+   apu_end_frame();
 }
 
 static void mem_trash(uint8 *buffer, int length)

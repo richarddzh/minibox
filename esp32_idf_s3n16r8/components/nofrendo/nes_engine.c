@@ -97,8 +97,7 @@ esp_err_t nes_engine_close(void) {
 
 void nes_engine_frame(uint8_t controller, bool draw, int16_t *samples) {
     s_pad.data = controller;
-    nes_renderframe(draw);
-    s_machine->apu->process(samples, NES_FRAME_SAMPLES);
+    nes_renderframe(draw, samples, NES_FRAME_SAMPLES);
 }
 
 const uint8_t *nes_engine_pixels(int *pitch) {

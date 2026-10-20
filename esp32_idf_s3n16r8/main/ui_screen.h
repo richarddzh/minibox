@@ -46,10 +46,10 @@ void ui_draw_text_box(int x, int y, int width, int height, const char *text,
 int ui_text_width(const char *text, uint8_t size);
 esp_err_t ui_flush(void);
 void ui_invalidate(void);
-/* Exclusive native-resolution indexed video through the same locked LVGL
+/* Exclusive nearest-neighbor scaled indexed video through the same locked LVGL
  * driver. Call begin/end on the app task, present on the video producer.
  * Present returns ESP_ERR_NOT_FINISHED when LVGL is busy: skip video only. */
-esp_err_t ui_video_begin(int width, int height);
+esp_err_t ui_video_begin(int width, int height, int display_width, int display_height);
 esp_err_t ui_video_present(const uint8_t *pixels, int pitch, const uint16_t *palette);
 void ui_video_end(void);
 esp_err_t ui_draw_rgb565_bitmap(int x, int y, int width, int height,

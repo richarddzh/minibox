@@ -211,6 +211,7 @@ typedef struct apu_s
 
    uint8 mix_enable;
    int filter_type;
+   int32 prev_sample;
 
    double base_freq;
    float cycle_rate;
@@ -241,6 +242,9 @@ extern apu_t *apu_create(double base_freq, int sample_rate, int refresh_rate, in
 extern void apu_destroy(apu_t **apu);
 
 extern void apu_process(void *buffer, int num_samples);
+extern void apu_begin_frame(void *buffer, int num_samples, uint32 cpu_cycles);
+extern void apu_sync(void);
+extern void apu_end_frame(void);
 extern void apu_reset(void);
 
 extern void apu_setext(apu_t *apu, apuext_t *ext);

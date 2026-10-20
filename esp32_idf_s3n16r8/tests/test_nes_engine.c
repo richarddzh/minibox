@@ -103,6 +103,57 @@ static void test_frames_and_controller(void) {
     }
 }
 
+static void test_audio_register_timing(void) {
+    make_rom(0, 0, 1, 1);
+    assert(nes_engine_open("test_generated.nes") == ESP_OK);
+    nes_engine_frame(0, false, samples);
+    apu_t initial;
+    apu_getcontext(&initial);
+    initial.mix_enable = 1;
+    initial.filter_type = APU_FILTER_NONE;
+    apu_setcontext(&initial);
+    apu_write(0x4015, 1);
+    apu_write(0x4000, 0xBF);
+    apu_write(0x4002, 0xFD);
+    apu_write(0x4003, 0x08);
+    apu_getcontext(&initial);
+
+    int16_t expected[NES_FRAME_SAMPLES];
+    apu_process(expected, NES_FRAME_SAMPLES / 2);
+    apu_write(0x4015, 0);
+    apu_process(expected + NES_FRAME_SAMPLES / 2, NES_FRAME_SAMPLES / 2);
+
+    struct {
+        int16_t before;
+        int16_t pcm[NES_FRAME_SAMPLES];
+        int16_t after;
+    } output;
+    for (int i = 0; i < NES_FRAME_SAMPLES; ++i) output.pcm[i] = 0x5A5A;
+    output.before = output.after = 0x1234;
+    apu_setcontext(&initial);
+    apu_begin_frame(output.pcm, NES_FRAME_SAMPLES, 4000);
+    uint32_t start = nes6502_getcycles(false);
+    nes6502_execute(1000);
+    unsigned first = (nes6502_getcycles(false) - start) * NES_FRAME_SAMPLES / 4000;
+    assert(first > 0 && first < NES_FRAME_SAMPLES / 2);
+    assert(apu_read(0x4015) & 1);
+    assert(memcmp(output.pcm, expected, first * sizeof(int16_t)) == 0);
+    assert(output.pcm[first] == 0x5A5A);
+    nes6502_execute(1000);
+    unsigned middle = (nes6502_getcycles(false) - start) * NES_FRAME_SAMPLES / 4000;
+    assert(middle == NES_FRAME_SAMPLES / 2);
+    /* Disabling mid-frame must not erase the pulse already played. */
+    apu_write(0x4015, 0);
+    assert(memcmp(output.pcm, expected, middle * sizeof(int16_t)) == 0);
+    assert(output.pcm[middle] == 0x5A5A);
+    nes6502_execute(5000);
+    apu_sync();
+    apu_end_frame();
+    assert(memcmp(output.pcm, expected, sizeof(expected)) == 0);
+    assert(output.before == 0x1234 && output.after == 0x1234);
+    assert(nes_engine_close() == ESP_OK);
+}
+
 static void write_mapper(unsigned address, uint8_t value) {
     const map_memwrite *handler = nes_getcontextptr()->mmc->intf->mem_write;
     for (; handler && handler->write_func; ++handler) {
@@ -247,6 +298,8 @@ int main(void) {
     setbuf(stdout, NULL);
     puts("NES frame/controller regression");
     test_frames_and_controller();
+    puts("NES cycle-timed audio regression");
+    test_audio_register_timing();
     puts("NES mapper/CPU regression");
     test_mappers_and_cpu_edges();
     puts("NES storage/validation regression");

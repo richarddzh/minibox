@@ -66,6 +66,8 @@ static esp_err_t s_transfer_error;
 static lv_obj_t *s_video;
 static lv_img_dsc_t s_video_image;
 static lv_color_t *s_video_pixels;
+static int s_video_width;
+static uint16_t s_video_x[PANEL_W], s_video_y[PANEL_H];
 
 static int px(int x) { return x * PANEL_W / APP_UI_W; }
 static int py(int y) { return y * PANEL_H / APP_UI_H; }
@@ -410,15 +412,17 @@ void ui_invalidate(void) {
     xSemaphoreGiveRecursive(s_lock);
 }
 
-esp_err_t ui_video_begin(int width, int height) {
+esp_err_t ui_video_begin(int width, int height, int display_width, int display_height) {
     if (!s_display || width <= 0 || height <= 0 ||
-        width > PANEL_W || height > PANEL_H) return ESP_ERR_INVALID_ARG;
+        width > PANEL_W || height > PANEL_H || display_width <= 0 ||
+        display_height <= 0 || display_width > PANEL_W ||
+        display_height > PANEL_H) return ESP_ERR_INVALID_ARG;
     xSemaphoreTakeRecursive(s_lock, portMAX_DELAY);
     if (s_video || s_frame_open) {
         xSemaphoreGiveRecursive(s_lock);
         return ESP_ERR_INVALID_STATE;
     }
-    size_t bytes = (size_t)width * height * sizeof(lv_color_t);
+    size_t bytes = (size_t)display_width * display_height * sizeof(lv_color_t);
     s_video_pixels = heap_caps_calloc(1, bytes, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     if (!s_video_pixels) {
         xSemaphoreGiveRecursive(s_lock);
@@ -437,8 +441,14 @@ esp_err_t ui_video_begin(int width, int height) {
     s_background = -1;
     lv_obj_set_style_bg_color(s_root, lv_color_black(), 0);
     lv_obj_remove_style_all(s_video);
+    s_video_width = width;
+    /* Pixel-center nearest-neighbor sampling keeps indexed pixel art sharp. */
+    for (int x = 0; x < display_width; ++x)
+        s_video_x[x] = (2 * x + 1) * width / (2 * display_width);
+    for (int y = 0; y < display_height; ++y)
+        s_video_y[y] = (2 * y + 1) * height / (2 * display_height);
     s_video_image = (lv_img_dsc_t){
-        .header = {.cf = LV_IMG_CF_TRUE_COLOR, .w = width, .h = height},
+        .header = {.cf = LV_IMG_CF_TRUE_COLOR, .w = display_width, .h = display_height},
         .data = (const uint8_t *)s_video_pixels, .data_size = bytes,
     };
     lv_img_set_src(s_video, &s_video_image);
@@ -450,7 +460,7 @@ esp_err_t ui_video_begin(int width, int height) {
 esp_err_t ui_video_present(const uint8_t *pixels, int pitch, const uint16_t *palette) {
     if (!pixels || !palette) return ESP_ERR_INVALID_ARG;
     if (xSemaphoreTakeRecursive(s_lock, 0) != pdTRUE) return ESP_ERR_NOT_FINISHED;
-    if (!s_video || pitch < s_video_image.header.w) {
+    if (!s_video || pitch < s_video_width) {
         xSemaphoreGiveRecursive(s_lock);
         return ESP_ERR_INVALID_STATE;
     }
@@ -465,8 +475,9 @@ esp_err_t ui_video_present(const uint8_t *pixels, int pitch, const uint16_t *pal
             colors[i].full = rgb;
         }
         for (int y = 0; y < s_video_image.header.h; ++y) {
+            const uint8_t *source = pixels + s_video_y[y] * pitch;
             for (int x = 0; x < s_video_image.header.w; ++x) {
-                s_video_pixels[y * s_video_image.header.w + x] = colors[pixels[y * pitch + x]];
+                s_video_pixels[y * s_video_image.header.w + x] = colors[source[s_video_x[x]]];
             }
         }
         lv_img_cache_invalidate_src(&s_video_image);
