@@ -4,7 +4,7 @@ idf_component_register(
          "nes/nes_mmc.c" "nes/nesinput.c" "sndhrdw/nes_apu.c"
          "mappers/map000.c" "mappers/map001.c" "mappers/map002.c"
          "mappers/map003.c" "mappers/map004.c" "mappers/map007.c"
-         "mappers/map066.c"
+         "mappers/map066.c" "mappers/map112.c" "mappers/map178.c"
     INCLUDE_DIRS "include"
     PRIV_INCLUDE_DIRS "." "cpu" "nes" "sndhrdw" "libsnss"
     REQUIRES esp_common

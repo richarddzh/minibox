@@ -15,10 +15,25 @@ GPIO6 返回，GPIO7 辅助确认。原录放音自检通过菜单切换。
 新增 [NES 模拟器](esp32_idf_s3n16r8/README.md#nes-游戏)，从本地 SPIFFS
 加载用户自备的 `.nes` 游戏；游戏内 A/B 为动作键、X/Y 为 Select/Start，
 同时长按 X+Y 退出，复用当前摇杆、ST7796 屏幕与 MAX98357 音频。
+NES 画面为 **256×240 原生像素居中显示，不缩放**；目标 60 次/秒模拟、
+最高 30 fps 显示，实际流畅度仍需实板确认。
+支持 mapper 0、1、2、3、4、7、66、112、178、245；游戏文件用英文名称，
+已配置的标题在设备上中英文双行显示。ROM 和私密配置不随仓库提供。
+菜单四方向、NES 八方向；NES 直向容错更宽，斜向要求两轴各至少 40%、
+副轴/主轴至少 85%，边界隔离区不动作。
+[摇杆规则与前后区域图](esp32_idf_s3n16r8/README.md#nes-摇杆活跃区域旧版与新版)
+及 [ROM 列表](esp32_idf_s3n16r8/README.md#rom-来源记录) 见固件说明。
 实现取舍与验收边界见 [NES 详细计划](docs/nes-implementation-plan.md)。
 当前接线为 RTC SDA=GPIO15、SCL=GPIO16，INMP441 SD=GPIO21，
 MAX98357 GAIN=GPIO42、SD/MODE=GPIO47；GPIO17 悬空 NC，
 摇杆按压焊脚保持 NC，GPIO42 不用于摇杆按压。
+
+16 MiB Flash 已分配：启动/系统区域 64 KiB、应用 2 MiB、
+字体文件系统 10 MiB、游戏与配置文件系统 3.9375 MiB。
+分区内空闲空间不会自动借给其他分区；8 MiB PSRAM 是易失运行内存。
+完整布局与更新注意事项见 [显示与存储说明](docs/display-fonts.md#文件系统分区)。
+仅更新固件使用 `idf.py -p COM8 app-flash`；完整 `flash` 或 `storage-flash`
+会覆盖设备 storage 中的配置和存档，须先备份。
 
 模型文档中的导出和检查命令均在 `models` 目录执行：
 

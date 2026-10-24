@@ -16,9 +16,11 @@ rgb_t gui_pal[GUI_TOTALCOLORS];
 
 extern mapintf_t map0_intf, map1_intf, map2_intf, map3_intf;
 extern mapintf_t map4_intf, map7_intf, map66_intf;
+extern mapintf_t map112_intf, map178_intf, map245_intf;
 mapintf_t *mappers[] = {
     &map0_intf, &map1_intf, &map2_intf, &map3_intf,
-    &map4_intf, &map7_intf, &map66_intf, NULL,
+    &map4_intf, &map7_intf, &map66_intf,
+    &map112_intf, &map178_intf, &map245_intf, NULL,
 };
 
 void nes_engine_set_error(const char *format, ...) {

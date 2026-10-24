@@ -294,6 +294,103 @@ static void test_saves_and_rejection(void) {
     assert(nes_engine_close() == ESP_OK);
 }
 
+static void test_added_mappers(void) {
+    make_rom(112, 0, 8, 64);
+    assert(nes_engine_open("test_generated.nes") == ESP_OK);
+    expect_prg(0xC000, 14); expect_prg(0xE000, 15);
+    write_mapper(0x8000, 0); write_mapper(0xA000, 5);
+    expect_prg(0x8000, 5);
+    write_mapper(0x8000, 1); write_mapper(0xA000, 9);
+    expect_prg(0xA000, 9);
+    write_mapper(0x8000, 2); write_mapper(0xA000, 7);
+    expect_chr(0, 6); expect_chr(0x400, 7);
+    write_mapper(0x8000, 3); write_mapper(0xA000, 11);
+    expect_chr(0x800, 10); expect_chr(0xC00, 11);
+    for (unsigned i = 4; i < 8; ++i) {
+        write_mapper(0x8000, i); write_mapper(0xA000, i + 1);
+    }
+    for (unsigned i = 4; i < 8; ++i) {
+        write_mapper(0xC000, 1 << i);
+        for (unsigned j = 4; j < 8; ++j)
+            expect_chr(0x1000 + (j - 4) * 0x400, j + 1 + (i == j ? 256 : 0));
+    }
+    ppu_t ppu;
+    write_mapper(0xE000, 1);
+    ppu_getcontext(&ppu);
+    assert(ppu.page[8] + 0x2000 == ppu.page[9] + 0x2400);
+    write_mapper(0xE000, 0);
+    ppu_getcontext(&ppu);
+    assert(ppu.page[8] + 0x2000 == ppu.page[10] + 0x2800);
+    assert(nes_engine_close() == ESP_OK);
+
+    make_rom(245, 0, 64, 0);
+    assert(nes_engine_open("test_generated.nes") == ESP_OK);
+    expect_prg(0xC000, 62); expect_prg(0xE000, 63);
+    write_mapper(0x8000, 6); write_mapper(0x8001, 5);
+    write_mapper(0x8000, 7); write_mapper(0x8001, 9);
+    write_mapper(0x8000, 0); write_mapper(0x8001, 2);
+    expect_prg(0x8000, 69); expect_prg(0xA000, 73);
+    expect_prg(0xC000, 126); expect_prg(0xE000, 127);
+    expect_chr(0, 0); expect_chr(0x1000, 4);
+    write_mapper(0x8000, 0xC0);
+    expect_prg(0x8000, 126); expect_prg(0xC000, 69);
+    expect_chr(0, 4); expect_chr(0x1000, 0);
+    write_mapper(0x8001, 0);
+    expect_prg(0x8000, 62); expect_prg(0xC000, 5);
+    assert(nes_engine_close() == ESP_OK);
+    make_rom(245, 0, 8, 0);
+    assert(nes_engine_open("test_generated.nes") == ESP_OK);
+    expect_prg(0xC000, 14); expect_prg(0xE000, 15);
+    write_mapper(0x8000, 0); write_mapper(0x8001, 2);
+    expect_prg(0xC000, 14); expect_prg(0xE000, 15);
+    assert(nes_engine_close() == ESP_OK);
+    make_rom(245, 0, 8, 2);
+    assert(nes_engine_open("test_generated.nes") == ESP_OK);
+    write_mapper(0x8000, 2); write_mapper(0x8001, 10);
+    expect_chr(0x1000, 10);
+    assert(nes_engine_close() == ESP_OK);
+
+    make_rom(178, 2, 32, 0);
+    patch_file(8, 4);
+    assert(nes_engine_open("test_generated.nes") == ESP_OK);
+    assert(nes_getcontextptr()->rominfo->sram_banks == 32);
+    expect_prg(0x8000, 0); expect_prg(0xC000, 2);
+    write_mapper(0x4802, 1); write_mapper(0x4801, 3);
+    expect_prg(0x8000, 20); expect_prg(0xC000, 22);
+    write_mapper(0x4800, 4);
+    expect_prg(0x8000, 22); expect_prg(0xC000, 22);
+    write_mapper(0x4800, 2);
+    expect_prg(0x8000, 22); expect_prg(0xC000, 30);
+    write_mapper(0x4800, 6); write_mapper(0x4801, 2);
+    expect_prg(0x8000, 20); expect_prg(0xC000, 28);
+    expect_chr(0, 0); expect_chr(0x1C00, 7);
+    for (int bank = 0; bank < 4; ++bank) {
+        write_mapper(0x4FFF, bank);
+        nes6502_context cpu;
+        nes6502_getcontext(&cpu);
+        assert(cpu.mem_page[6] == nes_getcontextptr()->rominfo->sram + bank * 8192);
+        assert(cpu.mem_page[7] == cpu.mem_page[6] + 4096);
+        cpu.mem_page[6][0] = 0xA0 + bank;
+        cpu.mem_page[7][4095] = 0xB0 + bank;
+    }
+    unsigned crc = nes_getcontextptr()->rominfo->crc32;
+    assert(nes_engine_close() == ESP_OK);
+    assert(nes_engine_open("test_generated.nes") == ESP_OK);
+    for (int bank = 0; bank < 4; ++bank) {
+        write_mapper(0x4803, bank);
+        nes6502_context cpu;
+        nes6502_getcontext(&cpu);
+        assert(cpu.mem_page[6][0] == 0xA0 + bank);
+        assert(cpu.mem_page[7][4095] == 0xB0 + bank);
+    }
+    assert(nes_engine_close() == ESP_OK);
+    char save[40], backup[44];
+    snprintf(save, sizeof(save), "nes_%08x.sav", crc);
+    snprintf(backup, sizeof(backup), "%s.bak", save);
+    assert(remove(save) == 0 && remove(backup) == 0);
+    assert(remove("test_generated.nes") == 0);
+}
+
 int main(void) {
     setbuf(stdout, NULL);
     puts("NES frame/controller regression");
@@ -302,6 +399,8 @@ int main(void) {
     test_audio_register_timing();
     puts("NES mapper/CPU regression");
     test_mappers_and_cpu_edges();
+    puts("NES 112/178/245 mapper and banked-save regression");
+    test_added_mappers();
     puts("NES storage/validation regression");
     test_saves_and_rejection();
     puts("NES core: CPU/PPU/APU, controller latch, mapper modes, saves, rejection and 40 reloads passed.");

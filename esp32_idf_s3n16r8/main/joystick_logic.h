@@ -3,6 +3,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define JOYSTICK_AXIS_DIFFERENCE_THRESHOLD 15
+#define JOYSTICK_AXIS_RATIO_PERCENT 150
+#define JOYSTICK_GAME_AXIS_DIFFERENCE_THRESHOLD 10
+#define JOYSTICK_GAME_AXIS_RATIO_PERCENT 125
+#define JOYSTICK_DIAGONAL_MIN_PERCENT 40
+#define JOYSTICK_DIAGONAL_RATIO_PERCENT 85
+
 typedef struct {
     bool candidate;
     bool pressed;

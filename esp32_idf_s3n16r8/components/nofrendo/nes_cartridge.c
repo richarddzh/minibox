@@ -13,7 +13,6 @@
 #include "esp_heap_caps.h"
 #endif
 
-#define SRAM_BYTES 8192
 #define MAX_ROM_BYTES (2 * 1024 * 1024)
 
 static void *rom_alloc(size_t bytes) {
@@ -54,10 +53,11 @@ static bool load_sram(rominfo_t *rom) {
         nes_engine_set_error("Cannot read battery save (%d)", errno);
         return false;
     }
-    bool ok = fread(rom->sram, 1, SRAM_BYTES, file) == SRAM_BYTES;
+    size_t bytes = (size_t)rom->sram_banks * 1024;
+    bool ok = fread(rom->sram, 1, bytes, file) == bytes;
     ok = ok && fgetc(file) == EOF && !ferror(file);
     if (fclose(file) != 0) ok = false;
-    if (!ok) nes_engine_set_error("Invalid battery save (expected 8192 bytes)");
+    if (!ok) nes_engine_set_error("Invalid battery save (expected %u bytes)", (unsigned)bytes);
     return ok;
 }
 
@@ -71,7 +71,8 @@ esp_err_t nes_cartridge_save(void) {
         nes_engine_set_error("Cannot create battery save (%d)", errno);
         return ESP_FAIL;
     }
-    bool ok = fwrite(rom->sram, 1, SRAM_BYTES, file) == SRAM_BYTES;
+    size_t bytes = (size_t)rom->sram_banks * 1024;
+    bool ok = fwrite(rom->sram, 1, bytes, file) == bytes;
     if (fclose(file) != 0) ok = false;
     if (!ok) {
         nes_engine_set_error("Battery save write failed; storage may be full");
@@ -129,14 +130,15 @@ rominfo_t *rom_load(const char *filename) {
         nes_engine_set_error("NES 2.0 is not supported");
         goto failed;
     }
-    if ((header[7] & 0x0f) || (header[9] & 1) || header[8] > 1 ||
+    unsigned mapper = (header[6] >> 4) | (header[7] & 0xf0);
+    if ((header[7] & 0x0f) || (header[9] & 1) ||
+        header[8] > (mapper == 178 ? 4 : 1) ||
         header[10] || header[11] || header[12] || header[13] || header[14] || header[15]) {
-        nes_engine_set_error("Requires clean NTSC iNES 1.0 (8 KiB RAM)");
+        nes_engine_set_error("Requires clean NTSC iNES 1.0 with supported RAM size");
         goto failed;
     }
-    unsigned mapper = (header[6] >> 4) | (header[7] & 0xf0);
     if (!mmc_peek(mapper)) {
-        nes_engine_set_error("Mapper %u not supported (0,1,2,3,4,7,66)", mapper);
+        nes_engine_set_error("Mapper %u not supported (0,1,2,3,4,7,66,112,178,245)", mapper);
         goto failed;
     }
     size_t prg_bytes = (size_t)header[4] * 16384;
@@ -159,14 +161,14 @@ rominfo_t *rom_load(const char *filename) {
     strcpy(rom->filename, filename);
     rom->rom_banks = header[4];
     rom->vrom_banks = header[5];
-    rom->sram_banks = 8;
+    rom->sram_banks = mapper == 178 ? 32 : 8;
     rom->vram_banks = 1;
     rom->mapper_number = mapper;
     rom->mirror = (header[6] & 1) ? MIRROR_VERT : MIRROR_HORIZ;
     if (header[6] & 2) rom->flags |= ROM_FLAG_BATTERY;
     if (header[6] & 4) rom->flags |= ROM_FLAG_TRAINER;
     if (header[6] & 8) rom->flags |= ROM_FLAG_FOURSCREEN;
-    rom->sram = calloc(1, SRAM_BYTES);
+    rom->sram = calloc(rom->sram_banks, 1024);
     rom->rom = rom_alloc(prg_bytes);
     if (chr_bytes) rom->vrom = rom_alloc(chr_bytes);
     else rom->vram = calloc(1, 8192);

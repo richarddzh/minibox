@@ -41,12 +41,23 @@ static uint8 banks[8];
 
 static void map4_sync(void)
 {
-   int fixed = mmc_getinfo()->rom_banks * 2 - 2;
-   mmc_bankrom(8, 0x8000, (command & 0x40) ? fixed : (banks[6] & 0x3F));
-   mmc_bankrom(8, 0xA000, banks[7] & 0x3F);
-   mmc_bankrom(8, 0xC000, (command & 0x40) ? (banks[6] & 0x3F) : fixed);
-   mmc_bankrom(8, 0xE000, MMC_LASTBANK);
+   bool waixing = mmc_getinfo()->mapper_number == 245;
+   int outer = waixing && (banks[0] & 2) ? 0x40 : 0;
+   int last = mmc_getinfo()->rom_banks * 2 - 1;
+   if (waixing && last >= 0x3F) last = outer | 0x3F;
+   int bank6 = outer | (banks[6] & 0x3F);
+   mmc_bankrom(8, 0x8000, (command & 0x40) ? last - 1 : bank6);
+   mmc_bankrom(8, 0xA000, outer | (banks[7] & 0x3F));
+   mmc_bankrom(8, 0xC000, (command & 0x40) ? bank6 : last - 1);
+   mmc_bankrom(8, 0xE000, last);
    vrombase = (command & 0x80) ? 0x1000 : 0;
+   /* Mapper 245 keeps CHR RAM in fixed 4 KiB halves, with MMC3 inversion. */
+   if (waixing && !mmc_getinfo()->vrom_banks)
+   {
+      mmc_bankvrom(4, vrombase, 0);
+      mmc_bankvrom(4, vrombase ^ 0x1000, 1);
+      return;
+   }
    mmc_bankvrom(2, vrombase, banks[0] >> 1);
    mmc_bankvrom(2, vrombase ^ 0x0800, banks[1] >> 1);
    for (int i = 2; i < 6; ++i)
@@ -184,6 +195,11 @@ mapintf_t map4_intf =
    NULL, /* memory read structure */
    map4_memwrite, /* memory write structure */
    NULL /* external sound device */
+};
+
+mapintf_t map245_intf = {
+   .number = 245, .name = "Waixing MMC3",
+   .init = map4_init, .hblank = map4_hblank, .mem_write = map4_memwrite,
 };
 
 /*

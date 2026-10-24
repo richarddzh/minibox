@@ -3,7 +3,7 @@
 The CPU, PPU, APU, bitmap and mapper sources are vendored from
 [espressif/esp32-nesemu](https://github.com/espressif/esp32-nesemu),
 revision `693e378` (local reference `C:\gitroot\esp32-nesemu`).
-Only mappers 0, 1, 2, 3, 4, 7 and 66 are compiled. No ROMs, old ESP32
+Mappers 0, 1, 2, 3, 4, 7, 66, 112, 178 and 245 are compiled. No ROMs, old ESP32
 LCD/controller drivers, Arduino dependency or external checkout is required.
 
 [Shim06/Anemoia-ESP32](https://github.com/Shim06/Anemoia-ESP32), revision
@@ -48,8 +48,8 @@ GNU Library General Public License version 2 (COPYING.LIB).
   the legacy global timer/main loop; restored 256x240 bitmap with overdraw.
 - Checked NTSC iNES file loading, independent PRG/CHR ownership, trainer
   loading, unsupported-format errors, PSRAM ROM/bitmap allocation.
-- 8 KiB battery RAM load/save keyed by full-ROM CRC32, with a temporary file
-  and retained backup (not compatible with Anemoia's full-state format).
+- 8 KiB battery RAM load/save (32 KiB for mapper 178) keyed by full-ROM CRC32,
+  with a temporary file and retained backup, not Anemoia's full-state format.
 - 24 kHz audio generated for every emulated frame, including frames not drawn.
   CPU-cycle synchronization before APU register reads/writes and at scanline
   boundaries preserves intra-frame changes instead of synthesizing only the
@@ -62,7 +62,32 @@ GNU Library General Public License version 2 (COPYING.LIB).
   snapshotting the sprite clipping flag across mapper callbacks.
 - CHR-ROM write protection, banked CHR-RAM, and resynchronizing MMC1/MMC3
   PRG/CHR banks when the mapping mode changes. MMC1 PRG is limited to 512 KiB;
-  board variants needing more than the supported 8 KiB RAM are not covered.
+  MMC1 board variants needing more than 8 KiB RAM are not covered.
+
+## Additional mapper references
+
+Register behavior was cross-checked against these mature GitHub implementations:
+
+| Mapper | Mesen2 at `b9fa69ddc6d0a331fb103fdb5eef6904305703c2` | FCEUX at `ac7c6cb643dd788daed2b6b8a31fe91d369a4a27` |
+|---|---|---|
+| 112 | [Mapper112.h](https://github.com/SourMesen/Mesen2/blob/b9fa69ddc6d0a331fb103fdb5eef6904305703c2/Core/NES/Mappers/Ntdec/Mapper112.h) | [112.cpp](https://github.com/TASEmulators/fceux/blob/ac7c6cb643dd788daed2b6b8a31fe91d369a4a27/src/boards/112.cpp) |
+| 178 | [Waixing178.h](https://github.com/SourMesen/Mesen2/blob/b9fa69ddc6d0a331fb103fdb5eef6904305703c2/Core/NES/Mappers/Waixing/Waixing178.h) | [178.cpp](https://github.com/TASEmulators/fceux/blob/ac7c6cb643dd788daed2b6b8a31fe91d369a4a27/src/boards/178.cpp) |
+| 245 | [MMC3_245.h](https://github.com/SourMesen/Mesen2/blob/b9fa69ddc6d0a331fb103fdb5eef6904305703c2/Core/NES/Mappers/Mmc3Variants/MMC3_245.h) | Existing Minibox MMC3 implementation |
+
+The adapters implement the observed register/banking rules using Nofrendo's
+own APIs; no Mesen2/FCEUX source files, emulator infrastructure or ROMs are
+vendored. Existing license notices remain unchanged.
+112 implements two 8 KiB PRG windows, two 2 KiB and four 1 KiB CHR windows,
+outer CHR bits and mirroring. 178 implements four PRG modes, register mirrors
+at $4800-$4FFF and four 8 KiB RAM banks; battery saves include all 32 KiB.
+178 education-board speech hardware and sports sensors are not emulated.
+245 reuses the existing MMC3 register/scanline-IRQ path, adding the 512 KiB
+PRG outer bit and fixed, invertible CHR-RAM halves. Its IRQ accuracy remains
+that of the old core, not Mesen2's cycle-level MMC3 implementation.
+Generated-cartridge regression covers bank/mode changes, CHR-ROM and CHR-RAM,
+small/large 245 PRG images and persistence of all four 178 RAM banks.
+
+## Video and audio
 
 The audio adapter also borrows the small-DMA, complete-buffer blocking-output
 strategy observed in Anemoia's `setupI2SDAC` and `Apu2A03::writeBuffer`, not its
@@ -70,15 +95,25 @@ independent APU task or Arduino driver. NES uses three 256-frame DMA buffers;
 400-sample frame remainders stay in the software ring until a block is complete.
 DSN's `vid_flush`-coupled synthesis and zero-timeout I2S writes are deliberately
 not reused. Both local references output native 256x240 images; neither provides
-a 480x320 scaler. Minibox's pixel-center nearest-neighbor 426x320 conversion
-remains in the existing LVGL path. The emulator copies only indexed frames
-into a two-buffer mailbox; the Core 0 display task scales and invalidates
-changed 16-row bands. Alternate-frame submissions target up to 30 fps for
-partial updates, not 30 full-screen transfers on a 40 MHz SPI bus.
+a 480x320 scaler. At the user's request Minibox now also displays native
+256x240 pixels, centered without scaling (112-pixel side margins, 40 top/bottom).
+The emulator copies indexed frames into a two-buffer mailbox; Core 0 converts
+colors and invalidates changed 16-row bands. Alternate-frame submissions target
+up to 30 fps; 122,880-byte native frames reduce SPI traffic by about 55% versus
+426x320, but actual animation/audio responsiveness still needs device acceptance.
 The producer skips PPU drawing when the mailbox is pending or less than two
 audio frames remain in the software ring, but still runs CPU/APU and input.
 Startup prefills four frames and the running software watermark is three
 frames; the shared audio driver and its DMA configuration are unchanged.
+
+Joystick sampling remains in `main/buttons.c`, not in the emulator core.
+Menus use four directions; NES uses eight. NES cardinal input requires the
+larger normalized magnitude to exceed the smaller by >10 percentage points
+and >1.25 times, with the existing 25% enter / 15% release center hysteresis.
+Diagonals require both axes >=40% and smaller/larger >=85%, even while held.
+Neither old direction nor diagonal state survives an isolation region.
+See the [firmware README diagrams](../../README.md#nes-摇杆活跃区域旧版与新版)
+for the previous and current initial-activation regions.
 
 The legacy APU and mapper implementations remain approximate. Cycle-timed
 register access does not make the envelope/frame sequencer cycle-exact.

@@ -9,6 +9,10 @@ disable-model-invocation: false
 # Build and flash Minibox
 
 Default firmware now runs the LVGL chat alarm, radio, settings and games.
+NES uses unscaled centered 256x240 video and bilingual titles for known English
+ROM filenames. Mapper support includes 112, 178 and 245; see the firmware README
+for compatibility limits. Menus use four directions; NES diagonals require both
+axes >=40% and minor/major >=85%, with neutral isolation between active regions.
 The original hardware test is selected with `CONFIG_MINIBOX_HARDWARE_TEST`.
 Hardware and wiring remain unchanged. Normal app credentials are local ignored
 `config_data/wifi_config.txt` (SSID, password) and `config_data/app_secrets.txt`

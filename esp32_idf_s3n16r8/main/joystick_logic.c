@@ -1,10 +1,6 @@
 #include "joystick_logic.h"
 #include <stdlib.h>
 
-#define AXIS_SWITCH_MARGIN 15
-#define DIAGONAL_ENTER_RATIO 65
-#define DIAGONAL_HOLD_RATIO 45
-
 bool joystick_center_valid(int center) {
     return center >= 256 && center <= 3839;
 }
@@ -32,27 +28,30 @@ joystick_directions_t joystick_screen_directions(int percent_x, int percent_y,
     /* Physical Y navigates horizontally; physical X is inverted vertically. */
     int horizontal = percent_y;
     int vertical = -percent_x;
-    joystick_directions_t result = {
-        .x = joystick_direction(horizontal, previous.x),
-        .y = joystick_direction(vertical, previous.y),
-    };
-    if (!result.x || !result.y) return result;
     int x = abs(horizontal), y = abs(vertical);
-    if (allow_diagonal) {
-        bool holding = result.x == previous.x && result.y == previous.y;
-        int ratio = holding ? DIAGONAL_HOLD_RATIO : DIAGONAL_ENTER_RATIO;
-        int major = x > y ? x : y;
-        int minor = x > y ? y : x;
-        if (minor * 100 >= major * ratio) return result;
+    int major = x > y ? x : y;
+    int minor = x > y ? y : x;
+    joystick_directions_t result = {0};
+    if (allow_diagonal && minor >= JOYSTICK_DIAGONAL_MIN_PERCENT) {
+        int dx = horizontal < 0 ? -1 : 1;
+        int dy = vertical < 0 ? -1 : 1;
+        if (minor * 100 >= major * JOYSTICK_DIAGONAL_RATIO_PERCENT) {
+            result.x = dx;
+            result.y = dy;
+            return result;
+        }
     }
-    if (previous.x == result.x && !previous.y && y < x + AXIS_SWITCH_MARGIN) {
-        result.y = 0;
-    } else if (previous.y == result.y && !previous.x && x < y + AXIS_SWITCH_MARGIN) {
-        result.x = 0;
-    } else if (x > y) {
-        result.y = 0;
+    int difference = allow_diagonal ? JOYSTICK_GAME_AXIS_DIFFERENCE_THRESHOLD
+                                   : JOYSTICK_AXIS_DIFFERENCE_THRESHOLD;
+    int ratio = allow_diagonal ? JOYSTICK_GAME_AXIS_RATIO_PERCENT
+                              : JOYSTICK_AXIS_RATIO_PERCENT;
+    /* Apply both gates even when the minor axis is below its own deadzone.
+     * Multiplication preserves strict ratio boundaries without division by zero. */
+    if (major - minor <= difference || major * 100 <= minor * ratio) return result;
+    if (x > y) {
+        result.x = joystick_direction(horizontal, previous.x);
     } else {
-        result.x = 0;
+        result.y = joystick_direction(vertical, previous.y);
     }
     return result;
 }

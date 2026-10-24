@@ -25,11 +25,9 @@
 
 #define ROM_LIMIT 32
 #define ROM_NAME_BYTES 25
-#define ROM_ROWS 5
+#define ROM_ROWS 3
 #define EXIT_HOLD_MS 1000
 #define VIDEO_FRAME_INTERVAL 2
-#define VIDEO_DISPLAY_WIDTH 426
-#define VIDEO_DISPLAY_HEIGHT 320
 #define AUDIO_FRAME_BYTES (NES_FRAME_SAMPLES * sizeof(int16_t))
 #define AUDIO_QUEUE_BYTES (3 * AUDIO_FRAME_BYTES)
 #define AUDIO_DRAW_MIN_BYTES (2 * AUDIO_FRAME_BYTES)
@@ -45,6 +43,23 @@ static bool s_busy, s_wait_release;
 static int64_t s_exit_pressed_ms;
 static atomic_bool s_stop;
 static SemaphoreHandle_t s_done;
+
+static const struct {
+    const char *filename;
+    const char *chinese;
+    const char *english;
+} s_titles[] = {
+    {"adventure_island.nes", "冒险岛1", "Adventure Island"},
+    {"battle_city.nes", "坦克大战", "Battle City"},
+    {"billiards.nes", "桌球", "Billiards"},
+    {"contra.nes", "魂斗罗", "Contra"},
+    {"kof97.nes", "拳皇97", "King of Fighters 97"},
+    {"pacman.nes", "吃豆", "Pac-Man"},
+    {"super_mario.nes", "超级玛丽", "Super Mario"},
+    {"three_kingdoms.nes", "三国志-群雄争霸", "Three Kingdoms"},
+    {"uncharted_waters7.nes", "大航海7", "Uncharted Waters 7"},
+    {"zelda_cn.nes", "塞尔达传说汉化版", "The Legend of Zelda"},
+};
 
 bool app_nes_busy(void) { return s_busy; }
 bool app_nes_captures_input(void) { return s_busy || s_wait_release; }
@@ -218,7 +233,7 @@ static void start_game(void) {
     if (!s_done) s_done = xSemaphoreCreateBinary();
     if (!s_done) { report("Not enough memory for NES task"); return; }
     esp_err_t err = ui_video_begin(NES_VIDEO_WIDTH, NES_VIDEO_HEIGHT,
-                                  VIDEO_DISPLAY_WIDTH, VIDEO_DISPLAY_HEIGHT);
+                                  NES_VIDEO_WIDTH, NES_VIDEO_HEIGHT);
     if (err != ESP_OK) { report(esp_err_to_name(err)); return; }
     snprintf(s_path, sizeof(s_path), "%s/%s", APP_SPIFFS_BASE_PATH, s_roms[s_selected]);
     s_worker_error[0] = 0;
@@ -276,10 +291,21 @@ static void render(const gui_model_t *model, int focused_item) {
         int first = s_selected / ROM_ROWS * ROM_ROWS;
         for (int row = 0; row < ROM_ROWS && first + row < s_count; ++row) {
             bool selected = first + row == s_selected;
-            int y = 32 + row * 23;
-            ui_fill_rect(8, y, 304, 22, selected ? UI_COLOR_PRIMARY_DARK : UI_COLOR_PANEL);
-            ui_draw_text(12, y + 4, s_roms[first + row], 1,
+            const char *filename = s_roms[first + row];
+            const char *chinese = filename;
+            const char *english = "";
+            for (size_t i = 0; i < sizeof(s_titles) / sizeof(s_titles[0]); ++i) {
+                if (strcasecmp(filename, s_titles[i].filename) == 0) {
+                    chinese = s_titles[i].chinese;
+                    english = s_titles[i].english;
+                    break;
+                }
+            }
+            int y = 32 + row * 38;
+            ui_fill_rect(8, y, 304, 37, selected ? UI_COLOR_PRIMARY_DARK : UI_COLOR_PANEL);
+            ui_draw_text(12, y + 2, chinese, 1,
                          selected ? UI_COLOR_FOCUS : UI_COLOR_TEXT);
+            ui_draw_text(12, y + 19, english, 1, UI_COLOR_MUTED);
         }
         char count[24];
         snprintf(count, sizeof(count), "%d / %d", s_selected + 1, s_count);
