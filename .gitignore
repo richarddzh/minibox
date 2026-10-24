@@ -6,3 +6,13 @@
 **/.playwright-mcp
 esp32_idf_s3n16r8/config_data/*
 !esp32_idf_s3n16r8/config_data/.gitkeep
+!esp32_idf_s3n16r8/config_data/adventure_island.nes
+!esp32_idf_s3n16r8/config_data/battle_city.nes
+!esp32_idf_s3n16r8/config_data/billiards.nes
+!esp32_idf_s3n16r8/config_data/contra.nes
+!esp32_idf_s3n16r8/config_data/kof97.nes
+!esp32_idf_s3n16r8/config_data/pacman.nes
+!esp32_idf_s3n16r8/config_data/super_mario.nes
+!esp32_idf_s3n16r8/config_data/three_kingdoms.nes
+!esp32_idf_s3n16r8/config_data/uncharted_waters7.nes
+!esp32_idf_s3n16r8/config_data/zelda_cn.nes

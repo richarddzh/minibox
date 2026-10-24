@@ -3,8 +3,10 @@
 The CPU, PPU, APU, bitmap and mapper sources are vendored from
 [espressif/esp32-nesemu](https://github.com/espressif/esp32-nesemu),
 revision `693e378` (local reference `C:\gitroot\esp32-nesemu`).
-Mappers 0, 1, 2, 3, 4, 7, 66, 112, 178 and 245 are compiled. No ROMs, old ESP32
-LCD/controller drivers, Arduino dependency or external checkout is required.
+Mappers 0, 1, 2, 3, 4, 7, 66, 112, 178 and 245 are compiled. This component
+contains no ROMs or old ESP32 LCD/controller drivers and requires no Arduino
+dependency or external checkout. The project separately tracks ten user-supplied
+ROMs in `config_data` for reproduction; they are not covered by this core's license.
 
 [Shim06/Anemoia-ESP32](https://github.com/Shim06/Anemoia-ESP32), revision
 `7cdf281`, was also reviewed from `C:\gitroot\Anemoia-ESP32`:

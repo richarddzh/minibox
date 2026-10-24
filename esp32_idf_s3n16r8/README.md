@@ -112,7 +112,8 @@ HTTPS/WSS 使用证书包校验，不沿用参考工程的跳过证书验证设�
 当前载板没有 SD 卡，游戏使用已有 `storage` SPIFFS 分区：
 
 1. 自行将有权使用的 **NTSC iNES 1.0 `.nes`** 文件放到
-   `esp32_idf_s3n16r8\config_data` 根目录，例如 `demo.nes`。不附带游戏 ROM。
+   `esp32_idf_s3n16r8\config_data` 根目录，例如 `demo.nes`。
+   当前用户指定的 10 个 ROM 已纳入 Git，异地检出后无需再次手动复制。
    文件名建议使用 ASCII，包含扩展名最多 **24 字节**；列表最多显示 32 个。
 2. 在 ESP-IDF 5.3.5 环境执行 `idf.py build`，游戏与本地配置一起打包到
    `build\storage.bin`。单个 ROM 最多 2 MiB；分区约 3.94 MiB，SPIFFS
@@ -240,7 +241,16 @@ mapper/原生画面版本曾观察到 `boot done`，最新摇杆版未重复现�
 实际游戏画面、声音、手感及零卡顿尚未验收。
 先前的 426×320 放大方案已被替换，历史过程见
 [实现与验收计划](../docs/nes-implementation-plan.md#历史实现与验证记录)。
-游戏文件不纳入 Git 或公开固件包，第三方代码的原有许可证保持不变。
+按用户要求，当前列表中的 10 个 ROM 纳入 Git 用于异地 reload 和复现，
+`.gitignore` 仅逐个放行这些英文文件名，不放行整个 `config_data`。
+ROM 文件保持用户提供的原始内容；模拟器源码许可证不授予游戏 ROM 的再分发权。
+私密配置、密码、API token、存档、固件镜像和设备备份仍不纳入 Git。
+
+异地复现：检出仓库后按“本地文件配置分区”创建自己的
+`wifi_config.txt` 和 `app_secrets.txt`（不需要联网功能时可留空），
+在 ESP-IDF 5.3.5 环境执行 `idf.py build`。首次安装需完整烧录以写入字体和 ROM；
+已有设备只更新 ROM 时先备份配置/存档，再执行 `storage-flash`。
+仅 `app-flash` 不会把新检出的 ROM 写入设备。
 
 ## 可选原始硬件诊断
 
