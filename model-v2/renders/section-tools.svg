@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -140 128 144" role="img" aria-label="Z = 61.8: actual mesh section in millimeters"><rect x="-4" y="-140" width="128" height="144" fill="#f7f9fc"/><path d="M 0,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 10,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 20,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 30,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 40,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 50,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 60,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 70,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 80,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 90,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 100,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 110,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 120,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 130,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 140,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,0 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-10 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-20 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-30 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-40 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-50 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-60 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-70 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-80 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-90 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-100 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-110 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-120 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-130 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-140 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-150 H 140" stroke="#d8e2ec" stroke-width="0.12"/><g fill="#52657c" fill-opacity="0.8" stroke="#52657c" stroke-width="0.18"><path d="
+M 2.89999,-63.1676 L 14.98,-63.1676 L 14.98,-66.4778 L 3.89999,-66.4778 L 3.89999,-68.1328 L 2.39999,-68.1328
+ L 2.39999,-88.75 L 3,-88.75 L 3,-89.7634 L 6.39999,-89.7634 L 6.39999,-90.9613 L 1.2,-90.9613
+ L 1.2,-95.6387 L 3,-95.6387 L 3,-113.961 L 1.2,-113.961 L 1.2,-118.639 L 6.39999,-118.639
+ L 6.39999,-119.837 L 3,-119.837 L 3,-120.85 L 2.39999,-120.85 L 2.39999,-121.5 L 2.42001,-121.5
+ L 2.42001,-124.203 L 2.58446,-125.873 L 3.13075,-127.674 L 4.01788,-129.333 L 5.21176,-130.788 L 6.66652,-131.982
+ L 8.32623,-132.869 L 10.1271,-133.416 L 12,-133.6 L 108,-133.6 L 109.873,-133.416 L 111.674,-132.869
+ L 113.333,-131.982 L 114.788,-130.788 L 115.982,-129.333 L 116.869,-127.674 L 117.416,-125.873 L 117.58,-124.203
+ L 117.58,-121.5 L 117.6,-121.5 L 117.6,-68.1328 L 116.1,-68.1328 L 116.1,-66.4778 L 100.5,-66.4778
+ L 100.5,-63.1676 L 117.1,-63.1676 L 117.1,-66.4778 L 117.6,-66.4778 L 117.6,-63.1676 L 120,-63.1676
+ L 120,-124 L 119.769,-126.341 L 119.087,-128.592 L 117.978,-130.667 L 116.485,-132.485 L 114.667,-133.978
+ L 112.592,-135.087 L 110.341,-135.769 L 108,-136 L 12,-136 L 9.65891,-135.769 L 7.40779,-135.087
+ L 5.33315,-133.978 L 3.51471,-132.485 L 2.02235,-130.667 L 0.913437,-128.592 L 0.230576,-126.341 L 0,-124
+ L 0,-63.1676 L 2.39999,-63.1676 L 2.39999,-66.4778 L 2.89999,-66.4778 z
+"/></g><g fill="#13a77a" fill-opacity="0.8" stroke="#13a77a" stroke-width="0.18"><path d="
+M 5.98,-67.5812 L 114.02,-67.5812 L 114.02,-73.0981 L 106.02,-73.0981 L 106.02,-77.2149 L 114.02,-77.2149
+ L 114.02,-86.3386 L 106.02,-86.3386 L 106.02,-77.5116 L 13.98,-77.5116 L 13.98,-73.0981 L 5.98,-73.0981
+ z
+"/></g><g fill="#e69c32" fill-opacity="0.8" stroke="#e69c32" stroke-width="0.18"><path d="
+M 12.1,-95.8 L 9.59999,-95.8 L 9.59999,-96.3 L 16.4,-96.3 L 16.4,-113.3 L 9.59999,-113.3
+ L 9.59999,-113.8 L 12.1,-113.8 L 12.1,-118.8 L 9.59999,-118.8 L 9.59999,-118.75 L 6.39999,-118.75
+ L 6.39999,-118.55 L 1.39999,-118.55 L 1.39999,-117.55 L 6.39999,-117.55 L 6.39999,-117.8 L 9.59999,-117.8
+ L 9.59999,-114.8 L 6.39999,-114.8 L 6.39999,-115.05 L 1.39999,-115.05 L 1.39999,-114.05 L 6.39999,-114.05
+ L 6.39999,-112.671 L 3.2,-112.671 L 3.2,-96.9292 L 6.39999,-96.9292 L 6.39999,-95.55 L 1.39999,-95.55
+ L 1.39999,-94.55 L 6.39999,-94.55 L 6.39999,-94.8 L 9.59999,-94.8 L 9.59999,-91.8 L 6.39999,-91.8
+ L 6.39999,-92.05 L 1.39999,-92.05 L 1.39999,-91.05 L 6.39999,-91.05 L 6.39999,-90.85 L 9.59999,-90.85
+ L 9.59999,-90.8 L 12.1,-90.8 z
+"/></g><g fill="#8475b9" fill-opacity="0.8" stroke="#8475b9" stroke-width="0.18"><path d="
+M 56.6,-120.3 L 16.6,-120.3 L 16.6,-118.3 L 12.1,-118.3 L 12.1,-114.3 L 16.6,-114.3
+ L 16.6,-112.3 L 56.6,-112.3 z
+M 56.6,-97.3 L 16.6,-97.3 L 16.6,-95.3 L 12.1,-95.3 L 12.1,-91.3 L 16.6,-91.3
+ L 16.6,-89.3 L 56.6,-89.3 z
+"/></g><text x="0" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">0</text><text x="20" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">20</text><text x="40" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">40</text><text x="60" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">60</text><text x="80" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">80</text><text x="100" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">100</text><text x="120" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">120</text><text x="1" y="-21" font-family="sans-serif" font-size="2.5" fill="#52657c">20</text><text x="1" y="-41" font-family="sans-serif" font-size="2.5" fill="#52657c">40</text><text x="1" y="-61" font-family="sans-serif" font-size="2.5" fill="#52657c">60</text><text x="1" y="-81" font-family="sans-serif" font-size="2.5" fill="#52657c">80</text><text x="1" y="-101" font-family="sans-serif" font-size="2.5" fill="#52657c">100</text><text x="1" y="-121" font-family="sans-serif" font-size="2.5" fill="#52657c">120</text><text x="1" y="-141" font-family="sans-serif" font-size="2.5" fill="#52657c">140</text></svg>

@@ -1,0 +1,64 @@
+{
+  "description": "V2 two-part enclosure with a direct display aperture, left speaker and rear triangle. Speaker-pockets clips X>20 to show the inner mounting sleeves; other PNGs are uncut. All PNGs show only the exported printing meshes.",
+  "source_sha256": {
+    "bottom.stl": "469b797d42bea254081ee5de9828f5f196b4c3c61e6be75c68f8d29861e4a836",
+    "lid.stl": "2e2cd6d8fcc28dff34cd7354d9b8b45c7816b0a32cd3ea08d26ce12a8bcfced8",
+    "minibox-enclosure.scad": "a4c88b77ac7db311acf0850f55dd0e9452bf060bfd1e750fa947dc6703e607c2"
+  },
+  "speaker_mount_mm": {
+    "metal_nut_diameter": 4.5,
+    "metal_nut_length": 5,
+    "printed_sleeve_height": 3.4,
+    "printed_sleeve_outer_diameter": 7.1,
+    "nut_pocket_depth": 5.2,
+    "pocket_diameter": 4.7,
+    "speaker_front_clearance": 0.2,
+    "frame_relief_clearance": 0.1,
+    "sleeve_relief_sector_angle": 100,
+    "blind_floor": 1.2,
+    "hole_spacing": [
+      23,
+      23
+    ],
+    "ear_thickness_estimate": 3.2,
+    "screw_length": 6
+  },
+  "images": {
+    "bottom-isometric.png": "54c261a368546306076b534f9ebf1923f035bea2390cd60b9c8ca291506061bc",
+    "bottom-top.png": "42b34346416d12f49e81729f8df07060b0b7b7cd492f20c67e94c02b32978cc4",
+    "bottom-rear.png": "655b28608ae47ceb53001a91a881057d938ccce8f96abe08e3de24b88a173741",
+    "bottom-side.png": "6cc55742818f8419773b928009af5344c24267d1fcab07e015928af1259d4b65",
+    "bottom-left.png": "0472bdd80b992b8f667a7d274d11c6a3412d8a3528b0d13c090a5452f5f3de5d",
+    "bottom-speaker.png": "c78bc7b245063b12380333f6f2b32f0094433d6ccd039b80f98f7b6920824cc2",
+    "bottom-speaker-pockets.png": "09a6f3fbf3c6d97b688cc4255b2658c5c43552bd5541d7545da99657e1da7ab3",
+    "lid-isometric.png": "ab1120726f4efe81a192e51bb354be9751cdc859e3509d0a21b3a5c65934c7fe",
+    "lid-top.png": "527e1e1b32fe1cfb03406b53d45ee3ad5816916a4da6c0496c41197c4707a324",
+    "lid-front.png": "c5de9bbdeb824c9770cfe133f6fb2283055568a983f3f4efd3b6b7a705119738",
+    "lid-inside.png": "7814ef9300520d5892b5447979f2be824afb90207aeb84d9dafc5e3e27ca0b42",
+    "lid-side.png": "ebeae38be62395d8552d39513e80c34b738a5b436c208e144047b9570cb6f56d",
+    "lid-left.png": "3c311029b2465086376a80ca9b87cd0ee6742ac52d7cb22e40d9eeb7834082d7",
+    "lid-controls.png": "d443d556c158b9b2a1971396ec20c83ecdb311745165a4b99147e7c132af5003",
+    "lid-controls-inside.png": "336599ff07c2cf9a92b4bea1ed994f821b9d05f82935536faa31068b985bf05c",
+    "assembly-isometric.png": "e9ed6609ac39428efbb7b01f5e3e4c3cc982c078f5a054bd139e8ba55d974832",
+    "assembly-top.png": "e6a48b33ad88bc1e0034963aa57f9de02770c94fb6dc9c0b3e71797c77dda3e4",
+    "assembly-front.png": "34356d16205d51c79fdd705aa991415a0c4ae34df61b73aed5595d8899fa8b9d",
+    "assembly-side.png": "ab31aabd6ca4ed402ef3177cf98a6755eae7882eef04dea0f8049600bb95df05",
+    "assembly-rear.png": "441cba739c05bf3e4e05470fdedbab550124e2409e387602901fb1dd37190f6f",
+    "assembly-left.png": "0f7464807a3282faf434174959d492d0e9f4689cf13aa6a0172e24085c7c52e8"
+  },
+  "sections": {
+    "section-center.svg": "7b3e8aa4e7076155b348ad6a79dca2886cb2d3b69aaedcaf0119a678696b1808",
+    "section-right.svg": "9e4780c124c70f4d77dd5e810393ee2e406578fd19607a4a80c6fe859f50b788",
+    "section-left.svg": "4251059ec1ba14758a863d11b65172c45384329e56e6abf345eb2b97c53b83a5",
+    "section-speaker.svg": "d8596a9fda8f61be654f6defd00ee9e558df9fb30d85bfab70f82dce4eb823ab",
+    "section-rear.svg": "594c3389cd658d8a50c3414ec397dd537e08026289b6542261d5a77aa845d578",
+    "section-horizontal.svg": "d8b5e94ee404df7fad5d9ab0931768d576eae1214968f7d20865487041ecd9de",
+    "section-switch.svg": "777e8c786f97bd9fef91ef3ed9dbc83ceb406a74fd473c6f237d9dc027ad1f43",
+    "section-rtc.svg": "5a7d920667ff1d6b287bdf4c7ea17b09d214979b910f44d030592c38b11ce25a",
+    "section-shared-height.svg": "9aab6e6f4f77af74bf5ee08bafa6c4fbf6fb0655881c4cd8ab182dc42f2f25f8",
+    "section-terminals.svg": "2e8bd1cd1dcc46de7559e5cca73a2b6d80f914e5c0d520a03f5fcd1fc96a91ff",
+    "section-usb.svg": "0e6a79afb80e964d0698e84bf58211cf822706e89f6d67835b9a672b6add4f4d",
+    "section-tools.svg": "a6b414b1e532499d177ce90755a6b744b6d5f8803f0d8fe68a860aaa619c1542"
+  },
+  "text_hash_normalization": "SCAD and SVG use LF line endings; binary meshes and images use raw bytes."
+}

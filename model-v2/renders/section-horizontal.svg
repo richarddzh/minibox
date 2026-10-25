@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -140 128 144" role="img" aria-label="Z = 55: actual mesh section in millimeters"><rect x="-4" y="-140" width="128" height="144" fill="#f7f9fc"/><path d="M 0,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 10,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 20,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 30,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 40,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 50,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 60,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 70,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 80,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 90,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 100,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 110,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 120,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 130,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 140,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,0 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-10 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-20 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-30 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-40 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-50 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-60 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-70 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-80 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-90 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-100 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-110 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-120 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-130 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-140 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-150 H 140" stroke="#d8e2ec" stroke-width="0.12"/><g fill="#52657c" fill-opacity="0.8" stroke="#52657c" stroke-width="0.18"><path d="
+M 3,-120.85 L 2.39999,-120.85 L 2.39999,-124 L 2.58446,-125.873 L 3.13075,-127.674 L 4.01788,-129.333
+ L 5.21176,-130.788 L 6.66652,-131.982 L 8.32623,-132.869 L 10.1271,-133.416 L 12,-133.6 L 34.0709,-133.6
+ L 34.0709,-136 L 12,-136 L 9.65891,-135.769 L 7.40779,-135.087 L 5.33315,-133.978 L 3.51471,-132.485
+ L 2.02235,-130.667 L 0.913437,-128.592 L 0.230576,-126.341 L 0,-124 L 0,-112.684 L 3,-112.684
+ z
+M 54.0709,-136 L 41.929,-136 L 41.929,-133.6 L 54.0709,-133.6 z
+M 100.467,-63.3069 L 100.385,-61.3196 L 100.215,-59.9968 L 117.1,-59.9968 L 117.1,-63.3069 L 117.6,-63.3069
+ L 117.6,-59.9968 L 120,-59.9968 L 120,-124 L 119.769,-126.341 L 119.087,-128.592 L 117.978,-130.667
+ L 116.485,-132.485 L 114.667,-133.978 L 112.592,-135.087 L 110.341,-135.769 L 108,-136 L 61.929,-136
+ L 61.929,-133.6 L 108,-133.6 L 109.873,-133.416 L 111.674,-132.869 L 113.333,-131.982 L 114.788,-130.788
+ L 115.982,-129.333 L 116.869,-127.674 L 117.416,-125.873 L 117.6,-124 L 117.6,-64.9619 L 116.1,-64.9619
+ L 116.1,-63.3069 z
+M 3,-108.917 L 0,-108.917 L 0,-106.68 L 3,-106.68 z
+M 3,-102.92 L 0,-102.92 L 0,-100.683 L 3,-100.683 z
+M 2.89999,-59.9968 L 15.2649,-59.9968 L 15.0953,-61.3196 L 15.0126,-63.3069 L 3.89999,-63.3069 L 3.89999,-64.9619
+ L 2.39999,-64.9619 L 2.39999,-88.75 L 3,-88.75 L 3,-96.9156 L 0,-96.9156 L 0,-59.9968
+ L 2.39999,-59.9968 L 2.39999,-63.3069 L 2.89999,-63.3069 z
+"/></g><g fill="#13a77a" fill-opacity="0.8" stroke="#13a77a" stroke-width="0.18"><path d="
+M 5.98,-64.4103 L 114.02,-64.4103 L 114.02,-69.9272 L 106.02,-69.9272 L 106.02,-74.3407 L 13.98,-74.3407
+ L 13.98,-69.9272 L 5.98,-69.9272 z
+"/></g><g fill="#e69c32" fill-opacity="0.8" stroke="#e69c32" stroke-width="0.18"><path d="
+M 41.929,-130.6 L 44.713,-130.6 L 44.713,-133.6 L 40.6646,-133.6 L 40.6646,-136 L 43.1901,-136
+ L 43.1901,-138 L 32.8099,-138 L 32.8099,-136 L 35.3354,-136 L 35.3354,-133.6 L 31.287,-133.6
+ L 31.287,-130.6 L 34.0709,-130.6 L 34.0709,-103.6 L 41.929,-103.6 z
+M 61.929,-130.6 L 64.713,-130.6 L 64.713,-133.6 L 60.6646,-133.6 L 60.6646,-136 L 63.1901,-136
+ L 63.1901,-138 L 52.8099,-138 L 52.8099,-136 L 55.3354,-136 L 55.3354,-133.6 L 51.287,-133.6
+ L 51.287,-130.6 L 54.0709,-130.6 L 54.0709,-103.6 L 61.929,-103.6 z
+M 16.4,-118.75 L 6.39999,-118.75 L 6.39999,-117.882 L 3.2,-117.882 L 3.2,-91.7182 L 6.39999,-91.7182
+ L 6.39999,-90.85 L 16.4,-90.85 z
+"/></g><text x="0" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">0</text><text x="20" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">20</text><text x="40" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">40</text><text x="60" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">60</text><text x="80" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">80</text><text x="100" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">100</text><text x="120" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">120</text><text x="1" y="-21" font-family="sans-serif" font-size="2.5" fill="#52657c">20</text><text x="1" y="-41" font-family="sans-serif" font-size="2.5" fill="#52657c">40</text><text x="1" y="-61" font-family="sans-serif" font-size="2.5" fill="#52657c">60</text><text x="1" y="-81" font-family="sans-serif" font-size="2.5" fill="#52657c">80</text><text x="1" y="-101" font-family="sans-serif" font-size="2.5" fill="#52657c">100</text><text x="1" y="-121" font-family="sans-serif" font-size="2.5" fill="#52657c">120</text><text x="1" y="-141" font-family="sans-serif" font-size="2.5" fill="#52657c">140</text></svg>

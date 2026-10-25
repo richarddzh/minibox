@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -116 128 120" role="img" aria-label="Y = 104.8: actual mesh section in millimeters"><rect x="-4" y="-116" width="128" height="120" fill="#f7f9fc"/><path d="M 0,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 10,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 20,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 30,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 40,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 50,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 60,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 70,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 80,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 90,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 100,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 110,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 120,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 130,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 140,0 V -150" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,0 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-10 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-20 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-30 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-40 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-50 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-60 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-70 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-80 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-90 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-100 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-110 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-120 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-130 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-140 H 140" stroke="#d8e2ec" stroke-width="0.12"/><path d="M 0,-150 H 140" stroke="#d8e2ec" stroke-width="0.12"/><g fill="#52657c" fill-opacity="0.8" stroke="#52657c" stroke-width="0.18"><path d="
+M 110.341,-0.230576 L 112.592,-0.913437 L 114.667,-2.02235 L 116.485,-3.51471 L 117.978,-5.33315 L 119.087,-7.40779
+ L 119.769,-9.65891 L 120,-12 L 120,-109.804 L 117.6,-109.804 L 117.6,-106.804 L 117.1,-106.804
+ L 117.1,-109.804 L 2.89999,-109.804 L 2.89999,-106.804 L 2.39999,-106.804 L 2.39999,-109.804 L 0,-109.804
+ L 0,-56.7 L 3,-56.7 L 3,-66.35 L 2.39999,-66.35 L 2.39999,-105.304 L 3.89999,-105.304
+ L 3.89999,-106.804 L 116.1,-106.804 L 116.1,-105.304 L 117.6,-105.304 L 117.6,-12 L 117.416,-10.1271
+ L 116.869,-8.32623 L 115.982,-6.66652 L 114.788,-5.21176 L 113.333,-4.01788 L 113.3,-4 L 6.69998,-4
+ L 6.66652,-4.01788 L 5.21176,-5.21176 L 4.01788,-6.66652 L 3.13075,-8.32623 L 2.58446,-10.1271 L 2.39999,-12
+ L 2.39999,-34.25 L 3,-34.25 L 3,-43.9 L 0,-43.9 L 0,-12 L 0.230576,-9.65891
+ L 0.913437,-7.40779 L 2.02235,-5.33315 L 3.51471,-3.51471 L 5.33315,-2.02235 L 7.40779,-0.913437 L 9.65891,-0.230576
+ L 12,-0 L 108,-0 z
+M 3,-52.9 L 0,-52.9 L 0,-47.7 L 3,-47.7 z
+"/></g><g fill="#13a77a" fill-opacity="0.8" stroke="#13a77a" stroke-width="0.18"><path d="
+M 107.25,-10.6 L 96.25,-10.6 L 96.25,-30.6 L 27.75,-30.6 L 27.75,-32.6 L 2.39999,-32.6
+ L 2.39999,-20.6 L 27.75,-20.6 L 27.75,-10.6 L 12.75,-10.6 L 12.75,-5.5 L 107.25,-5.5
+ z
+"/></g><g fill="#e69c32" fill-opacity="0.8" stroke="#e69c32" stroke-width="0.18"><path d="
+M 50.3411,-67.2306 L 52.5922,-67.9134 L 54.6668,-69.0224 L 56.4853,-70.5147 L 57.9776,-72.3331 L 59.0865,-74.4078
+ L 59.7694,-76.6589 L 60,-79 L 59.7694,-81.3411 L 59.0865,-83.5922 L 57.9776,-85.6668 L 56.4853,-87.4853
+ L 54.6668,-88.9776 L 52.5922,-90.0865 L 50.3411,-90.7694 L 48,-91 L 45.6589,-90.7694 L 43.4078,-90.0865
+ L 41.3331,-88.9776 L 39.5147,-87.4853 L 38.0224,-85.6668 L 36.9134,-83.5922 L 36.2306,-81.3411 L 36,-79
+ L 36.2306,-76.6589 L 36.9134,-74.4078 L 38.0224,-72.3331 L 39.5147,-70.5147 L 41.3331,-69.0224 L 43.4078,-67.9134
+ L 45.6589,-67.2306 L 48,-67 z
+M 16.4,-64.25 L 3.2,-64.25 L 3.2,-36.35 L 16.4,-36.35 z
+M 39.1705,-44.6153 L 40.2961,-44.9567 L 41.3334,-45.5112 L 42.2426,-46.2574 L 42.9888,-47.1666 L 43.5433,-48.2039
+ L 43.8847,-49.3295 L 44,-50.5 L 43.8847,-51.6705 L 43.5433,-52.7961 L 42.9888,-53.8334 L 42.2426,-54.7426
+ L 41.3334,-55.4888 L 40.2961,-56.0433 L 39.1705,-56.3847 L 38,-56.5 L 36.8295,-56.3847 L 35.7039,-56.0433
+ L 34.6666,-55.4888 L 33.7574,-54.7426 L 33.0112,-53.8334 L 32.4567,-52.7961 L 32.1153,-51.6705 L 32,-50.5
+ L 32.1153,-49.3295 L 32.4567,-48.2039 L 33.0112,-47.1666 L 33.7574,-46.2574 L 34.6666,-45.5112 L 35.7039,-44.9567
+ L 36.8295,-44.6153 L 38,-44.5 z
+M 59.1705,-44.6153 L 60.2961,-44.9567 L 61.3334,-45.5112 L 62.2426,-46.2574 L 62.9888,-47.1666 L 63.5433,-48.2039
+ L 63.8847,-49.3295 L 64,-50.5 L 63.8847,-51.6705 L 63.5433,-52.7961 L 62.9888,-53.8334 L 62.2426,-54.7426
+ L 61.3334,-55.4888 L 60.2961,-56.0433 L 59.1705,-56.3847 L 58,-56.5 L 56.8295,-56.3847 L 55.7039,-56.0433
+ L 54.6666,-55.4888 L 53.7574,-54.7426 L 53.0112,-53.8334 L 52.4567,-52.7961 L 52.1153,-51.6705 L 52,-50.5
+ L 52.1153,-49.3295 L 52.4567,-48.2039 L 53.0112,-47.1666 L 53.7574,-46.2574 L 54.6666,-45.5112 L 55.7039,-44.9567
+ L 56.8295,-44.6153 L 58,-44.5 z
+"/></g><text x="0" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">0</text><text x="20" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">20</text><text x="40" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">40</text><text x="60" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">60</text><text x="80" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">80</text><text x="100" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">100</text><text x="120" y="3" font-family="sans-serif" font-size="2.5" text-anchor="middle" fill="#52657c">120</text><text x="1" y="-21" font-family="sans-serif" font-size="2.5" fill="#52657c">20</text><text x="1" y="-41" font-family="sans-serif" font-size="2.5" fill="#52657c">40</text><text x="1" y="-61" font-family="sans-serif" font-size="2.5" fill="#52657c">60</text><text x="1" y="-81" font-family="sans-serif" font-size="2.5" fill="#52657c">80</text><text x="1" y="-101" font-family="sans-serif" font-size="2.5" fill="#52657c">100</text><text x="1" y="-121" font-family="sans-serif" font-size="2.5" fill="#52657c">120</text><text x="1" y="-141" font-family="sans-serif" font-size="2.5" fill="#52657c">140</text></svg>

@@ -1,0 +1,98 @@
+{
+  "full_assembly_checks": true,
+  "compatibility_limits": {
+    "usb_normal_straight_cable_confirmed": false,
+    "usb_current_cable_insertion_user_confirmed": true,
+    "usb_left_wall_contact_user_confirmed": true,
+    "usb_note": "User confirmed their current cable inserts and touches the left wall. Reserve the complete X=2.4..27.75 occupied band; zero wall clearance is an intentional contact, not a guaranteed air gap. Do not infer their cable dimensions from a different manufacturer's drawing.",
+    "panel_typec_note": "30 mm x 12 mm inner body/tail is a design acceptance envelope, not a verified product drawing.",
+    "joystick_note": "User measured the cap bottom approximately 26.4 mm and requested a 30 mm bore. 29 mm motion is a design acceptance limit, not a measured sweep."
+  },
+  "source_sha256": {
+    "minibox-enclosure.scad": "a4c88b77ac7db311acf0850f55dd0e9452bf060bfd1e750fa947dc6703e607c2",
+    "carrier-clearance.scad": "625477d9bec17d8b67ecf826808637a1227a727f230b4fad373175228ca30cf2",
+    "installation-clearance.scad": "93c0030b9951db66b416250c52342f0794792e6185f42b9835f49a0b4e0d898e",
+    "minibox-carrier.kicad_pcb": "aa5fccdd232b1861f6fb86d00b72f5cb75ca320b65f2abb682123e3c9f481c50"
+  },
+  "exports_sha256": {
+    "bottom-y-up.stl": "46551bb8763971379d99da8ca05f1b2eb67d4c4fd452e5b34ffef88eae24680a",
+    "bottom.3mf": "c19ea00fde3fc0951a9e4b9504d9a6cf99b444256c97f4b029a9f14abd40c279",
+    "bottom.stl": "469b797d42bea254081ee5de9828f5f196b4c3c61e6be75c68f8d29861e4a836",
+    "lid-y-up.stl": "88c533fea42407535355d986b816fa8fd5e543b40eba94e768e7c097727790cb",
+    "lid.3mf": "854c479605720bae4a4e5b96fbb94d32c71d9f5fc89001c14c2736b4d2dd29ba",
+    "lid.stl": "2e2cd6d8fcc28dff34cd7354d9b8b45c7816b0a32cd3ea08d26ce12a8bcfced8"
+  },
+  "measurements": {
+    "bottom": {
+      "bounds_mm": [
+        [
+          0.0,
+          120.0
+        ],
+        [
+          0.0,
+          136.0
+        ],
+        [
+          0.0,
+          109.80406188964844
+        ]
+      ],
+      "volume_mm3": 144113.40134384955
+    },
+    "lid": {
+      "bounds_mm": [
+        [
+          2.8999996185302734,
+          117.0999984741211
+        ],
+        [
+          6.5,
+          129.5
+        ],
+        [
+          18.599990844726562,
+          109.80406188964844
+        ]
+      ],
+      "volume_mm3": 43103.08360300371
+    },
+    "lid-print": {
+      "bounds_mm": [
+        [
+          0.1959381103515625,
+          91.40000915527344
+        ],
+        [
+          0.0,
+          123.0
+        ],
+        [
+          -3.814697322468419e-07,
+          114.19999694824219
+        ]
+      ],
+      "volume_mm3": 43103.08322775655
+    }
+  },
+  "checks": [
+    "carrier alignment",
+    "static assembly and key travel",
+    "uncut vertical riser and no inclined control cuts",
+    "screen thickness, rear switch depth and upright RTC",
+    "speaker and screen pillar/brace clearance to sockets and terminals",
+    "screen connector clearance to rear wall, speaker and RTC",
+    "1 mm component envelopes",
+    "continuous PCB and RTC insertion",
+    "left-wall speaker seats and blind pockets; former right wall closed",
+    "rear triangle, Type-C nuts vs speaker/wire, switch and rear mounts",
+    "user-confirmed USB wall-contact band; 1 mm clearance to internal hardware, not to the contacted wall",
+    "four 4 mm driver tips plus 8 x 40 mm working corridors",
+    "30 mm joystick bore and reclaimed former 35 mm bore material",
+    "recentered triangle and full 30 mm panel Type-C inner-body reservation",
+    "direct display aperture in the original 3 mm lid; no added rails or outward frame",
+    "closed connected meshes, 0.001 mm precision",
+    "lossless STL/3MF identity"
+  ],
+  "text_hash_normalization": "Source text uses LF line endings; binary exports use raw bytes."
+}

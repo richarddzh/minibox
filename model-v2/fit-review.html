@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Minibox V2 · 外壳设计与装配</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef3f8;color:#182b40;font:15px/1.7 system-ui,"Microsoft YaHei",sans-serif}
+header{background:#172c45;color:#fff;padding:30px max(24px,calc((100% - 1240px)/2))}
+h1{margin:0 0 10px;font-size:30px}h2{font-size:23px;margin:0 0 12px}h3{font-size:17px;margin:0 0 8px}
+nav,.downloads{display:flex;gap:15px;flex-wrap:wrap}nav{margin-top:15px}header a{color:#a4e5ff}
+a{color:#086ca4;text-underline-offset:3px}main{max-width:1288px;margin:auto;padding:24px}
+section,article{background:#fff;border:1px solid #d8e2ec;border-radius:10px;padding:20px;margin-bottom:20px}
+p{margin:8px 0}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+.metric{background:#f4f8fc;border:1px solid #d8e2ec;border-radius:8px;padding:14px}.metric strong{font-size:24px;display:block}
+.muted,figcaption,.metric span{color:#52657c;font-size:13px}.note{padding:12px 16px;background:#fff5df;border-left:4px solid #e69c32}
+.status{padding:12px;background:#e1f3eb;border-radius:8px;margin-bottom:20px}.bad{background:#ffe7e7;color:#982323}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px;border-bottom:1px solid #d8e2ec;text-align:left;vertical-align:top}
+th{background:#f5f8fb;white-space:nowrap}td:first-child{font-weight:600}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.gallery figure{margin:0}
+figure img{width:100%;display:block;border-radius:7px;border:1px solid #d8e2ec;background:#f7f9fc}
+.gallery img{aspect-ratio:4/3;object-fit:contain}figcaption{margin-top:6px}
+.cuts{display:grid;grid-template-columns:1fr 1fr;gap:20px}.cuts article{margin:0}.cuts img{height:350px;object-fit:contain}.cuts figure{margin:10px 0}
+.legend{display:flex;gap:20px;flex-wrap:wrap}.swatch{display:inline-block;width:12px;height:12px;margin-right:6px}
+code{font-size:12px;overflow-wrap:anywhere}pre{overflow:auto;background:#f4f7fa;padding:14px;border-radius:7px}
+details{margin:12px 0}summary{cursor:pointer;font-weight:600}.downloads a{background:#e9f2fa;padding:7px 12px;border-radius:6px}
+footer{max-width:1240px;margin:0 auto 28px;padding:0 24px;color:#52657c;font-size:13px}
+@media(max-width:800px){main{padding:14px}.metrics,.gallery{grid-template-columns:1fr 1fr}.cuts{grid-template-columns:1fr}header{padding:24px 20px}}
+@media print{header{background:white;color:#182b40}nav{display:none}section,article{break-inside:avoid}.cuts{display:block}.cuts article{margin-bottom:14px}main{padding:0}}
+</style>
+</head>
+<body>
+<header><h1>Minibox V2 · 外壳设计与装配</h1>
+<p>两件式低矮外壳 · 直接屏幕开窗 · 左侧喇叭 · 后壁三角接口 · Ø30摇杆孔</p>
+<nav><a href="#spec">规格</a><a href="#views">整机视角</a><a href="#bottom">底壳</a><a href="#lid">盖板</a>
+<a href="#sections">截面</a><a href="#clearance">避让</a><a href="#assembly">装配</a><a href="#files">文件</a></nav>
+</header>
+<main>
+<div id="status" class="status bad">未加载配套数据。请保留 report-data.js 与 renders 文件夹。</div>
+<noscript><p class="note">请启用JavaScript查看尺寸表和图集。打印文件可在页面末尾直接下载。</p></noscript>
+<section id="spec"><h2>规格与坐标</h2>
+<p>单位为mm。X从设备正面看由左向右，Y从操作者指向背面，Z竖直向上。
+局部s沿屏幕斜面向上，n垂直于斜面向机外。后视照片的视觉左右与正面X坐标相反。</p>
+<div id="metrics" class="metrics"></div>
+<div class="table-wrap"><table><thead><tr><th>项目</th><th>当前规格</th><th>说明</th></tr></thead><tbody id="spec-data"></tbody></table></div>
+<p class="note">本设计使用明确的元件接受包络，并非全部实物尺寸已测定。用户已确认现用USB线可以插上且抵住左壁，
+以及摇杆帽底约Ø26.4、Ø30开孔足够。其他未测量尺寸见“避让与硬件条件”，更换部件需重新核对。</p>
+</section>
+<section id="views"><h2>整机视角</h2><p>由本目录的底壳、盖板STL渲染，不包含电子元件。</p>
+<div id="assembly-gallery" class="gallery"></div></section>
+<section id="bottom"><h2>底壳单独渲染</h2><p>只显示 bottom.stl。喇叭柱内侧特写隐藏X&gt;20的遮挡部分，其余图不剖切。</p>
+<div id="bottom-gallery" class="gallery"></div></section>
+<section id="lid"><h2>盖板单独渲染</h2><p>只显示 lid.stl。屏幕区为3 mm厚面板上的直接通孔，显示窗口85.52×57.68、R6。</p>
+<div id="lid-gallery" class="gallery"></div></section>
+<section id="sections"><h2>实际截面</h2>
+<p>灰蓝色轮廓直接切自交付STL，绿色和橙色来自相同SCAD的元件接受包络；不是手绘壳体或精确供应商CAD。
+背景每格10 mm，数字为装配坐标。点击图片可看原图。</p>
+<div class="legend"><span><i class="swatch" style="background:#52657c"></i>打印件</span>
+<span><i class="swatch" style="background:#13a77a"></i>PCB/模块/USB占用带</span>
+<span><i class="swatch" style="background:#e69c32"></i>喇叭/开关/Type-C</span>
+<span><i class="swatch" style="background:#8475b9"></i>工具操作空间</span></div>
+</section>
+<div id="section-gallery" class="cuts"></div>
+<section id="clearance"><h2>避让与硬件条件</h2>
+<p>尺寸余量和几何碰撞检查是不同的证据。下表中的轴向间隔是所列包围范围的分离量，
+不等于全机任意两点的精确最短距离。USB与左壁为用户确认的接触，不能记成有空气间隙。</p>
+<div class="table-wrap"><table><thead><tr><th>关系</th><th>尺寸或检查范围</th><th>前提</th></tr></thead><tbody id="clearance-data"></tbody></table></div>
+<h3>需要实物核对的尺寸</h3>
+<p>面板Type-C：螺纹Ø10.5×14.5、外头Ø13.8×2、内螺母厚3及外接圆约Ø16.17为已有尺寸记录；
+从内壁向机内的Ø12×30后部是设计接受包络，不是已确认SKU的总长。
+船型开关内侧Ø24×30加10线尾、屏幕右上8×42×12插头区、RTC含插座竖装40高均保守预留。
+喇叭耳厚和前面偏距3.2来自图像比例估计。完整来源见
+<a href="../hardware_references/enclosure-hardware-specs.md">硬件规格与来源</a>。</p>
+<p>USB口到左壁的X=2.4…27.75区域按现用线头/护尾已占用处理；Y=88…122、Z=20.6…32.6为设计接受范围，
+不是线材外形实测。不同成品线的外壳和护尾长度不统一，不能把一种线的图纸套用到全部线材。</p>
+</section>
+<section id="assembly"><h2>装配</h2>
+<ol>
+<li>先不装屏幕、RTC模块、摇杆帽、USB线和盖板。载板上其余模块按模型包络安装。</li>
+<li>从正面看将载板左边抬高17°，整体向前偏1；保持倾角下降到载板中心底面Z=26.5后摆平。</li>
+<li>向后移1恢复孔位，再下降到四个支柱顶面Z=9，用M2.5×6固定。</li>
+<li>RTC从尚未装屏幕的前方送入，在模块底面Z=55横移至排母上方，再向下就位。</li>
+<li>安装喇叭、后壁接口和屏幕，连接USB及其他线束，整理后安装摇杆帽和盖板。保留螺丝刀通道，不用线束填满预留区域。</li>
+</ol>
+<p>载板路线按连续扫掠检查，旋转段每1°取相邻姿态凸包并外扩0.1；只豁免指定安装接触面。
+它不代表可以把已接USB线的载板强行塞入，也不验证任意工具手柄、插拔力或松散线束走向。</p>
+<p>喇叭四颗螺丝使用Ø4刀头穿过后角Ø6井，喇叭背后另留Ø8×40直进操作空间。
+底壳四个载板孔使用M2.5×6，其他固定位置按模型嵌件孔和螺钉深度选择，不混用过长螺丝。</p>
+</section>
+<section id="files"><h2>文件与配套验证</h2>
+<div class="downloads">
+<a href="minibox-enclosure.scad">参数化SCAD</a><a href="bottom.stl">底壳STL</a><a href="lid.stl">盖板STL</a>
+<a href="bottom.3mf">底壳3MF</a><a href="lid.3mf">盖板3MF</a>
+<a href="bottom-y-up.stl">底壳Y-up</a><a href="lid-y-up.stl">盖板Y-up</a>
+<a href="verification.json">验证清单</a><a href="renders/manifest.json">图像清单</a><a href="README.md">使用说明</a>
+</div>
+<p>普通STL/3MF保持装配坐标，3MF与STL使用相同网格。盖板Y-up版本包含侧立打印变换，不能直接叠在普通底壳上作为装配预览。
+切片时仍需检查方向、支撑和打印公差，先做首件松装。</p>
+<details><summary>网格包围盒、体积与源码标识</summary><div id="mesh-data"></div><p><code id="source-hash"></code></p></details>
+<details><summary>重新导出命令</summary><pre>Set-Location C:\gitroot\minibox\model-v2
+python -m unittest discover -s .\tests -p test_mesh_checks.py
+python .\tests\check_enclosure.py --openscad "C:\Program Files\OpenSCAD\openscad.com" --output .
+python .\render_models.py --openscad "C:\Program Files\OpenSCAD\openscad.com"</pre></details>
+</section>
+</main>
+<footer>本页可离线打开。源码和SVG的SHA-256按LF换行计算，二进制文件按原始字节计算。
+修改模型后应重新验证和导出；仅刷新页面不会重新核对文件SHA-256。</footer>
+<script src="report-data.js"></script>
+<script>
+"use strict";
+const report=window.MODEL_REPORT;
+if(report){
+const p=report.parameters,v=report.verification,rad=Math.PI/180;
+const sn=Math.sin(p.slope_angle*rad),cs=Math.cos(p.slope_angle*rad),along=46+p.screen_shift_along;
+const height=p.slope_base_height+sn*p.slope_length;
+const f=(x,n=2)=>Number(x).toFixed(n);
+const point=(x,s,n)=>`(${f(x)}, ${f(p.deck_depth+cs*s-sn*n)}, ${f(p.slope_base_height+sn*s+cs*n)})`;
+const rows=(id,data)=>document.getElementById(id).innerHTML=data.map(r=>"<tr>"+r.map(x=>`<td>${x}</td>`).join("")+"</tr>").join("");
+const status=document.getElementById("status");
+status.textContent=v.full_assembly_checks?"配套模型、装配包络与打印网格检查已完成。USB贴壁为实物确认的接触；未实测硬件仍按接受包络使用。":"当前仅有部分导出，完整装配检查尚未完成。";
+status.classList.toggle("bad",!v.full_assembly_checks);
+document.getElementById("metrics").innerHTML=[
+["120 × 136","宽 × 深 / mm"],[f(height,3),"最大高度 / mm"],[`${90-p.slope_angle}°`,"屏幕相对竖直后仰"],[`Ø${p.joystick_window_diameter}`,"摇杆开孔 / mm"]
+].map(([a,b])=>`<div class="metric"><strong>${a}</strong><span>${b}</span></div>`).join("");
+rows("spec-data",[
+["外壳","120×136×"+f(height,3),"侧壁2.4、底板4、盖板3；底角R12，操作台接R4，再由垂直段经R6接屏幕面"],
+["操作台","外面Z=21.6，内面Z=18.6","载板顶面Z=10.6；垂直面Y=55.8，斜面基准Z=46"],
+["屏幕窗口","85.52×57.68，R6，直接开窗","窗口中心X=57.74、沿面s="+along+"；圆角会遮挡显示矩形少量角部"],
+["屏幕模块","PCB 108.04×61.74，厚2；显示层厚3","PCB承托面n=−9，显示层前面n=−4；原盖板内面n=−3"],
+["屏幕三点支撑",["左下 "+point(9.05,along-27.45,-9),"左上 "+point(9.05,along+27.45,-9),"右下 "+point(110.95,along-27.45,-9)].join("<br>"),"右上留8×42×12接头区；下斜撑65°、左上60°，台座Ø8、深10"],
+["左侧喇叭",`左壁X=0，中心Y=${p.speaker_center[0]} / Z=${p.speaker_center[1]}`,"27.5±0.2方腔、厚13±0.2；局部壁厚3，四柱孔距23×23"],
+["喇叭固定","柱高3.4、外Ø7.1、孔Ø4.7×深5.2、盲底1.2","M2.5×6；承托面X=6.4；柱轴Y93.3/116.3、Z38.8/61.8"],
+["后壁三角接口",`开关(${p.switch_center.join(", ")})；Type-C(${p.typec_center_x-10}, ${p.typec_center_z}) / (${p.typec_center_x+10}, ${p.typec_center_z})`,"坐标为(X,Z)；开关孔Ø21，双Type-C孔Ø12；三孔组中心比外壳中心偏左12"],
+["载板固定","载板94.5×117、R5、厚1.6；底面Z=9","四孔(X,Y)：(17.75,17)、(102.25,17)、(17.75,124)、(102.25,124)；孔Ø3、柱Ø7"],
+["摇杆",`中心(24.55,36.5)，孔Ø${p.joystick_window_diameter}；帽底约Ø${p.joystick_cap_base_diameter}`,"孔后缘Y=51.5，完全位于水平面；Ø29为设计运动接受上限，不是实测扫掠"],
+["键盘开孔","上排X68.6…107.65 / Y32.5…52.5；下排X60.5…99.55 / Y13.45…33.45","保留错位轮廓的连通孔；18×18键帽每侧余量1；仅后缘轻微进入R4圆弧"],
+["麦克风","中心(52.205,41.75)，声孔Ø6","罩内Ø16、外Ø20.8、顶Z31；模块顶26.8，内顶28"],
+["合盖螺丝","X9/111，Y11/125，共4孔","沉孔Ø4.5×深1.4、通孔Ø3；剩余盖板厚1.6"]
+]);
+const galleries={
+assembly:[["isometric","前左上轴测"],["front","前视"],["rear","三角后视"],["left","左侧喇叭"],["side","右侧"],["top","顶视"]],
+bottom:[["isometric","底壳轴测"],["top","底壳顶视"],["rear","后壁"],["left","左侧"],["side","右侧"],["speaker","网孔外侧"],["speaker-pockets","喇叭柱内侧 · 局部剖视"]],
+lid:[["isometric","盖板外侧"],["inside","盖板内侧"],["front","直接屏幕窗口"],["top","顶视"],["left","左视"],["side","右视"],["controls","控制孔外侧"],["controls-inside","控制孔内侧"]]
+};
+for(const [part,items]of Object.entries(galleries))document.getElementById(part+"-gallery").innerHTML=items.map(([key,label])=>
+`<figure><a href="renders/${part}-${key}.png"><img src="renders/${part}-${key}.png" alt="${label}" loading="lazy"></a><figcaption>${label}</figcaption></figure>`).join("");
+const cuts=[
+["center","中央纵剖 X=60","横轴Y，纵轴Z。显示屏幕、功放及后部Type-C接受包络。盖板在屏幕处直接开窗，厚度3。"],
+["left","左侧纵剖 X=10","横轴Y，纵轴Z。左喇叭下方保留USB贴壁占用带；同时可见左侧屏幕支撑。"],
+["right","右侧纵剖 X=110","横轴Y，纵轴Z。经过屏幕右上8×42×12接头区；左喇叭和载板本体不在此切面。"],
+["speaker","喇叭中心横剖 Y=104.8","横轴X，纵轴Z。左壁安装面X=3，喇叭最内侧X=16.4。绿色包含USB占用带和模块包络。"],
+["rear","后壁中厚截面 Y=134.8","横轴X，纵轴Z。使用正面坐标显示三角孔位；从背面看视觉左右相反。"],
+["horizontal","水平截面 Z=55","横轴X，纵轴Y，图上方为背面。显示喇叭、母座完整后部和屏幕的不同横向位置。"],
+["switch","开关轴线纵剖 X=48","横轴Y，纵轴Z。包含开关30主体+10线尾；RTC位于X68.25以右，不在本面。"],
+["rtc","RTC与喇叭横剖 Y=118","横轴X，纵轴Z。竖装RTC与喇叭可能同高，但沿X分开；同时核对母座后部。"],
+["shared-height","共同高度水平截面 Z=42","横轴X，纵轴Y。显示RTC和喇叭的横向分离；喇叭引线高于该面。"],
+["terminals","端子与支撑横剖 Y=76","横轴X，纵轴Z。两侧屏幕支撑与端子、功放同时切过，不只比较安装孔中心。"],
+["usb","USB占用带水平截面 Z=26.6","横轴X，纵轴Y。USB带X2.4…27.75贴左壁；这是用户确认的占用区域，不是线材精确CAD。"],
+["tools","喇叭上排工具空间 Z=61.8","横轴X，纵轴Y。紫色为Ø4刀头与后方Ø8×40操作空间；母座后部和开关还分别做三维检查。"]
+];
+document.getElementById("section-gallery").innerHTML=cuts.map(([key,title,caption])=>
+`<article class="cut"><h3>${title}</h3><figure><a href="renders/section-${key}.svg"><img src="renders/section-${key}.svg" alt="${title}" loading="lazy"></a><figcaption>${caption}</figcaption></figure></article>`).join("");
+const speakerInner=p.panel_thickness+.2+p.speaker_size[2]+p.speaker_tolerance;
+const speakerBottom=p.speaker_center[1]-p.speaker_size[1]/2-p.speaker_tolerance;
+const headerRear=p.deck_depth+cs*(along+p.tft_size[1]/2)+sn*21;
+rows("clearance-data",[
+["屏幕/功放",`屏幕最低点比功放及出线最高点高${f(report.screen_amplifier_z_gap_mm,3)}`,"功放总堆叠23.7，加10出线；其他模块和孔柱做完整三维检查"],
+["屏幕右侧接头/后壁",`接头最靠后Y=${f(headerRear,3)}；后壁内面Y=133.6，沿Y余量${f(133.6-headerRear)}`,"8×42×12包含插头及接线预留，不只是裸排针"],
+["喇叭/USB线",`喇叭本体最低Z=${f(speakerBottom)}；USB占用顶Z=32.6，名义竖向间隔${f(speakerBottom-32.6)}`,"螺母柱和工具通道另查；USB与左壁为0净空接触"],
+["喇叭/RTC",`喇叭最内X=${f(speakerInner)}，RTC最左X=68.25，横向间隔${f(68.25-speakerInner)}`,"RTC按Z10.6…50.6竖装，不把它当作平放板"],
+["开关/RTC","开关最右X=60至RTC最左68.25相隔8.25；开关下缘67至RTC顶50.6另隔16.4","保留Ø24×40完整内伸包络"],
+["面板Type-C/喇叭","母座内壁以内Ø12×30后部，最前Y=103.6；不只检查14.5螺纹长度","母座和螺母分别检查，与喇叭本体、柱及引线均无交叠"],
+["喇叭螺丝刀/接口","上排工具底Z57.8至母座顶56.5留1.3；下排工具顶42.8至母座底44.5留1.7；上排工具顶65.8至开关底67留1.2","Ø4刀头通过Ø6后角井，后方Ø8×40为操作接受空间，不保证大手柄/电批"],
+["键帽/孔口","侧向各1、竖向各1，行程4.3","键帽18×18、高≤12，轴芯插入≥2"],
+["焊脚/底板","PCB底Z9，焊脚深3.5，底板顶Z4，留1.5","指定载板支柱接触区除外；同时检查底角"],
+["麦克风/罩顶","模块顶Z26.8，罩内顶Z28，留1.2；Ø14模块对Ø16腔径向留1","声孔偏心和实际模块突出须实物核对"]
+]);
+document.getElementById("mesh-data").innerHTML="<table><thead><tr><th>网格</th><th>X / Y / Z范围</th><th>体积 mm³</th></tr></thead><tbody>"+
+Object.entries(v.measurements).map(([name,m])=>`<tr><td>${name}</td><td>${m.bounds_mm.map(b=>b.map(x=>f(x,3)).join("…")).join(" / ")}</td><td>${f(m.volume_mm3,1)}</td></tr>`).join("")+"</tbody></table>";
+document.getElementById("source-hash").textContent=v.source_sha256["minibox-enclosure.scad"];
+}
+</script>
+</body>
+</html>
