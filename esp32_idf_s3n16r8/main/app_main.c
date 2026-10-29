@@ -4,6 +4,7 @@
 #include <string.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
+#include <freertos/queue.h>
 #include <esp_log.h>
 #include <esp_random.h>
 #include <esp_timer.h>
@@ -32,6 +33,7 @@
 #include "chime_player.h"
 #include "radio_player.h"
 #include "mem_log.h"
+#include "boot_screen.h"
 
 static const char *TAG = "app";
 
@@ -81,6 +83,29 @@ static volatile bool s_chime_status_dirty;
 static int64_t s_voice_face_hide_at_ms;
 static bool    s_face_was_visible;
 static chime_schedule_t s_chime_sched = { .hour_key = -1 };
+
+typedef enum { NETWORK_CONNECT, NETWORK_SYNC, NETWORK_SCAN } network_operation_t;
+
+typedef struct {
+    network_operation_t operation;
+    char reason[24];
+} network_request_t;
+
+typedef struct {
+    network_operation_t operation;
+    esp_err_t error;
+    char detail[48];
+    bool time_attempted;
+    wifi_time_result_t time;
+    wifi_scan_ap_t scan[WIFI_SCAN_MAX_RESULTS];
+    size_t scan_count;
+} network_result_t;
+
+static QueueHandle_t s_network_requests;
+static QueueHandle_t s_network_results;
+/* Only the app task updates these flags or applies worker results to the UI/RTC. */
+static bool s_network_busy;
+static bool s_time_sync_pending = true;
 
 static inline int64_t now_ms(void) { return esp_timer_get_time() / 1000; }
 
@@ -269,90 +294,119 @@ static void format_ampm_time(int hour24, int minute, char out[16]) {
     snprintf(out, 16, "%d:%02d %s", hour12, minute, suffix);
 }
 
-static bool ensure_wifi_connected(const char *reason) {
-    if (!wifi_time_has_credentials() || s_setup_mode || wifi_provision_active()) return false;
-    if (wifi_time_is_connected()) return true;
-
-    snprintf(s_status_msg, sizeof(s_status_msg), "%s wifi...", reason);
-    render_home();
-
-    if (wifi_time_connect() != ESP_OK) {
-        uint8_t disc_reason = wifi_time_last_disconnect_reason();
-        const char *disc_text = wifi_time_last_disconnect_reason_text();
-        ESP_LOGW(TAG, "wifi connect failed for %s: %u (%s)",
-                 reason, disc_reason, disc_text);
-        if (!s_last_time.ok) {
-            if (disc_reason) {
-                snprintf(s_last_time.err, sizeof(s_last_time.err),
-                         "WiFi %s (%u)", disc_text, disc_reason);
-            } else {
-                snprintf(s_last_time.err, sizeof(s_last_time.err),
-                         "WiFi %s", disc_text);
+static void network_task(void *argument) {
+    (void)argument;
+    network_request_t request;
+    for (;;) {
+        if (xQueueReceive(s_network_requests, &request, portMAX_DELAY) != pdTRUE) continue;
+        network_result_t result = { .operation = request.operation };
+        ESP_LOGI(TAG, "background network: %s", request.reason);
+        if (request.operation == NETWORK_SCAN) {
+            result.error = wifi_time_scan(result.scan, WIFI_SCAN_MAX_RESULTS,
+                                           &result.scan_count);
+        } else {
+            result.error = wifi_time_connect();
+            if (result.error != ESP_OK) {
+                snprintf(result.detail, sizeof(result.detail), "WiFi: %s",
+                         wifi_time_last_disconnect_reason_text());
+            } else if (request.operation == NETWORK_SYNC) {
+                result.time_attempted = true;
+                result.time = wifi_time_fetch();
+                if (!result.time.ok) {
+                    result.error = ESP_FAIL;
+                    snprintf(result.detail, sizeof(result.detail), "%s", result.time.err);
+                }
             }
         }
-        if (disc_reason) {
-            snprintf(s_status_msg, sizeof(s_status_msg),
-                     "wifi: %s (%u)", disc_text, disc_reason);
-        } else {
-            snprintf(s_status_msg, sizeof(s_status_msg),
-                     "wifi: %s", disc_text);
+        if (result.error != ESP_OK) {
+            ESP_LOGW(TAG, "background network %s: %s (%s)", request.reason,
+                     esp_err_to_name(result.error), result.detail);
         }
-        s_last_wifi_retry_ms = now_ms();
+        xQueueSend(s_network_results, &result, portMAX_DELAY);
+    }
+}
+
+static bool request_network(network_operation_t operation, const char *reason) {
+    if (s_network_busy) {
+        snprintf(s_status_msg, sizeof(s_status_msg), "Network busy; retry shortly");
+        return false;
+    }
+    network_request_t queued = { .operation = operation };
+    snprintf(queued.reason, sizeof(queued.reason), "%s", reason);
+    if (xQueueSend(s_network_requests, &queued, 0) != pdTRUE) {
+        ESP_LOGE(TAG, "network request queue full");
+        snprintf(s_status_msg, sizeof(s_status_msg), "Network queue full");
         render_home();
         return false;
     }
-
-    snprintf(s_status_msg, sizeof(s_status_msg), "wifi connected");
-    s_last_wifi_retry_ms = now_ms();
+    s_network_busy = true;
+    if (operation != NETWORK_SCAN) s_last_wifi_retry_ms = now_ms();
+    snprintf(s_status_msg, sizeof(s_status_msg), "%s in background",
+             operation == NETWORK_SCAN ? "WiFi scan" :
+             operation == NETWORK_SYNC ? "WiFi/time" : "WiFi connect");
     render_home();
     return true;
 }
 
+static bool ensure_wifi_connected(const char *reason) {
+    if (!wifi_time_has_credentials() || s_setup_mode || wifi_provision_active()) return false;
+    if (wifi_time_is_connected()) return true;
+    request_network(NETWORK_CONNECT, reason);
+    snprintf(s_status_msg, sizeof(s_status_msg), "WiFi connecting; retry when ready");
+    render_home();
+    return false;
+}
+
 static bool sync_time_from_wifi(const char *reason) {
-    if (audio_activity_busy()) {
-        ESP_LOGI(TAG, "time sync deferred while audio is active");
-        return false;
-    }
-    if (s_setup_mode || wifi_provision_active()) {
-        snprintf(s_status_msg, sizeof(s_status_msg), "AP on, sync paused");
+    if (audio_activity_busy() || s_setup_mode || wifi_provision_active() ||
+        !wifi_time_has_credentials()) {
+        snprintf(s_status_msg, sizeof(s_status_msg), "Time sync unavailable/busy");
         render_home();
         return false;
     }
-    if (!wifi_time_has_credentials()) {
-        snprintf(s_status_msg, sizeof(s_status_msg), "time needs wifi");
+    return request_network(NETWORK_SYNC, reason);
+}
+
+static void poll_network_result(void) {
+    network_result_t result;
+    if (xQueueReceive(s_network_results, &result, 0) != pdTRUE) return;
+    s_network_busy = false;
+    if (result.operation == NETWORK_SCAN) {
+        app_settings_set_wifi_scan(result.scan, result.scan_count, result.error);
+        snprintf(s_status_msg, sizeof(s_status_msg), "WiFi scan %s",
+                 result.error == ESP_OK ? "done" : "failed");
         render_home();
-        return false;
+        return;
     }
-    if (!ensure_wifi_connected(reason)) return false;
-
-    snprintf(s_status_msg, sizeof(s_status_msg), "%s time...", reason);
-    render_home();
-
-    wifi_time_result_t fetched = wifi_time_fetch();
-    s_last_refresh_ms = now_ms();
-    if (!fetched.ok) {
-        snprintf(s_status_msg, sizeof(s_status_msg), "time sync fail");
+    s_last_wifi_retry_ms = now_ms();
+    if (result.time_attempted) {
+        s_last_refresh_ms = now_ms();
+        s_time_sync_pending = false;
+    }
+    if (result.error != ESP_OK) {
+        snprintf(s_status_msg, sizeof(s_status_msg), "%s",
+                 result.detail[0] ? result.detail : esp_err_to_name(result.error));
+        app_settings_set_wifi_status(s_status_msg);
         if (!s_last_time.ok) {
-            snprintf(s_last_time.err, sizeof(s_last_time.err), "%s",
-                     fetched.err[0] ? fetched.err : "time sync fail");
+            snprintf(s_last_time.err, sizeof(s_last_time.err), "%s", s_status_msg);
         }
-        render_home();
-        return false;
+    } else if (result.time_attempted) {
+        esp_err_t err = rtc_pcf8563_set_from_strings(result.time.date, result.time.time);
+        if (err == ESP_OK) {
+            rtc_pcf8563_time_t rtc = rtc_pcf8563_read();
+            copy_time_from_rtc(&rtc);
+        } else {
+            ESP_LOGE(TAG, "RTC sync write: %s", esp_err_to_name(err));
+            s_last_time = result.time;
+        }
+        snprintf(s_status_msg, sizeof(s_status_msg), "%s",
+                 err == ESP_OK ? "Time synced" : "Time synced; RTC write failed");
+        app_settings_set_wifi_status("连接成功");
+    } else {
+        snprintf(s_status_msg, sizeof(s_status_msg), "WiFi connected");
+        app_settings_set_wifi_status("连接成功");
     }
-
-    esp_err_t err = rtc_pcf8563_set_from_strings(fetched.date, fetched.time);
-    if (err != ESP_OK) {
-        s_last_time = fetched;
-        snprintf(s_status_msg, sizeof(s_status_msg), "rtc write fail");
-        render_home();
-        return false;
-    }
-
-    rtc_pcf8563_time_t rtc = rtc_pcf8563_read();
-    copy_time_from_rtc(&rtc);
-    snprintf(s_status_msg, sizeof(s_status_msg), "time synced");
     render_home();
-    return true;
 }
 
 static void poll_rtc_time(void) {
@@ -427,6 +481,11 @@ static void maybe_dispatch_scheduled_chime(void) {
 // --- Wi-Fi setup AP -----------------------------------------------------
 static void set_setup_ap(bool on) {
     if (on == s_setup_mode) return;
+    if (s_network_busy) {
+        snprintf(s_status_msg, sizeof(s_status_msg), "Network busy; retry setup shortly");
+        render_home();
+        return;
+    }
     if (on) {
         radio_player_stop(4000);
         wifi_time_disconnect();
@@ -486,34 +545,39 @@ static void dispatch_gui_action(gui_action_t action) {
             app_settings_set_wifi_status("音频使用中，稍后重试");
             break;
         }
-        wifi_scan_ap_t results[WIFI_SCAN_MAX_RESULTS];
-        size_t count = 0;
-        esp_err_t err = wifi_time_scan(results, WIFI_SCAN_MAX_RESULTS, &count);
-        app_settings_set_wifi_scan(results, count, err);
+        if (request_network(NETWORK_SCAN, "settings scan")) {
+            app_settings_set_wifi_status("正在后台扫描");
+        } else {
+            app_settings_set_wifi_status("网络忙，请稍后重试");
+        }
         break;
     }
     case GUI_ACTION_WIFI_CONNECT: {
+        if (s_network_busy) {
+            app_settings_set_wifi_status("网络忙，请稍后重试");
+            break;
+        }
         wifi_creds_t creds;
         if (!app_settings_take_wifi_credentials(&creds)) break;
         if (audio_activity_busy()) {
             app_settings_set_wifi_status("音频使用中，无法切换");
             break;
         }
-        if (s_setup_mode) set_setup_ap(false);
+        if (s_setup_mode) {
+            /* Do not enqueue an old-profile reconnect while switching profiles. */
+            esp_err_t err = wifi_provision_stop();
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "stop setup: %s", esp_err_to_name(err));
+                app_settings_set_wifi_status("退出配置失败");
+                break;
+            }
+            s_setup_mode = false;
+        }
         wifi_time_disconnect();
         wifi_time_set_credentials(&creds);
-        snprintf(s_status_msg, sizeof(s_status_msg), "连接 %s", creds.ssid);
-        render_home();
-        esp_err_t err = wifi_time_connect();
-        if (err == ESP_OK) {
-            snprintf(s_status_msg, sizeof(s_status_msg), "WiFi connected");
-            app_settings_set_wifi_status("连接成功");
-            s_last_wifi_retry_ms = now_ms();
-        } else {
-            snprintf(s_status_msg, sizeof(s_status_msg), "WiFi: %s",
-                     wifi_time_last_disconnect_reason_text());
-            app_settings_set_wifi_status(wifi_time_last_disconnect_reason_text());
-        }
+        s_time_sync_pending = true;
+        request_network(NETWORK_SYNC, "settings connect");
+        app_settings_set_wifi_status("正在后台连接");
         break;
     }
     case GUI_ACTION_API_SETUP_START:
@@ -667,17 +731,19 @@ static void poll_wifi_provision(void) {
 // --- Boot --------------------------------------------------------------
 static void initialise(void) {
     ESP_ERROR_CHECK(audio_io_quiet_speaker_pins());
+    ESP_ERROR_CHECK(onboard_led_off());
+    ESP_ERROR_CHECK(boot_screen_init());
+    boot_screen_step("Initialize NVS");
     esp_err_t e = nvs_flash_init();
     if (e == ESP_ERR_NVS_NO_FREE_PAGES || e == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
         e = nvs_flash_init();
     }
-    ESP_ERROR_CHECK(e);
-    ESP_ERROR_CHECK(onboard_led_off());
-    ESP_ERROR_CHECK(ui_init());
-    ui_show_status("闲聊闹钟", "设备开启", "等待", "", "");
-    ESP_ERROR_CHECK(wifi_creds_init());
+    ESP_ERROR_CHECK(boot_screen_result(e));
+    boot_screen_step("Mount settings and ROMs");
+    ESP_ERROR_CHECK(boot_screen_result(wifi_creds_init()));
 
+    boot_screen_step("Read saved configuration");
     wifi_creds_t wc;
     int rc = wifi_creds_load(&wc);
     if (rc == 0) {
@@ -690,21 +756,41 @@ static void initialise(void) {
     if (app_secrets_load(&secrets) == 0) {
         app_secrets_set_current(&secrets);
     }
+    boot_screen_result(ESP_OK);
 
+    boot_screen_step("Joystick: keep centered");
     buttons_init();
-    ESP_ERROR_CHECK(wifi_time_init());
-    ESP_ERROR_CHECK(wifi_provision_init());
+    boot_screen_result(ESP_OK);
+    boot_screen_step("Initialize WiFi drivers");
+    ESP_ERROR_CHECK(boot_screen_result(wifi_time_init()));
+    boot_screen_step("Initialize setup service");
+    ESP_ERROR_CHECK(boot_screen_result(wifi_provision_init()));
+    boot_screen_step("Read PCF8563 clock");
     esp_err_t rtc_error = rtc_pcf8563_init();
+    boot_screen_result(rtc_error);
     if (rtc_error != ESP_OK) {
         ESP_LOGE(TAG, "PCF8563 unavailable: %s", esp_err_to_name(rtc_error));
         snprintf(s_status_msg, sizeof(s_status_msg), "PCF8563 unavailable");
     }
-    ESP_ERROR_CHECK(voice_chat_init());
-    ESP_ERROR_CHECK(chime_player_init());
-    ESP_ERROR_CHECK(radio_player_init());
+    boot_screen_step("Initialize voice service");
+    ESP_ERROR_CHECK(boot_screen_result(voice_chat_init()));
+    boot_screen_step("Initialize chime service");
+    ESP_ERROR_CHECK(boot_screen_result(chime_player_init()));
+    boot_screen_step("Initialize radio service");
+    ESP_ERROR_CHECK(boot_screen_result(radio_player_init()));
     voice_chat_set_status_cb(voice_status_changed_cb, NULL);
     chime_player_set_status_cb(chime_status_changed_cb, NULL);
     chime_player_set_text_cb(chime_text_received_cb, NULL);
+
+    boot_screen_step("Start background network task");
+    s_network_requests = xQueueCreate(1, sizeof(network_request_t));
+    s_network_results = xQueueCreate(1, sizeof(network_result_t));
+    ESP_ERROR_CHECK(boot_screen_result(s_network_requests && s_network_results
+                                       ? ESP_OK : ESP_ERR_NO_MEM));
+    ESP_ERROR_CHECK(boot_screen_result(
+        xTaskCreatePinnedToCore(network_task, "network", 6144, NULL, 1, NULL, 0) == pdPASS
+            ? ESP_OK : ESP_ERR_NO_MEM));
+    ESP_ERROR_CHECK(ui_init());
 
     const gui_app_t *apps[] = {
         app_chat_alarm_descriptor(),
@@ -722,13 +808,13 @@ static void initialise(void) {
     if (!wifi_time_has_credentials()) {
         snprintf(s_status_msg, sizeof(s_status_msg), "请在设置中配置 WiFi");
         render_home();
-    } else if (ensure_wifi_connected("boot")) {
+    } else {
         sync_time_from_wifi("boot");
     }
     s_last_refresh_ms = now_ms();
     s_last_wifi_retry_ms = now_ms();
     s_last_mem_log_ms = now_ms();
-    mem_log("boot done");
+    mem_log("local boot done; network runs in background");
 }
 
 void app_main(void) {
@@ -737,6 +823,7 @@ void app_main(void) {
 
     for (;;) {
         ui_task_handler();
+        poll_network_result();
         app_input_event_t ev;
         while (buttons_poll(&ev)) {
             snprintf(s_btn_msg, sizeof(s_btn_msg), "%s",
@@ -779,16 +866,17 @@ void app_main(void) {
             continue;
         }
 
-        if (!audio_activity_busy() &&
+        if (!s_network_busy && !audio_activity_busy() &&
             !wifi_time_is_connected() &&
             (uint32_t)(now_ms() - s_last_wifi_retry_ms) >= APP_WIFI_RETRY_MS) {
-            ensure_wifi_connected("auto");
+            request_network(s_time_sync_pending ? NETWORK_SYNC : NETWORK_CONNECT, "auto");
         }
 
         maybe_dispatch_scheduled_chime();
 
-        if (!audio_activity_busy() &&
-            (uint32_t)(now_ms() - s_last_refresh_ms) >= APP_TIME_REFRESH_MS) {
+        if (!s_network_busy && !audio_activity_busy() && wifi_time_is_connected() &&
+            (s_time_sync_pending ||
+             (uint32_t)(now_ms() - s_last_refresh_ms) >= APP_TIME_REFRESH_MS)) {
             sync_time_from_wifi("hourly");
         }
 

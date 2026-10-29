@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdatomic.h>
 #include <time.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
@@ -19,8 +20,8 @@ static const char *TAG = "wifi_time";
 static wifi_creds_t  s_creds;
 static bool          s_inited;
 static bool          s_started;
-static bool          s_connected;
-static uint8_t       s_last_disconnect_reason;
+static atomic_bool   s_connected;
+static atomic_uchar  s_last_disconnect_reason;
 static EventGroupHandle_t s_evt;
 #define EVT_GOT_IP   BIT0
 #define EVT_FAIL     BIT1

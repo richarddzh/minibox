@@ -10,7 +10,7 @@ else()
         "rtc_pcf8563.c" "voice_chat.c" "chime_player.c"
         "doubao_asr_client.c" "doubao_agent_client.c" "doubao_tts_player.c"
         "radio_stations.c" "radio_player.c" "mem_log.c"
-        "ui_screen.c" "ui_font.c" "ui_cat_avatar.c" "gui_shell.c"
+        "ui_screen.c" "ui_font.c" "boot_screen.c" "ui_cat_avatar.c" "gui_shell.c"
         "app_chat_alarm.c" "app_settings.c" "app_radio.c"
         "app_tetris.c" "app_snake.c" "app_nes.c")
     set(app_requires nofrendo)

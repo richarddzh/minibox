@@ -39,5 +39,5 @@ esp_err_t wifi_time_disconnect(void);
 esp_err_t wifi_time_scan(wifi_scan_ap_t *results, size_t capacity,
                          size_t *count);
 
-// One-shot HTTPS GET to the time API.
+// One-shot SNTP synchronization. Blocks; run on the network worker.
 wifi_time_result_t wifi_time_fetch(void);

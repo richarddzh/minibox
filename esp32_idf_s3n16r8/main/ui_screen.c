@@ -3,6 +3,7 @@
 #include "app_config.h"
 #include "st7796.h"
 #include "ui_font.h"
+#include "boot_screen.h"
 #include "lvgl.h"
 
 #include <stdatomic.h>
@@ -144,13 +145,16 @@ static void display_task(void *argument) {
 
 esp_err_t ui_init(void) {
     if (s_display) return ESP_OK;
-    esp_err_t err = ui_font_init();
+    esp_err_t err = boot_screen_init();
+    if (err != ESP_OK) return err;
+    boot_screen_step("Load and verify fonts");
+    err = ui_font_init(boot_screen_font_progress);
+    boot_screen_result(err);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "font asset /fonts/minibox_sans_24.bin: %s", esp_err_to_name(err));
         return err;
     }
-    err = st7796_init();
-    if (err != ESP_OK) return err;
+    boot_screen_step("Initialize LVGL");
     s_lock = xSemaphoreCreateRecursiveMutex();
     s_video_lock = xSemaphoreCreateMutex();
     s_nodes = heap_caps_calloc(MAX_NODES, sizeof(*s_nodes),
@@ -177,14 +181,14 @@ esp_err_t ui_init(void) {
     lv_obj_set_style_bg_opa(s_root, LV_OPA_COVER, 0);
     lv_obj_set_style_bg_color(s_root, color(UI_COLOR_BG), 0);
     s_tick_us = esp_timer_get_time();
-    err = st7796_backlight_on();
-    if (err != ESP_OK) goto failed;
+    boot_screen_result(ESP_OK);
     if (xTaskCreatePinnedToCore(display_task, "lvgl", 6144, NULL, 2, NULL, 0) != pdPASS) {
         err = ESP_ERR_NO_MEM;
         goto failed;
     }
     return ESP_OK;
 failed:
+    boot_screen_result(err);
     if (s_display) { lv_disp_remove(s_display); s_display = NULL; }
     heap_caps_free(s_pixels);
     heap_caps_free(s_nodes);

@@ -59,7 +59,8 @@ esp_err_t bitmap_font_init(void) {
     ESP_RETURN_ON_FALSE(fread(&s_header, sizeof(s_header), 1, file) == 1,
                         ESP_FAIL, TAG, "read header");
     ESP_RETURN_ON_FALSE(memcmp(s_header.magic, "MBF1", 4) == 0 &&
-                        s_header.pixels == 24 && s_header.alpha_bits == 4 &&
+                        s_header.pixels == 24 &&
+                        (s_header.alpha_bits == 2 || s_header.alpha_bits == 4) &&
                         s_header.count > 0 && s_header.count <= 40000 &&
                         s_header.index_offset == sizeof(s_header) &&
                         s_header.data_offset == sizeof(s_header) +
@@ -89,11 +90,13 @@ esp_err_t bitmap_font_init(void) {
                             entry->advance <= 64 &&
                             entry->offset >= s_header.data_offset &&
                             entry->offset <= s_header.total_size &&
-                            (pixels + 1) / 2 <= s_header.total_size - entry->offset,
+                            (pixels * s_header.alpha_bits + 7) / 8 <=
+                                s_header.total_size - entry->offset,
                             ESP_ERR_INVALID_SIZE, TAG, "invalid glyph index");
     }
-    ESP_LOGI(TAG, "Minibox Sans 24: %lu glyphs, %lu bytes, 4-bit antialiasing, SPIFFS -> PSRAM",
-             (unsigned long)s_header.count, (unsigned long)s_header.total_size);
+    ESP_LOGI(TAG, "Minibox Sans 24: %lu glyphs, %lu bytes, %u-bit antialiasing, SPIFFS -> PSRAM",
+             (unsigned long)s_header.count, (unsigned long)s_header.total_size,
+             s_header.alpha_bits);
     return ESP_OK;
 }
 
@@ -175,8 +178,12 @@ esp_err_t bitmap_font_draw(uint8_t *frame, int width, int height, int x, int y,
                 int px = x + entry->x_offset + (int)column;
                 if (px < 0 || px >= width) continue;
                 unsigned pixel = row * entry->width + column;
-                uint8_t packed = coverage[pixel / 2];
-                unsigned alpha = pixel & 1 ? packed & 15 : packed >> 4;
+                unsigned bits = s_header.alpha_bits;
+                unsigned per_byte = 8 / bits;
+                unsigned alpha = (coverage[pixel / per_byte] >>
+                                  (8 - bits * (pixel % per_byte + 1))) &
+                                 ((1U << bits) - 1);
+                if (bits == 2) alpha *= 5;
                 if (!alpha) continue;
                 size_t offset = ((size_t)py * width + px) * 2;
                 uint16_t background = ((uint16_t)frame[offset] << 8) | frame[offset + 1];

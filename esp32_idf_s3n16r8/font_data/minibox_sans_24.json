@@ -3,41 +3,14 @@
   "source_font": "Noto Sans CJK SC Regular",
   "source_version": "Version 2.004;hotconv 1.0.118;makeotfexe 2.5.65603",
   "copyright": "© 2014-2021 Adobe (http://www.adobe.com/).",
-  "license": "SIL Open Font License 1.1; see OFL.txt",
   "source_sha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
-  "font_sha256": "b518b221582f9c97862ccf6f810c01b4e02a8d509f5c2e12e829bf43bd4f9d84",
+  "license": "SIL Open Font License 1.1; see OFL.txt",
+  "font_sha256": "5efddec79138c7db17cc6a51c0ea925f3f388622d9450e98d8b41201d0af038d",
   "pixels": 24,
-  "alpha_bits": 4,
-  "glyph_count": 21524,
-  "bytes": 6411342,
-  "ranges": [
-    [
-      "0x20",
-      "0x7e"
-    ],
-    [
-      "0xa0",
-      "0x17f"
-    ],
-    [
-      "0x2000",
-      "0x206f"
-    ],
-    [
-      "0x2190",
-      "0x2193"
-    ],
-    [
-      "0x3000",
-      "0x303f"
-    ],
-    [
-      "0x4e00",
-      "0x9fff"
-    ],
-    [
-      "0xff00",
-      "0xffef"
-    ]
-  ]
+  "alpha_bits": 2,
+  "glyph_count": 7311,
+  "bytes": 1123256,
+  "charset": "6763 GB2312 Hanzi + firmware strings + existing non-Hanzi",
+  "gb2312_hanzi_count": 6763,
+  "extra_hanzi": []
 }

@@ -68,7 +68,7 @@ static const uint8_t *glyph_bitmap(const lv_font_t *font, uint32_t codepoint) {
     if (!entry) entry = find_glyph('?');
     if (!entry) return NULL;
     unsigned size = *(const unsigned *)font->dsc;
-    if (size == 24) return s_data + entry->offset;
+    if (size == 24 && s_header.alpha_bits == 4) return s_data + entry->offset;
     unsigned width = scale(entry->width, size);
     unsigned height = scale(entry->height, size);
     memset(s_glyph, 0, (width * height + 1) / 2);
@@ -76,8 +76,11 @@ static const uint8_t *glyph_bitmap(const lv_font_t *font, uint32_t codepoint) {
         for (unsigned x = 0; x < width; ++x) {
             unsigned src = (y * entry->height / height) * entry->width +
                            x * entry->width / width;
-            unsigned alpha = s_data[entry->offset + src / 2];
-            alpha = src & 1 ? alpha & 15 : alpha >> 4;
+            unsigned bits = s_header.alpha_bits;
+            unsigned per_byte = 8 / bits;
+            unsigned alpha = (s_data[entry->offset + src / per_byte] >>
+                              (8 - bits * (src % per_byte + 1))) & ((1U << bits) - 1);
+            if (bits == 2) alpha *= 5;
             unsigned dst = y * width + x;
             s_glyph[dst / 2] |= dst & 1 ? alpha : alpha << 4;
         }
@@ -85,7 +88,7 @@ static const uint8_t *glyph_bitmap(const lv_font_t *font, uint32_t codepoint) {
     return s_glyph;
 }
 
-esp_err_t ui_font_init(void) {
+esp_err_t ui_font_init(void (*progress)(size_t loaded, size_t total)) {
     if (s_data) return ESP_OK;
     if (!esp_spiffs_mounted("fonts")) {
         const esp_vfs_spiffs_conf_t config = {
@@ -100,7 +103,8 @@ esp_err_t ui_font_init(void) {
     esp_err_t err = ESP_ERR_INVALID_SIZE;
     if (fread(&s_header, sizeof(s_header), 1, file) != 1 ||
         memcmp(s_header.magic, "MBF1", 4) || s_header.pixels != 24 ||
-        s_header.alpha_bits != 4 || !s_header.count || s_header.count > 40000 ||
+        (s_header.alpha_bits != 2 && s_header.alpha_bits != 4) ||
+        !s_header.count || s_header.count > 40000 ||
         s_header.index_offset != sizeof(s_header) ||
         s_header.data_offset != sizeof(s_header) +
                                 s_header.count * sizeof(font_entry_t) ||
@@ -109,11 +113,13 @@ esp_err_t ui_font_init(void) {
     s_data = heap_caps_malloc(s_header.total_size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     if (!s_data) { err = ESP_ERR_NO_MEM; goto done; }
     memcpy(s_data, &s_header, sizeof(s_header));
+    if (progress) progress(sizeof(s_header), s_header.total_size);
     for (size_t offset = sizeof(s_header); offset < s_header.total_size;) {
         size_t bytes = s_header.total_size - offset;
         if (bytes > 16384) bytes = 16384;
         if (fread(s_data + offset, 1, bytes, file) != bytes) goto done;
         offset += bytes;
+        if (progress) progress(offset, s_header.total_size);
         vTaskDelay(1);
     }
     if (fgetc(file) != EOF) goto done;
@@ -125,7 +131,8 @@ esp_err_t ui_font_init(void) {
             pixels > 4096 || entry->advance > 64 ||
             entry->offset < s_header.data_offset ||
             entry->offset > s_header.total_size ||
-            (pixels + 1) / 2 > s_header.total_size - entry->offset) goto done;
+            (pixels * s_header.alpha_bits + 7) / 8 >
+                s_header.total_size - entry->offset) goto done;
     }
     for (unsigned i = 0; i < 4; ++i) {
         s_fonts[i] = (lv_font_t){
