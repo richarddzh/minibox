@@ -214,7 +214,8 @@ static void voice_worker(void *arg) {
         if (err != ESP_OK || !agent_text || !agent_text[0]) {
             free(transcript);
             free(agent_text);
-            set_status(VC_ERROR, "agent fail");
+            set_status(VC_ERROR, err == ESP_ERR_NOT_FOUND
+                                    ? "agent DNS fail" : "agent fail");
             continue;
         }
         if (s_turn_cb) s_turn_cb(transcript, agent_text, s_turn_ctx);

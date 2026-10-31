@@ -73,7 +73,8 @@ static void chime_worker(void *arg) {
         if (err != ESP_OK || !text || !text[0]) {
             ESP_LOGE(TAG, "agent chime err=%s", esp_err_to_name(err));
             free(text);
-            set_status(CHIME_ERROR, "chime fail");
+            set_status(CHIME_ERROR, err == ESP_ERR_NOT_FOUND
+                                       ? "agent DNS fail" : "chime fail");
             continue;
         }
 

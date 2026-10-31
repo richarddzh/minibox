@@ -7,8 +7,11 @@
 #include <string.h>
 #include <esp_http_client.h>
 #include <esp_crt_bundle.h>
+#include <esp_tls.h>
 #include <esp_log.h>
 #include <esp_random.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 static const char *TAG = "doubao_agent";
 
@@ -250,7 +253,27 @@ static esp_err_t doubao_agent_request(const char *prompt, char **out_text) {
     esp_http_client_set_header(cli, "Accept", "application/json");
     esp_http_client_set_post_field(cli, body, (int)strlen(body));
 
-    esp_err_t err = esp_http_client_perform(cli);
+    esp_err_t err;
+    for (unsigned attempt = 0; attempt < 2; ++attempt) {
+        err = esp_http_client_perform(cli);
+        if (err == ESP_OK) break;
+        int tls_code = 0;
+        int tls_flags = 0;
+        esp_err_t tls_err = esp_http_client_get_and_clear_last_tls_error(
+            cli, &tls_code, &tls_flags);
+        ESP_LOGE(TAG, "agent transport: %s tls=%d flags=%d",
+                 esp_err_to_name(tls_err), tls_code, tls_flags);
+        if (tls_err == ESP_ERR_ESP_TLS_CANNOT_RESOLVE_HOSTNAME) {
+            err = ESP_ERR_NOT_FOUND;
+            if (attempt == 0) {
+                /* No HTTP request was sent when hostname resolution failed. */
+                ESP_LOGW(TAG, "agent DNS lookup failed; retrying once");
+                vTaskDelay(pdMS_TO_TICKS(250));
+                continue;
+            }
+        }
+        break;
+    }
     int code = esp_http_client_get_status_code(cli);
     esp_http_client_cleanup(cli);
     free(body);

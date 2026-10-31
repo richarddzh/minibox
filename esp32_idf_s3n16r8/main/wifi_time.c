@@ -26,6 +26,36 @@ static EventGroupHandle_t s_evt;
 #define EVT_GOT_IP   BIT0
 #define EVT_FAIL     BIT1
 
+static void ensure_backup_dns(esp_netif_t *netif) {
+    esp_netif_dns_info_t dns = {0};
+    esp_err_t err = esp_netif_get_dns_info(netif, ESP_NETIF_DNS_BACKUP, &dns);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "read backup DNS: %s", esp_err_to_name(err));
+        return;
+    }
+    if (dns.ip.type == ESP_IPADDR_TYPE_V4 && dns.ip.u_addr.ip4.addr == 0) {
+        esp_netif_dns_info_t fallback = {
+            .ip = ESP_IP4ADDR_INIT(223, 5, 5, 5),
+        };
+        /* Error replies only try the immediately following DNS slot in lwIP. */
+        err = esp_netif_set_dns_info(netif, ESP_NETIF_DNS_BACKUP, &fallback);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "set backup DNS: %s", esp_err_to_name(err));
+            return;
+        }
+        ESP_LOGI(TAG, "backup DNS 223.5.5.5; DHCP main DNS retained");
+    }
+    for (esp_netif_dns_type_t type = ESP_NETIF_DNS_MAIN;
+         type < ESP_NETIF_DNS_MAX; ++type) {
+        err = esp_netif_get_dns_info(netif, type, &dns);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "read DNS %d: %s", type, esp_err_to_name(err));
+        } else if (dns.ip.type == ESP_IPADDR_TYPE_V4) {
+            ESP_LOGI(TAG, "DNS %d: " IPSTR, type, IP2STR(&dns.ip.u_addr.ip4));
+        }
+    }
+}
+
 static void event_handler(void *arg, esp_event_base_t base,
                           int32_t id, void *data) {
     if (base == WIFI_EVENT && id == WIFI_EVENT_STA_START) {
@@ -40,6 +70,8 @@ static void event_handler(void *arg, esp_event_base_t base,
                  wifi_time_last_disconnect_reason_text());
         xEventGroupSetBits(s_evt, EVT_FAIL);
     } else if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
+        const ip_event_got_ip_t *event = data;
+        ensure_backup_dns(event->esp_netif);
         s_connected = true;
         xEventGroupSetBits(s_evt, EVT_GOT_IP);
     }
