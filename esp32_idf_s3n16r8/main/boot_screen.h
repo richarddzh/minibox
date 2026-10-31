@@ -8,3 +8,5 @@ esp_err_t boot_screen_init(void);
 void boot_screen_step(const char *text);
 esp_err_t boot_screen_result(esp_err_t result);
 void boot_screen_font_progress(size_t loaded, size_t total);
+/* Release temporary pixels after the final boot message, before UI ownership. */
+void boot_screen_finish(void);

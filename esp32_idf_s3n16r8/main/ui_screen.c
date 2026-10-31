@@ -186,6 +186,7 @@ esp_err_t ui_init(void) {
         err = ESP_ERR_NO_MEM;
         goto failed;
     }
+    boot_screen_finish();
     return ESP_OK;
 failed:
     boot_screen_result(err);

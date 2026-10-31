@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include "esp_heap_caps.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 
@@ -16,12 +17,13 @@
 #define TEXT_TOP 144
 #define LINES 14
 #define COLUMNS 77
+#define PIXEL_BYTES (WIDTH * STRIPE_ROWS * 2)
 
 _Static_assert(TEXT_TOP + LINES * LINE_HEIGHT <= HEIGHT, "Boot log fits display");
 _Static_assert(6 + BOOT_LOGO_HEIGHT <= TEXT_TOP, "Boot logo fits header");
 
 static const char *TAG = "boot";
-static uint8_t s_pixels[WIDTH * STRIPE_ROWS * 2];
+static uint8_t *s_pixels;
 static char s_lines[LINES][COLUMNS + 1];
 static unsigned s_count;
 static bool s_initialized;
@@ -85,7 +87,7 @@ static void text(int x, int y, const char *value, int scale, uint16_t color) {
 }
 
 static void draw_line(unsigned line) {
-    memset(s_pixels, 0, sizeof(s_pixels));
+    memset(s_pixels, 0, PIXEL_BYTES);
     text(8, 2, s_lines[line], 1, 0xc618);
     ESP_ERROR_CHECK(st7796_draw_rows(TEXT_TOP + line * LINE_HEIGHT,
                                      LINE_HEIGHT, s_pixels));
@@ -95,13 +97,19 @@ esp_err_t boot_screen_init(void) {
     if (s_initialized) return ESP_OK;
     esp_err_t err = st7796_init();
     if (err != ESP_OK) return err;
-    memset(s_pixels, 0, sizeof(s_pixels));
+    /* st7796 copies these pixels into its own internal DMA transfer buffer. */
+    s_pixels = heap_caps_malloc(PIXEL_BYTES, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (!s_pixels) {
+        ESP_LOGE(TAG, "boot pixel buffer allocation failed");
+        return ESP_ERR_NO_MEM;
+    }
+    memset(s_pixels, 0, PIXEL_BYTES);
     for (int y = 0; y < HEIGHT; y += STRIPE_ROWS) {
         err = st7796_draw_rows(y, STRIPE_ROWS, s_pixels);
-        if (err != ESP_OK) return err;
+        if (err != ESP_OK) goto failed;
     }
     for (int top = 0; top < TEXT_TOP; top += STRIPE_ROWS) {
-        memset(s_pixels, 0, sizeof(s_pixels));
+        memset(s_pixels, 0, PIXEL_BYTES);
         text(BOOT_LOGO_WIDTH + 32, 10 - top, "MINIBOX BIOS", 2, 0xc618);
         text(BOOT_LOGO_WIDTH + 32, 34 - top,
              "ESP32-S3 / 16MB FLASH / 8MB PSRAM", 1, 0x8410);
@@ -113,11 +121,21 @@ esp_err_t boot_screen_init(void) {
             }
         }
         err = st7796_draw_rows(top, STRIPE_ROWS, s_pixels);
-        if (err != ESP_OK) return err;
+        if (err != ESP_OK) goto failed;
     }
     err = st7796_backlight_on();
-    if (err == ESP_OK) s_initialized = true;
+    if (err != ESP_OK) goto failed;
+    s_initialized = true;
+    return ESP_OK;
+failed:
+    ESP_LOGE(TAG, "boot display failed: %s", esp_err_to_name(err));
+    boot_screen_finish();
     return err;
+}
+
+void boot_screen_finish(void) {
+    heap_caps_free(s_pixels);
+    s_pixels = NULL;
 }
 
 void boot_screen_step(const char *value) {

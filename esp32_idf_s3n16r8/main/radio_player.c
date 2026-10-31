@@ -2,6 +2,7 @@
 
 #include "audio_io.h"
 #include "radio_stations.h"
+#include "mem_log.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -15,6 +16,7 @@
 #include <esp_http_client.h>
 #include <esp_crt_bundle.h>
 #include <esp_log.h>
+#include <esp_heap_caps.h>
 #include <esp_timer.h>
 
 #define RADIO_TASK_STACK_BYTES (24 * 1024)
@@ -153,8 +155,12 @@ static esp_err_t push_pcm(uint8_t *data, size_t size, uint8_t channels,
         if (!*playback_started) {
             *prefill_bytes += written;
             if (*prefill_bytes >= RADIO_PREFILL_BYTES) {
+                mem_log("radio before I2S start");
                 esp_err_t err = audio_io_start_playback(2000);
-                if (err != ESP_OK) return err;
+                if (err != ESP_OK) {
+                    ESP_LOGE(TAG, "audio start failed: %s", esp_err_to_name(err));
+                    return err;
+                }
                 *playback_started = true;
                 set_state(RADIO_PLAYER_PLAYING, "正在播放");
             }
@@ -164,8 +170,10 @@ static esp_err_t push_pcm(uint8_t *data, size_t size, uint8_t channels,
 }
 
 static esp_err_t decode_stream(esp_http_client_handle_t client) {
-    uint8_t *input = malloc(RADIO_INPUT_BYTES);
-    uint8_t *output = malloc(RADIO_OUTPUT_BYTES);
+    uint8_t *input = heap_caps_malloc(RADIO_INPUT_BYTES,
+                                      MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    uint8_t *output = heap_caps_malloc(RADIO_OUTPUT_BYTES,
+                                       MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
     if (!input || !output) {
         free(input);
         free(output);
@@ -309,6 +317,7 @@ static void radio_task(void *arg) {
     esp_http_client_set_header(client, "User-Agent", "Minibox/1.0");
 
     set_state(RADIO_PLAYER_CONNECTING, "正在连接");
+    mem_log("radio before HTTP");
     result = esp_http_client_open(client, 0);
     if (result == ESP_OK) {
         int64_t content_length = esp_http_client_fetch_headers(client);
@@ -316,6 +325,7 @@ static void radio_task(void *arg) {
         ESP_LOGI(TAG, "%s HTTP %d length=%lld", station->name, status,
                  (long long)content_length);
         if (status == 200 || status == 206) {
+            mem_log("radio before decoder");
             result = decode_stream(client);
         } else {
             result = ESP_ERR_INVALID_RESPONSE;
@@ -324,13 +334,18 @@ static void radio_task(void *arg) {
 
     esp_http_client_close(client);
     esp_http_client_cleanup(client);
+    mem_log("radio after cleanup");
     if (s_stop_requested) {
         set_state(RADIO_PLAYER_IDLE, "已停止");
     } else if (result == ESP_OK) {
         set_state(RADIO_PLAYER_IDLE, "播放结束");
     } else {
         ESP_LOGE(TAG, "stream failed: %s", esp_err_to_name(result));
-        set_state(RADIO_PLAYER_ERROR, "连接或解码失败");
+        const char *message = result == ESP_ERR_NO_MEM ? "内存不足" :
+                              result == ESP_ERR_TIMEOUT ? "读取或播放超时" :
+                              result == ESP_ERR_NOT_SUPPORTED ? "音频格式不支持" :
+                              "连接或解码失败";
+        set_state(RADIO_PLAYER_ERROR, message);
     }
     finish_task();
 }

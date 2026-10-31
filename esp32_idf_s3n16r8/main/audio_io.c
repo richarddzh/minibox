@@ -48,6 +48,7 @@ static volatile uint8_t  s_ring_role = RING_ROLE_NONE;
 static volatile uint8_t  s_req_start = REQ_NONE;
 static volatile uint8_t  s_req_stop  = 0;
 static volatile uint8_t  s_req_abort = 0;
+static volatile esp_err_t s_play_start_result = ESP_OK;
 static volatile uint32_t s_mic_overflow_chunks = 0;
 static volatile uint32_t s_spk_underrun = 0;
 static volatile uint32_t s_spk_sample_rate = APP_VOICE_SAMPLE_RATE;
@@ -309,16 +310,21 @@ static size_t read_speaker_chunk(size_t capacity) {
 
 // --- Playback phase: reuse arena as speaker ring; consumer = audio task -
 static void do_playback(void) {
-    if (install_speaker() != ESP_OK) {
+    esp_err_t start_result = install_speaker();
+    if (start_result != ESP_OK) {
         s_req_stop = 0;
         s_req_abort = 0;
         __sync_synchronize();
         s_phase = AUDIO_PHASE_IDLE;
+        __sync_synchronize();
+        s_play_start_result = start_result;
         return;
     }
     s_spk_underrun = 0;
     __sync_synchronize();
     s_phase = AUDIO_PHASE_PLAY;
+    __sync_synchronize();
+    s_play_start_result = ESP_OK;
     ESP_LOGI(TAG, "PLAY start rate=%u channels=%u",
              (unsigned)s_spk_sample_rate, (unsigned)s_spk_channels);
 
@@ -391,6 +397,10 @@ static void task_run(void *arg) {
             s_req_abort = 0;
             __sync_synchronize();
             s_phase = AUDIO_PHASE_IDLE;
+            if (r == REQ_START_PLAY) {
+                __sync_synchronize();
+                s_play_start_result = ESP_ERR_INVALID_STATE;
+            }
             continue;
         }
         if      (r == REQ_START_REC)  do_recording();
@@ -478,9 +488,16 @@ esp_err_t audio_io_start_playback(uint32_t ack_timeout_ms) {
     }
     s_req_stop = 0;
     s_req_abort = 0;
+    s_play_start_result = ESP_ERR_NOT_FINISHED;
     __sync_synchronize();
     s_req_start = REQ_START_PLAY;
-    esp_err_t e = wait_phase(AUDIO_PHASE_PLAY, ack_timeout_ms);
+    int64_t start_ms = now_ms();
+    while (s_play_start_result == ESP_ERR_NOT_FINISHED &&
+           now_ms() - start_ms < ack_timeout_ms) {
+        vTaskDelay(pdMS_TO_TICKS(POLL_MS));
+    }
+    esp_err_t e = s_play_start_result;
+    if (e == ESP_ERR_NOT_FINISHED) e = ESP_ERR_TIMEOUT;
     if (e != ESP_OK) {
         s_req_start = REQ_NONE;
         audio_io_abort(2000);
